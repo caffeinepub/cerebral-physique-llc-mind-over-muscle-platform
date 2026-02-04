@@ -1,0 +1,211 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+    :root {
+        --radius: 0.625rem;
+        
+        /* Base colors - Light mode (not used, but kept for compatibility) */
+        --background: 0.98 0 0;
+        --foreground: 0.15 0 0;
+        --card: 1 0 0;
+        --card-foreground: 0.15 0 0;
+        --popover: 1 0 0;
+        --popover-foreground: 0.15 0 0;
+        --primary: 0.25 0 0;
+        --primary-foreground: 0.98 0 0;
+        --secondary: 0.95 0 0;
+        --secondary-foreground: 0.15 0 0;
+        --muted: 0.95 0 0;
+        --muted-foreground: 0.50 0 0;
+        --accent: 0.95 0 0;
+        --accent-foreground: 0.15 0 0;
+        --destructive: 0.60 0.25 27;
+        --destructive-foreground: 0.98 0 0;
+        --border: 0.90 0 0;
+        --input: 0.90 0 0;
+        --ring: 0.70 0 0;
+        
+        /* Custom brand colors */
+        --deep-blue: 0.25 0.15 250;
+        --neon-purple: 0.60 0.25 290;
+    }
+
+    .dark {
+        /* Dark minimalist theme - Black, Deep Blue, Medium Gray, Neon Purple */
+        --background: 0.10 0 0;
+        --foreground: 0.95 0 0;
+        --card: 0.15 0 0;
+        --card-foreground: 0.95 0 0;
+        --popover: 0.12 0 0;
+        --popover-foreground: 0.95 0 0;
+        
+        /* Primary uses medium gray */
+        --primary: 0.60 0 0;
+        --primary-foreground: 0.10 0 0;
+        
+        /* Secondary uses deep blue */
+        --secondary: 0.25 0.15 250;
+        --secondary-foreground: 0.95 0 0;
+        
+        /* Muted grays */
+        --muted: 0.20 0 0;
+        --muted-foreground: 0.65 0 0;
+        
+        /* Accent uses subtle deep blue */
+        --accent: 0.20 0.10 250;
+        --accent-foreground: 0.95 0 0;
+        
+        /* Destructive */
+        --destructive: 0.55 0.25 27;
+        --destructive-foreground: 0.95 0 0;
+        
+        /* Borders and inputs - very subtle */
+        --border: 0.25 0 0;
+        --input: 0.20 0 0;
+        --ring: 0.60 0.25 290;
+        
+        /* Custom brand colors */
+        --deep-blue: 0.25 0.15 250;
+        --neon-purple: 0.60 0.25 290;
+    }
+
+    * {
+        @apply border-border;
+    }
+    
+    body {
+        @apply bg-background text-foreground;
+        font-feature-settings: "rlig" 1, "calt" 1;
+    }
+    
+    /* Custom utility classes */
+    .text-neon-purple {
+        color: oklch(var(--neon-purple));
+    }
+    
+    .bg-neon-purple {
+        background-color: oklch(var(--neon-purple));
+    }
+    
+    .border-neon-purple {
+        border-color: oklch(var(--neon-purple));
+    }
+    
+    .text-deep-blue {
+        color: oklch(var(--deep-blue));
+    }
+    
+    .bg-deep-blue {
+        background-color: oklch(var(--deep-blue));
+    }
+    
+    .from-deep-blue\/20 {
+        --tw-gradient-from: oklch(var(--deep-blue) / 0.2);
+    }
+    
+    .from-deep-blue\/10 {
+        --tw-gradient-from: oklch(var(--deep-blue) / 0.1);
+    }
+    
+    .from-deep-blue\/30 {
+        --tw-gradient-from: oklch(var(--deep-blue) / 0.3);
+    }
+    
+    .from-deep-blue\/40 {
+        --tw-gradient-from: oklch(var(--deep-blue) / 0.4);
+    }
+    
+    .from-deep-blue\/50 {
+        --tw-gradient-from: oklch(var(--deep-blue) / 0.5);
+    }
+    
+    .to-neon-purple\/10 {
+        --tw-gradient-to: oklch(var(--neon-purple) / 0.1);
+    }
+    
+    .to-neon-purple\/20 {
+        --tw-gradient-to: oklch(var(--neon-purple) / 0.2);
+    }
+    
+    .to-neon-purple\/30 {
+        --tw-gradient-to: oklch(var(--neon-purple) / 0.3);
+    }
+    
+    .via-deep-blue\/10 {
+        --tw-gradient-via: oklch(var(--deep-blue) / 0.1);
+    }
+    
+    .via-deep-blue\/30 {
+        --tw-gradient-via: oklch(var(--deep-blue) / 0.3);
+    }
+}
+
+/* Smooth scrolling */
+@media (prefers-reduced-motion: no-preference) {
+    html {
+        scroll-behavior: smooth;
+    }
+}
+
+/* Custom scrollbar for webkit browsers */
+::-webkit-scrollbar {
+    width: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: oklch(var(--background));
+}
+
+::-webkit-scrollbar-thumb {
+    background: oklch(var(--muted));
+    border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: oklch(var(--muted-foreground));
+}
+
+/* Subtle motion effects for backgrounds - smooth looping animations */
+@keyframes subtle-zoom {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.08);
+    }
+}
+
+@keyframes subtle-pan {
+    0%, 100% {
+        transform: translateX(0) translateY(0) scale(1.05);
+    }
+    25% {
+        transform: translateX(-3%) translateY(2%) scale(1.05);
+    }
+    50% {
+        transform: translateX(-2%) translateY(-2%) scale(1.08);
+    }
+    75% {
+        transform: translateX(3%) translateY(-1%) scale(1.05);
+    }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    .animate-subtle-zoom {
+        animation: subtle-zoom 35s ease-in-out infinite;
+    }
+    
+    .animate-subtle-pan {
+        animation: subtle-pan 45s ease-in-out infinite;
+    }
+}
+
+/* Disable animations for users who prefer reduced motion */
+@media (prefers-reduced-motion: reduce) {
+    .animate-subtle-zoom,
+    .animate-subtle-pan {
+        animation: none;
+    }
+}
