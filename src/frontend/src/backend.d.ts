@@ -7,16 +7,29 @@ export interface None {
     __kind__: "None";
 }
 export type Option<T> = Some<T> | None;
+export class ExternalBlob {
+    getBytes(): Promise<Uint8Array<ArrayBuffer>>;
+    getDirectURL(): string;
+    static fromURL(url: string): ExternalBlob;
+    static fromBytes(blob: Uint8Array<ArrayBuffer>): ExternalBlob;
+    withUploadProgress(onProgress: (percentage: number) => void): ExternalBlob;
+}
+export interface ExercisePreview {
+    id: bigint;
+    primaryMuscle: MuscleGroup;
+    name: string;
+    imageUrl: string;
+}
 export interface Exercise {
     id: bigint;
-    difficultyLevel: DifficultyLevel;
+    primaryMuscle: MuscleGroup;
+    cues: string;
     name: string;
     equipmentType: EquipmentType;
-    instructions: string;
-    mediaUrl: string;
     imageUrl: string;
-    benefits: string;
-    muscleGroup: MuscleGroup;
+    isPlaceholder: boolean;
+    videoUrl: string;
+    secondaryMuscles: Array<MuscleGroup>;
 }
 export interface BlogPost {
     id: bigint;
@@ -28,58 +41,108 @@ export interface BlogPost {
     createdAt: Time;
     author: string;
     seoKeywords: Array<string>;
+    memberOnly: boolean;
     seoMetaDescription: string;
 }
+export interface TransformationOutput {
+    status: bigint;
+    body: Uint8Array;
+    headers: Array<http_header>;
+}
 export type Time = bigint;
+export interface BlogPostPreview {
+    id: bigint;
+    title: string;
+    seoTitle: string;
+    createdAt: Time;
+    author: string;
+    memberOnly: boolean;
+    seoMetaDescription: string;
+}
+export interface http_header {
+    value: string;
+    name: string;
+}
+export interface http_request_result {
+    status: bigint;
+    body: Uint8Array;
+    headers: Array<http_header>;
+}
+export interface AmazonProduct {
+    id: bigint;
+    name: string;
+    description: string;
+    imageUrl: string;
+    category: string;
+    affiliateLink: string;
+}
+export interface ShoppingItem {
+    productName: string;
+    currency: string;
+    quantity: bigint;
+    priceInCents: bigint;
+    productDescription: string;
+}
 export interface MuscleGroupDetails {
     exerciseIds: Array<bigint>;
+    card: MuscleGroupCard;
     name: string;
     description: string;
     imageUrl: string;
 }
-export interface Routine {
-    breathworkPracticeIds: Array<bigint>;
-    exerciseIds: Array<bigint>;
-    userId: Principal;
+export interface TransformationInput {
+    context: Uint8Array;
+    response: http_request_result;
 }
-export interface BreathworkPractice {
-    id: bigint;
-    difficultyLevel: DifficultyLevel;
-    duration: bigint;
-    name: string;
-    mindfulnessBenefits: string;
-    recommendedExerciseIds: Array<bigint>;
-    techniqueDescription: string;
-    mediaUrl: string;
+export interface MuscleGroupCard {
+    title: string;
+    description: string;
+    heroImage?: ExternalBlob;
+    imageUrl: string;
+}
+export type StripeSessionStatus = {
+    __kind__: "completed";
+    completed: {
+        userPrincipal?: string;
+        response: string;
+    };
+} | {
+    __kind__: "failed";
+    failed: {
+        error: string;
+    };
+};
+export interface StripeConfiguration {
+    allowedCountries: Array<string>;
+    secretKey: string;
+}
+export interface Membership {
+    principal: Principal;
+    active: boolean;
+    stripeId: string;
 }
 export interface UserProfile {
     name: string;
-    musicPreference: MusicPreference;
-}
-export enum DifficultyLevel {
-    intermediate = "intermediate",
-    beginner = "beginner",
-    advanced = "advanced"
+    email?: string;
+    membershipStatus?: string;
 }
 export enum EquipmentType {
     bodyweight = "bodyweight",
     cable = "cable",
-    barbell = "barbell",
     dumbbell = "dumbbell",
-    bands = "bands",
     machine = "machine"
 }
 export enum MuscleGroup {
+    triceps = "triceps",
     shoulders = "shoulders",
-    arms = "arms",
     back = "back",
     core = "core",
     chest = "chest",
-    legs = "legs"
-}
-export enum MusicPreference {
-    on = "on",
-    off = "off"
+    quads = "quads",
+    hamstrings = "hamstrings",
+    glutes = "glutes",
+    calves = "calves",
+    biceps = "biceps"
 }
 export enum UserRole {
     admin = "admin",
@@ -87,40 +150,48 @@ export enum UserRole {
     guest = "guest"
 }
 export interface backendInterface {
-    addBreathworkPractice(name: string, techniqueDescription: string, mediaUrl: string, recommendedExerciseIds: Array<bigint>, mindfulnessBenefits: string, duration: bigint, difficulty: DifficultyLevel): Promise<void>;
-    addExercise(name: string, muscleGroup: MuscleGroup, equipmentType: EquipmentType, difficulty: DifficultyLevel, instructions: string, mediaUrl: string, imageUrl: string, benefits: string): Promise<void>;
-    addMuscleGroup(name: string, description: string, imageUrl: string): Promise<void>;
-    addToRoutine(exerciseId: bigint, isBreathwork: boolean): Promise<void>;
+    addAmazonProduct(name: string, description: string, imageUrl: string, category: string, affiliateLink: string): Promise<void>;
+    addExercise(name: string, primaryMuscle: MuscleGroup, secondaryMuscles: Array<MuscleGroup>, equipmentType: EquipmentType, videoUrl: string, cues: string, imageUrl: string, isPlaceholder: boolean): Promise<void>;
+    addMembership(stripeId: string): Promise<void>;
+    addMembershipForUser(user: Principal, stripeId: string): Promise<void>;
     assignCallerUserRole(user: Principal, role: UserRole): Promise<void>;
-    createBlogPost(title: string, content: string, author: string, seoTitle: string, seoMetaDescription: string, seoKeywords: Array<string>): Promise<bigint>;
-    createRoutine(): Promise<void>;
+    createBlogPost(title: string, content: string, author: string, memberOnly: boolean, seoTitle: string, seoMetaDescription: string, seoKeywords: Array<string>): Promise<void>;
+    createCheckoutSession(items: Array<ShoppingItem>, successUrl: string, cancelUrl: string): Promise<string>;
+    deleteAmazonProduct(id: bigint): Promise<void>;
     deleteBlogPost(id: bigint): Promise<void>;
-    deleteBreathworkPractice(breathworkPracticeId: bigint): Promise<void>;
-    deleteExercise(exerciseId: bigint): Promise<void>;
-    deleteMuscleGroup(name: string): Promise<void>;
-    deleteRoutine(): Promise<void>;
-    editBlogPost(id: bigint, title: string, content: string, author: string, seoTitle: string, seoMetaDescription: string, seoKeywords: Array<string>): Promise<void>;
-    editBreathworkPractice(id: bigint, name: string, techniqueDescription: string, mediaUrl: string, recommendedExerciseIds: Array<bigint>, mindfulnessBenefits: string, duration: bigint, difficulty: DifficultyLevel): Promise<void>;
-    editExercise(id: bigint, name: string, muscleGroup: MuscleGroup, equipmentType: EquipmentType, difficulty: DifficultyLevel, instructions: string, mediaUrl: string, imageUrl: string, benefits: string): Promise<void>;
-    editMuscleGroup(name: string, description: string, imageUrl: string): Promise<void>;
+    deleteExercise(id: bigint): Promise<void>;
+    getAffiliateDisclosure(): Promise<string>;
+    getAllAmazonProducts(): Promise<Array<AmazonProduct>>;
+    getAllBlogPostPreviews(): Promise<Array<BlogPostPreview>>;
     getAllBlogPosts(): Promise<Array<BlogPost>>;
-    getAllBreathworkPractices(): Promise<Array<BreathworkPractice>>;
+    getAllExercisePreviews(): Promise<Array<ExercisePreview>>;
     getAllExercises(): Promise<Array<Exercise>>;
-    getAllMuscleGroups(): Promise<Array<MuscleGroupDetails>>;
+    getAllMemberships(): Promise<Array<Membership>>;
     getBlogPost(id: bigint): Promise<BlogPost | null>;
+    getBlogPostPreview(id: bigint): Promise<BlogPostPreview | null>;
     getCallerUserProfile(): Promise<UserProfile | null>;
     getCallerUserRole(): Promise<UserRole>;
-    getMuscleGroupDetails(muscleGroupName: string): Promise<{
-        exercises: Array<Exercise>;
-        muscleGroup: MuscleGroupDetails;
-    } | null>;
+    getMembership(): Promise<Membership | null>;
+    getMuscleGroupArtist(name: string): Promise<MuscleGroupCard | null>;
+    getMuscleGroupArtists(): Promise<Array<MuscleGroupCard>>;
+    getMuscleGroupExercisePreviews(muscleGroup: MuscleGroup): Promise<Array<ExercisePreview>>;
     getMuscleGroupExercises(muscleGroup: MuscleGroup): Promise<Array<Exercise>>;
-    getRoutine(userId: Principal): Promise<Routine | null>;
+    getMuscleGroups(): Promise<Array<MuscleGroupDetails>>;
+    getPrivacyPolicy(): Promise<string>;
+    getStripeSessionStatus(sessionId: string): Promise<StripeSessionStatus>;
     getUserProfile(user: Principal): Promise<UserProfile | null>;
+    hasActiveMembership(): Promise<boolean>;
     isCallerAdmin(): Promise<boolean>;
+    isStripeConfigured(): Promise<boolean>;
     publishBlogPost(id: bigint): Promise<void>;
-    removeFromRoutine(exerciseId: bigint, isBreathwork: boolean): Promise<void>;
     saveCallerUserProfile(profile: UserProfile): Promise<void>;
+    setStripeConfiguration(config: StripeConfiguration): Promise<void>;
+    transform(input: TransformationInput): Promise<TransformationOutput>;
     unpublishBlogPost(id: bigint): Promise<void>;
-    updateMusicPreference(preference: MusicPreference): Promise<void>;
+    updateAmazonProduct(id: bigint, name: string, description: string, imageUrl: string, category: string, affiliateLink: string): Promise<void>;
+    updateBlogPost(id: bigint, title: string, content: string, author: string, memberOnly: boolean, seoTitle: string, seoMetaDescription: string, seoKeywords: Array<string>): Promise<void>;
+    updateExercise(id: bigint, name: string, primaryMuscle: MuscleGroup, secondaryMuscles: Array<MuscleGroup>, equipmentType: EquipmentType, videoUrl: string, cues: string, imageUrl: string, isPlaceholder: boolean): Promise<void>;
+    updateMembershipStatus(user: Principal, active: boolean): Promise<void>;
+    updateMuscleGroup(name: string, description: string, imageUrl: string): Promise<void>;
+    updateMuscleGroupArtist(name: string, card: MuscleGroupCard): Promise<void>;
 }

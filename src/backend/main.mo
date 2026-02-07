@@ -1,15 +1,20 @@
 import Map "mo:core/Map";
 import Array "mo:core/Array";
-import Principal "mo:core/Principal";
-import Runtime "mo:core/Runtime";
 import Iter "mo:core/Iter";
-import Text "mo:core/Text";
 import Time "mo:core/Time";
 import Nat "mo:core/Nat";
+import Text "mo:core/Text";
+import Principal "mo:core/Principal";
+import Runtime "mo:core/Runtime";
 import MixinStorage "blob-storage/Mixin";
-import MixinAuthorization "authorization/MixinAuthorization";
 import AccessControl "authorization/access-control";
+import MixinAuthorization "authorization/MixinAuthorization";
+import Stripe "stripe/stripe";
+import OutCall "http-outcalls/outcall";
+import Storage "blob-storage/Storage";
+import Migration "migration";
 
+(with migration = Migration.run)
 actor {
   include MixinStorage();
   let accessControlState = AccessControl.initState();
@@ -18,71 +23,40 @@ actor {
   type MuscleGroup = {
     #chest;
     #back;
-    #legs;
     #shoulders;
-    #arms;
+    #biceps;
+    #triceps;
+    #quads;
+    #hamstrings;
+    #glutes;
+    #calves;
     #core;
   };
 
   type EquipmentType = {
-    #barbell;
+    #machine;
     #dumbbell;
     #cable;
-    #machine;
     #bodyweight;
-    #bands;
-  };
-
-  type DifficultyLevel = {
-    #beginner;
-    #intermediate;
-    #advanced;
   };
 
   public type Exercise = {
     id : Nat;
     name : Text;
-    muscleGroup : MuscleGroup;
+    primaryMuscle : MuscleGroup;
+    secondaryMuscles : [MuscleGroup];
     equipmentType : EquipmentType;
-    difficultyLevel : DifficultyLevel;
-    instructions : Text;
-    mediaUrl : Text;
+    videoUrl : Text;
+    cues : Text;
     imageUrl : Text;
-    benefits : Text;
+    isPlaceholder : Bool;
   };
 
-  public type BreathworkPractice = {
+  public type ExercisePreview = {
     id : Nat;
     name : Text;
-    techniqueDescription : Text;
-    mediaUrl : Text;
-    recommendedExerciseIds : [Nat];
-    mindfulnessBenefits : Text;
-    duration : Nat;
-    difficultyLevel : DifficultyLevel;
-  };
-
-  type Routine = {
-    userId : Principal;
-    exerciseIds : [Nat];
-    breathworkPracticeIds : [Nat];
-  };
-
-  public type UserProfile = {
-    name : Text;
-    musicPreference : MusicPreference;
-  };
-
-  public type MusicPreference = {
-    #on;
-    #off;
-  };
-
-  public type MuscleGroupDetails = {
-    name : Text;
-    description : Text;
+    primaryMuscle : MuscleGroup;
     imageUrl : Text;
-    exerciseIds : [Nat];
   };
 
   public type BlogPost = {
@@ -93,614 +67,308 @@ actor {
     createdAt : Time.Time;
     modifiedAt : Time.Time;
     published : Bool;
+    memberOnly : Bool;
     seoTitle : Text;
     seoMetaDescription : Text;
     seoKeywords : [Text];
   };
 
-  let exerciseStore = Map.empty<Nat, Exercise>();
-  let breathworkPracticeStore = Map.empty<Nat, BreathworkPractice>();
-  let routineStore = Map.empty<Principal, Routine>();
-  let userProfileStore = Map.empty<Principal, UserProfile>();
-  let muscleGroupStore = Map.empty<Text, MuscleGroupDetails>();
-  let blogPostStore = Map.empty<Nat, BlogPost>();
+  public type BlogPostPreview = {
+    id : Nat;
+    title : Text;
+    author : Text;
+    createdAt : Time.Time;
+    memberOnly : Bool;
+    seoTitle : Text;
+    seoMetaDescription : Text;
+  };
+
+  public type AmazonProduct = {
+    id : Nat;
+    name : Text;
+    description : Text;
+    imageUrl : Text;
+    category : Text;
+    affiliateLink : Text;
+  };
+
+  public type Membership = {
+    principal : Principal;
+    active : Bool;
+    stripeId : Text;
+  };
+
+  public type MuscleGroupCard = {
+    title : Text;
+    description : Text;
+    imageUrl : Text;
+    heroImage : ?Storage.ExternalBlob;
+  };
+
+  public type MuscleGroupDetails = {
+    name : Text;
+    description : Text;
+    imageUrl : Text;
+    exerciseIds : [Nat];
+    card : MuscleGroupCard;
+  };
+
+  public type UserProfile = {
+    name : Text;
+    email : ?Text;
+    membershipStatus : ?Text;
+  };
+
+  public type StripeConfig = {
+    secretKey : Text;
+    allowedCountries : [Text];
+  };
+
+  public type MiscConfig = {
+    adminContactEmail : Text;
+    supportContactEmail : Text;
+  };
+
+  let exercises = Map.empty<Nat, Exercise>();
+  let blogPosts = Map.empty<Nat, BlogPost>();
+  let amazonProducts = Map.empty<Nat, AmazonProduct>();
+  let memberships = Map.empty<Principal, Membership>();
+  let muscleGroups = Map.empty<Text, MuscleGroupDetails>();
+  let muscleGroupCards = Map.empty<Text, MuscleGroupCard>();
+  let userProfiles = Map.empty<Principal, UserProfile>();
 
   var nextExerciseId = 1;
-  var nextBreathworkPracticeId = 1;
   var nextBlogPostId = 1;
+  var nextAmazonProductId = 1;
 
-  system func preupgrade() {
-    if (muscleGroupStore.isEmpty()) {
-      let initialMuscleGroups = [
-        {
-          name = "Chest";
-          description = "Exercises targeting the pectoral muscles";
-          imageUrl = "https://granada-images.s3.eu-central-1.amazonaws.com/11221F74-38EF-44B9-BF04-854685D39C7C_1_105_c.jpeg";
-          exerciseIds = [];
-        },
-        {
-          name = "Back";
-          description = "Exercises for the upper and lower back muscles";
-          imageUrl = "https://granada-images.s3.eu-central-1.amazonaws.com/01C4E651-E164-4CF8-AB45-66DEB0353DF6_1_105_c.jpeg";
-          exerciseIds = [];
-        },
-        {
-          name = "Legs";
-          description = "Leg exercises including quads, hamstrings, and calves";
-          imageUrl = "https://granada-images.s3.eu-central-1.amazonaws.com/24935045-CBB9-481B-A0B1-5BFD8B0262BE_1_105_c.jpeg";
-          exerciseIds = [];
-        },
-        {
-          name = "Shoulders";
-          description = "Shoulder-focused resistance training";
-          imageUrl = "https://granada-images.s3.eu-central-1.amazonaws.com/32E3BC67-EA56-47DC-A8A9-1565B2EEAFFF_1_105_c.jpeg";
-          exerciseIds = [];
-        },
-        {
-          name = "Arms";
-          description = "Biceps, triceps, and forearm exercises";
-          imageUrl = "https://granada-images.s3.eu-central-1.amazonaws.com/31ED900E-EC30-4607-9A24-E7C5CD13587D_1_105_c.jpeg";
-          exerciseIds = [];
-        },
-        {
-          name = "Core";
-          description = "Core stability and abdominal training";
-          imageUrl = "https://granada-images.s3.eu-central-1.amazonaws.com/97E5BD29-E1DA-4DA9-8EDA-45A6D41505ED_1_105_c.jpeg";
-          exerciseIds = [];
-        },
-      ];
-
-      for (group in initialMuscleGroups.values()) {
-        muscleGroupStore.add(group.name, group);
-      };
-    };
-  };
-
-  public query ({ caller }) func getAllExercises() : async [Exercise] {
-    exerciseStore.values().toArray();
-  };
-
-  public query ({ caller }) func getMuscleGroupExercises(muscleGroup : MuscleGroup) : async [Exercise] {
-    exerciseStore.values().toArray().filter(
-      func(exercise) {
-        exercise.muscleGroup == muscleGroup;
-      }
-    );
-  };
-
-  public query ({ caller }) func getAllBreathworkPractices() : async [BreathworkPractice] {
-    breathworkPracticeStore.values().toArray();
-  };
-
-  public query ({ caller }) func getRoutine(userId : Principal) : async ?Routine {
-    switch (routineStore.get(userId)) {
-      case (null) { null };
-      case (?routine) {
-        if (caller != userId and not AccessControl.isAdmin(accessControlState, caller)) {
-          Runtime.trap("Unauthorized: Can only view your own routine");
-        };
-        ?routine;
-      };
-    };
-  };
+  var stripeConfig : ?Stripe.StripeConfiguration = null;
+  var miscConfig : ?MiscConfig = null;
 
   public query ({ caller }) func getCallerUserProfile() : async ?UserProfile {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
       Runtime.trap("Unauthorized: Only users can view profiles");
     };
-    userProfileStore.get(caller);
+    userProfiles.get(caller);
   };
 
   public query ({ caller }) func getUserProfile(user : Principal) : async ?UserProfile {
     if (caller != user and not AccessControl.isAdmin(accessControlState, caller)) {
       Runtime.trap("Unauthorized: Can only view your own profile");
     };
-    userProfileStore.get(user);
+    userProfiles.get(user);
   };
 
   public shared ({ caller }) func saveCallerUserProfile(profile : UserProfile) : async () {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
       Runtime.trap("Unauthorized: Only users can save profiles");
     };
-    userProfileStore.add(caller, profile);
+    userProfiles.add(caller, profile);
   };
 
-  public shared ({ caller }) func createRoutine() : async () {
+  public shared ({ caller }) func createCheckoutSession(items : [Stripe.ShoppingItem], successUrl : Text, cancelUrl : Text) : async Text {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
-      Runtime.trap("Unauthorized: Only users can create routines");
+      Runtime.trap("Unauthorized: Only authenticated users can create checkout sessions");
     };
+    let config = switch (stripeConfig) {
+      case (null) { Runtime.trap("Stripe needs to be first configured") };
+      case (?val) { val };
+    };
+    await Stripe.createCheckoutSession(config, caller, items, successUrl, cancelUrl, transform);
+  };
 
-    if (routineStore.get(caller) != null) {
-      Runtime.trap("Routine already exists for this principal");
-    } else {
-      let newRoutine = {
-        userId = caller;
-        exerciseIds = [];
-        breathworkPracticeIds = [];
-      };
-      routineStore.add(caller, newRoutine);
+  public query func isStripeConfigured() : async Bool {
+    stripeConfig != null;
+  };
+
+  public shared ({ caller }) func setStripeConfiguration(config : Stripe.StripeConfiguration) : async () {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+      Runtime.trap("Unauthorized: Only admins can perform this action");
+    };
+    stripeConfig := ?config;
+  };
+
+  public shared ({ caller }) func getStripeSessionStatus(sessionId : Text) : async Stripe.StripeSessionStatus {
+    switch (stripeConfig) {
+      case (null) { Runtime.trap("Stripe needs to be first configured") };
+      case (?config) { await Stripe.getSessionStatus(config, sessionId, transform) };
     };
   };
 
-  public shared ({ caller }) func addToRoutine(exerciseId : Nat, isBreathwork : Bool) : async () {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
-      Runtime.trap("Unauthorized: Only users can add to routine");
+  public query ({ caller }) func getAllExercises() : async [Exercise] {
+    if (not hasActiveMembershipLocal(caller) and not AccessControl.isAdmin(accessControlState, caller)) {
+      Runtime.trap("Unauthorized: Only active members can view full exercise library");
     };
-
-    switch (routineStore.get(caller)) {
-      case (null) {
-        let newRoutine = {
-          userId = caller;
-          exerciseIds = if (isBreathwork) { [] } else { [exerciseId] };
-          breathworkPracticeIds = if (isBreathwork) { [exerciseId] } else { [] };
-        };
-        routineStore.add(caller, newRoutine);
-      };
-      case (?routine) {
-        let alreadyExists = if (isBreathwork) {
-          routine.breathworkPracticeIds.any(func(id) { id == exerciseId });
-        } else {
-          routine.exerciseIds.any(func(id) { id == exerciseId });
-        };
-
-        if (alreadyExists) {
-          Runtime.trap("Item already in routine");
-        };
-
-        let updatedRoutine = {
-          userId = caller;
-          exerciseIds = if (isBreathwork) { routine.exerciseIds } else {
-            routine.exerciseIds.concat([exerciseId]);
-          };
-          breathworkPracticeIds = if (isBreathwork) {
-            routine.breathworkPracticeIds.concat([exerciseId]);
-          } else {
-            routine.breathworkPracticeIds;
-          };
-        };
-        routineStore.add(caller, updatedRoutine);
-      };
-    };
+    exercises.values().toArray();
   };
 
-  public shared ({ caller }) func removeFromRoutine(exerciseId : Nat, isBreathwork : Bool) : async () {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
-      Runtime.trap("Unauthorized: Only users can remove from routine");
-    };
-
-    switch (routineStore.get(caller)) {
-      case (null) {
-        Runtime.trap("Routine does not exist for this principal");
-      };
-      case (?routine) {
-        let updatedRoutine = {
-          userId = caller;
-          exerciseIds = if (isBreathwork) { routine.exerciseIds } else {
-            let filtered = routine.exerciseIds.filter(
-              func(id) { id != exerciseId }
-            );
-            filtered;
-          };
-          breathworkPracticeIds = if (isBreathwork) {
-            let filtered = routine.breathworkPracticeIds.filter(
-              func(id) { id != exerciseId }
-            );
-            filtered;
-          } else {
-            routine.breathworkPracticeIds;
-          };
-        };
-        routineStore.add(caller, updatedRoutine);
-      };
-    };
+  public query ({ caller }) func getAllExercisePreviews() : async [ExercisePreview] {
+    exercises.values().toArray().map(func(exercise) { { id = exercise.id; name = exercise.name; primaryMuscle = exercise.primaryMuscle; imageUrl = exercise.imageUrl } });
   };
 
-  public shared ({ caller }) func deleteRoutine() : async () {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
-      Runtime.trap("Unauthorized: Only users can delete routines");
+  public query ({ caller }) func getMuscleGroupExercises(muscleGroup : MuscleGroup) : async [Exercise] {
+    if (not hasActiveMembershipLocal(caller) and not AccessControl.isAdmin(accessControlState, caller)) {
+      Runtime.trap("Unauthorized: Only active members can view full exercise library");
     };
-    routineStore.remove(caller);
+    exercises.values().toArray().filter(func(exercise) { exercise.primaryMuscle == muscleGroup });
   };
 
-  public shared ({ caller }) func updateMusicPreference(preference : MusicPreference) : async () {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
-      Runtime.trap("Unauthorized: Only users can update music preferences");
-    };
-
-    switch (userProfileStore.get(caller)) {
-      case (null) {
-        Runtime.trap("User profile not found");
-      };
-      case (?profile) {
-        let updatedProfile = { profile with musicPreference = preference };
-        userProfileStore.add(caller, updatedProfile);
-      };
-    };
-  };
-
-  public query ({ caller }) func getMuscleGroupDetails(muscleGroupName : Text) : async ?{
-    muscleGroup : MuscleGroupDetails;
-    exercises : [Exercise];
-  } {
-    switch (muscleGroupStore.get(muscleGroupName)) {
-      case (null) {
-        Runtime.trap("Muscle group not found: " # muscleGroupName);
-      };
-      case (?mg) {
-        let mappedExercises = mg.exerciseIds.map(
-          func(exerciseId) {
-            switch (exerciseStore.get(exerciseId)) {
-              case (null) { null };
-              case (?exercise) { ?exercise };
-            };
-          }
-        );
-
-        let filteredExercises = mappedExercises.filter(
-          func(exercise) {
-            switch (exercise) {
-              case (null) { false };
-              case (?_) { true };
-            };
-          }
-        );
-
-        let flattenedExercises = filteredExercises.map(
-          func(exercise) {
-            switch (exercise) {
-              case (null) { Runtime.trap("Should not get here") };
-              case (?ex) { ex };
-            };
-          }
-        );
-
-        ?{
-          muscleGroup = mg;
-          exercises = flattenedExercises;
-        };
-      };
-    };
-  };
-
-  public query ({ caller }) func getAllMuscleGroups() : async [MuscleGroupDetails] {
-    muscleGroupStore.values().toArray();
+  public query ({ caller }) func getMuscleGroupExercisePreviews(muscleGroup : MuscleGroup) : async [ExercisePreview] {
+    exercises.values().toArray().filter(func(exercise) { exercise.primaryMuscle == muscleGroup }).map(func(exercise) { { id = exercise.id; name = exercise.name; primaryMuscle = exercise.primaryMuscle; imageUrl = exercise.imageUrl } });
   };
 
   public shared ({ caller }) func addExercise(
     name : Text,
-    muscleGroup : MuscleGroup,
+    primaryMuscle : MuscleGroup,
+    secondaryMuscles : [MuscleGroup],
     equipmentType : EquipmentType,
-    difficulty : DifficultyLevel,
-    instructions : Text,
-    mediaUrl : Text,
+    videoUrl : Text,
+    cues : Text,
     imageUrl : Text,
-    benefits : Text,
+    isPlaceholder : Bool,
   ) : async () {
     if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
       Runtime.trap("Unauthorized: Only admins can add exercises");
     };
 
-    let exercise = {
-      id = nextExerciseId;
-      name;
-      muscleGroup;
-      equipmentType;
-      difficultyLevel = difficulty;
-      instructions;
-      mediaUrl;
-      imageUrl;
-      benefits;
-    };
+    let exercise : Exercise = { id = nextExerciseId; name; primaryMuscle; secondaryMuscles; equipmentType; videoUrl; cues; imageUrl; isPlaceholder };
+    exercises.add(nextExerciseId, exercise);
 
-    exerciseStore.add(nextExerciseId, exercise);
-
-    switch (getMuscleGroupName(muscleGroup)) {
-      case (null) { Runtime.trap("Muscle group not found") };
-      case (?mgName) {
-        switch (muscleGroupStore.get(mgName)) {
-          case (null) { Runtime.trap("Muscle group not found") };
-          case (?mgDetails) {
-            let updatedExercises = mgDetails.exerciseIds.concat([nextExerciseId]);
-            let updatedMuscleGroup = { mgDetails with exerciseIds = updatedExercises };
-            muscleGroupStore.add(mgName, updatedMuscleGroup);
-          };
+    switch (muscleGroups.get(muscleGroupToName(primaryMuscle))) {
+      case (null) {
+        let newMuscleGroup : MuscleGroupDetails = {
+          name = muscleGroupToName(primaryMuscle);
+          description = "";
+          imageUrl = "";
+          exerciseIds = [nextExerciseId];
+          card = createDefaultMuscleGroupCard(primaryMuscle);
         };
+        muscleGroups.add(muscleGroupToName(primaryMuscle), newMuscleGroup);
+      };
+      case (?mg) {
+        let updatedExercises = mg.exerciseIds.concat([nextExerciseId]);
+        let updatedMuscleGroup = {
+          mg with
+          exerciseIds = updatedExercises;
+        };
+        muscleGroups.add(muscleGroupToName(primaryMuscle), updatedMuscleGroup);
       };
     };
 
     nextExerciseId += 1;
   };
 
-  public shared ({ caller }) func addBreathworkPractice(
-    name : Text,
-    techniqueDescription : Text,
-    mediaUrl : Text,
-    recommendedExerciseIds : [Nat],
-    mindfulnessBenefits : Text,
-    duration : Nat,
-    difficulty : DifficultyLevel,
-  ) : async () {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
-      Runtime.trap("Unauthorized: Only admins can add breathwork practices");
-    };
-
-    let breathworkPractice = {
-      id = nextBreathworkPracticeId;
-      name;
-      techniqueDescription;
-      mediaUrl;
-      recommendedExerciseIds;
-      mindfulnessBenefits;
-      duration;
-      difficultyLevel = difficulty;
-    };
-
-    breathworkPracticeStore.add(nextBreathworkPracticeId, breathworkPractice);
-    nextBreathworkPracticeId += 1;
-  };
-
-  public shared ({ caller }) func editExercise(
+  public shared ({ caller }) func updateExercise(
     id : Nat,
     name : Text,
-    muscleGroup : MuscleGroup,
+    primaryMuscle : MuscleGroup,
+    secondaryMuscles : [MuscleGroup],
     equipmentType : EquipmentType,
-    difficulty : DifficultyLevel,
-    instructions : Text,
-    mediaUrl : Text,
+    videoUrl : Text,
+    cues : Text,
     imageUrl : Text,
-    benefits : Text,
+    isPlaceholder : Bool,
   ) : async () {
     if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
-      Runtime.trap("Unauthorized: Only admins can edit exercises");
+      Runtime.trap("Unauthorized: Only admins can update exercises");
     };
 
-    let currentExercise = switch (exerciseStore.get(id)) {
-      case (null) { Runtime.trap("Exercise not found") };
-      case (?exercise) { exercise };
+    let exercise = switch (exercises.get(id)) {
+      case (null) { Runtime.trap("Could not find exercise with id=" # id.toText()) };
+      case (?e) { e };
     };
 
-    let updatedExercise = {
-      id;
-      name;
-      muscleGroup;
-      equipmentType;
-      difficultyLevel = difficulty;
-      instructions;
-      mediaUrl;
-      imageUrl;
-      benefits;
-    };
+    let updatedExercise = { id; name; primaryMuscle; secondaryMuscles; equipmentType; videoUrl; cues; imageUrl; isPlaceholder };
+    exercises.add(id, updatedExercise);
 
-    exerciseStore.add(id, updatedExercise);
-
-    switch (getMuscleGroupName(currentExercise.muscleGroup)) {
-      case (null) { Runtime.trap("Old muscle group not found") };
-      case (?oldMg) {
-        switch (muscleGroupStore.get(oldMg)) {
-          case (null) { Runtime.trap("Old muscle group not found") };
-          case (?mgDetails) {
-            let filteredExercises = mgDetails.exerciseIds.filter(
-              func(exerciseId) { exerciseId != id }
-            );
-            let updatedOldMg = { mgDetails with exerciseIds = filteredExercises };
-            muscleGroupStore.add(oldMg, updatedOldMg);
-          };
-        };
+    switch (muscleGroups.get(muscleGroupToName(exercise.primaryMuscle))) {
+      case (null) {};
+      case (?mg) {
+        let filtered = mg.exerciseIds.filter(func(exId) { exId != id });
+        let updatedMg = { mg with exerciseIds = filtered };
+        muscleGroups.add(muscleGroupToName(exercise.primaryMuscle), updatedMg);
       };
     };
 
-    switch (getMuscleGroupName(muscleGroup)) {
-      case (null) { Runtime.trap("New muscle group not found") };
-      case (?newMg) {
-        switch (muscleGroupStore.get(newMg)) {
-          case (null) { Runtime.trap("New muscle group not found") };
-          case (?mgDetails) {
-            let updatedExercises = mgDetails.exerciseIds.concat([id]);
-            let updatedMuscleGroup = { mgDetails with exerciseIds = updatedExercises };
-            muscleGroupStore.add(newMg, updatedMuscleGroup);
-          };
+    switch (muscleGroups.get(muscleGroupToName(primaryMuscle))) {
+      case (null) {
+        let newMuscleGroup : MuscleGroupDetails = {
+          name = muscleGroupToName(primaryMuscle);
+          description = "";
+          imageUrl = "";
+          exerciseIds = [id];
+          card = createDefaultMuscleGroupCard(primaryMuscle);
         };
+        muscleGroups.add(muscleGroupToName(primaryMuscle), newMuscleGroup);
+      };
+      case (?mg) {
+        let updatedExercises = mg.exerciseIds.concat([id]);
+        let updatedMuscleGroup = { mg with exerciseIds = updatedExercises };
+        muscleGroups.add(muscleGroupToName(primaryMuscle), updatedMuscleGroup);
       };
     };
   };
 
-  public shared ({ caller }) func editBreathworkPractice(
-    id : Nat,
-    name : Text,
-    techniqueDescription : Text,
-    mediaUrl : Text,
-    recommendedExerciseIds : [Nat],
-    mindfulnessBenefits : Text,
-    duration : Nat,
-    difficulty : DifficultyLevel,
-  ) : async () {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
-      Runtime.trap("Unauthorized: Only admins can edit breathwork practices");
-    };
-
-    switch (breathworkPracticeStore.get(id)) {
-      case (null) { Runtime.trap("Breathwork practice not found") };
-      case (?_) {
-        let updatedPractice = {
-          id;
-          name;
-          techniqueDescription;
-          mediaUrl;
-          recommendedExerciseIds;
-          mindfulnessBenefits;
-          duration;
-          difficultyLevel = difficulty;
-        };
-        breathworkPracticeStore.add(id, updatedPractice);
-      };
-    };
-  };
-
-  public shared ({ caller }) func deleteExercise(exerciseId : Nat) : async () {
+  public shared ({ caller }) func deleteExercise(id : Nat) : async () {
     if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
       Runtime.trap("Unauthorized: Only admins can delete exercises");
     };
 
-    switch (exerciseStore.get(exerciseId)) {
+    let exercise = switch (exercises.get(id)) {
       case (null) { Runtime.trap("Exercise not found") };
-      case (?exercise) {
-        switch (getMuscleGroupName(exercise.muscleGroup)) {
-          case (null) { Runtime.trap("Muscle group not found") };
-          case (?mgName) {
-            switch (muscleGroupStore.get(mgName)) {
-              case (null) { Runtime.trap("Muscle group not found") };
-              case (?mgDetails) {
-                let filteredExercises = mgDetails.exerciseIds.filter(
-                  func(id) { id != exerciseId }
-                );
-                let updatedMuscleGroup = { mgDetails with exerciseIds = filteredExercises };
-                muscleGroupStore.add(mgName, updatedMuscleGroup);
-              };
-            };
-          };
-        };
-        exerciseStore.remove(exerciseId);
+      case (?e) { e };
+    };
+
+    switch (muscleGroups.get(muscleGroupToName(exercise.primaryMuscle))) {
+      case (null) {};
+      case (?mg) {
+        let filtered = mg.exerciseIds.filter(func(exId) { exId != id });
+        let updatedMuscleGroup = { mg with exerciseIds = filtered };
+        muscleGroups.add(muscleGroupToName(exercise.primaryMuscle), updatedMuscleGroup);
       };
     };
+    exercises.remove(id);
   };
 
-  public shared ({ caller }) func deleteBreathworkPractice(breathworkPracticeId : Nat) : async () {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
-      Runtime.trap("Unauthorized: Only admins can delete breathwork practices");
-    };
-
-    switch (breathworkPracticeStore.get(breathworkPracticeId)) {
-      case (null) { Runtime.trap("Breathwork practice not found") };
-      case (?_) {
-        breathworkPracticeStore.remove(breathworkPracticeId);
-      };
-    };
-  };
-
-  public shared ({ caller }) func addMuscleGroup(
-    name : Text,
-    description : Text,
-    imageUrl : Text,
-  ) : async () {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
-      Runtime.trap("Unauthorized: Only admins can add muscle groups");
-    };
-
-    let mgDetails = {
-      name;
-      description;
-      imageUrl;
-      exerciseIds = [];
-    };
-
-    muscleGroupStore.add(name, mgDetails);
-  };
-
-  public shared ({ caller }) func editMuscleGroup(
-    name : Text,
-    description : Text,
-    imageUrl : Text,
-  ) : async () {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
-      Runtime.trap("Unauthorized: Only admins can edit muscle groups");
-    };
-
-    switch (muscleGroupStore.get(name)) {
-      case (null) { Runtime.trap("Muscle group not found") };
-      case (?mgDetails) {
-        let updatedMg = { mgDetails with
-          description;
-          imageUrl;
-        };
-        muscleGroupStore.add(name, updatedMg);
-      };
-    };
-  };
-
-  public shared ({ caller }) func deleteMuscleGroup(name : Text) : async () {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
-      Runtime.trap("Unauthorized: Only admins can delete muscle groups");
-    };
-
-    let associatedExercises = switch (muscleGroupStore.get(name)) {
-      case (null) { [] };
-      case (?mg) { mg.exerciseIds };
-    };
-
-    for (id in associatedExercises.values()) {
-      exerciseStore.remove(id);
-      for ((mgName, mg) in muscleGroupStore.entries()) {
-        let filteredExercises = mg.exerciseIds.filter(
-          func(exId) { exId != id }
-        );
-        let updatedMg = { mg with exerciseIds = filteredExercises };
-        muscleGroupStore.add(mgName, updatedMg);
-      };
-    };
-
-    muscleGroupStore.remove(name);
-  };
-
-  /* --- BLOG MANAGEMENT --- */
   public shared ({ caller }) func createBlogPost(
     title : Text,
     content : Text,
     author : Text,
+    memberOnly : Bool,
     seoTitle : Text,
     seoMetaDescription : Text,
     seoKeywords : [Text],
-  ) : async Nat {
+  ) : async () {
     if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
       Runtime.trap("Unauthorized: Only admins can create blog posts");
     };
 
     let now = Time.now();
-    let blogPost = {
-      id = nextBlogPostId;
-      title;
-      content;
-      author;
-      createdAt = now;
-      modifiedAt = now;
-      published = false;
-      seoTitle;
-      seoMetaDescription;
-      seoKeywords;
-    };
-
-    blogPostStore.add(nextBlogPostId, blogPost);
+    let post = { id = nextBlogPostId; title; content; author; createdAt = now; modifiedAt = now; published = false; memberOnly; seoTitle; seoMetaDescription; seoKeywords };
+    blogPosts.add(nextBlogPostId, post);
     nextBlogPostId += 1;
-    blogPost.id;
   };
 
-  public shared ({ caller }) func editBlogPost(
+  public shared ({ caller }) func updateBlogPost(
     id : Nat,
     title : Text,
     content : Text,
     author : Text,
+    memberOnly : Bool,
     seoTitle : Text,
     seoMetaDescription : Text,
     seoKeywords : [Text],
   ) : async () {
     if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
-      Runtime.trap("Unauthorized: Only admins can edit blog posts");
+      Runtime.trap("Unauthorized: Only admins can update blog posts");
     };
 
-    switch (blogPostStore.get(id)) {
+    let post = switch (blogPosts.get(id)) {
       case (null) { Runtime.trap("Blog post not found") };
-      case (?post) {
-        let updatedPost = { post with
-          title;
-          content;
-          author;
-          seoTitle;
-          seoMetaDescription;
-          seoKeywords;
-          modifiedAt = Time.now();
-        };
-        blogPostStore.add(id, updatedPost);
-      };
+      case (?p) { p };
     };
+
+    let updated = { post with title; content; author; memberOnly; seoTitle; seoMetaDescription; seoKeywords; modifiedAt = Time.now() };
+    blogPosts.add(id, updated);
   };
 
   public shared ({ caller }) func deleteBlogPost(id : Nat) : async () {
@@ -708,12 +376,11 @@ actor {
       Runtime.trap("Unauthorized: Only admins can delete blog posts");
     };
 
-    switch (blogPostStore.get(id)) {
+    let _ = switch (blogPosts.get(id)) {
       case (null) { Runtime.trap("Blog post not found") };
-      case (?post) {
-        blogPostStore.remove(id);
-      };
+      case (?post) { post };
     };
+    blogPosts.remove(id);
   };
 
   public shared ({ caller }) func publishBlogPost(id : Nat) : async () {
@@ -721,13 +388,13 @@ actor {
       Runtime.trap("Unauthorized: Only admins can publish blog posts");
     };
 
-    switch (blogPostStore.get(id)) {
+    let post = switch (blogPosts.get(id)) {
       case (null) { Runtime.trap("Blog post not found") };
-      case (?post) {
-        let updatedPost = { post with published = true };
-        blogPostStore.add(id, updatedPost);
-      };
+      case (?p) { p };
     };
+
+    let updated = { post with published = true };
+    blogPosts.add(id, updated);
   };
 
   public shared ({ caller }) func unpublishBlogPost(id : Nat) : async () {
@@ -735,63 +402,279 @@ actor {
       Runtime.trap("Unauthorized: Only admins can unpublish blog posts");
     };
 
-    switch (blogPostStore.get(id)) {
+    let post = switch (blogPosts.get(id)) {
       case (null) { Runtime.trap("Blog post not found") };
+      case (?p) { p };
+    };
+
+    let updated = { post with published = false };
+    blogPosts.add(id, updated);
+  };
+
+  public query ({ caller }) func getBlogPost(id : Nat) : async ?BlogPost {
+    let isAdmin = AccessControl.isAdmin(accessControlState, caller);
+
+    switch (blogPosts.get(id)) {
+      case (null) { null };
       case (?post) {
-        let updatedPost = { post with published = false };
-        blogPostStore.add(id, updatedPost);
+        if (isAdmin) {
+          return ?post;
+        };
+
+        if (not post.published) {
+          return null;
+        };
+
+        if (post.memberOnly and not hasActiveMembershipLocal(caller)) {
+          return null;
+        };
+
+        ?post;
       };
     };
   };
 
-  public query ({ caller }) func getBlogPost(id : Nat) : async ?BlogPost {
-    switch (blogPostStore.get(id)) {
+  public query ({ caller }) func getBlogPostPreview(id : Nat) : async ?BlogPostPreview {
+    switch (blogPosts.get(id)) {
       case (null) { null };
       case (?post) {
-        if (not post.published and not AccessControl.isAdmin(accessControlState, caller)) {
-          null;
-        } else {
-          ?post;
+        if (not post.published) {
+          return null;
+        };
+        ?{
+          id = post.id;
+          title = post.title;
+          author = post.author;
+          createdAt = post.createdAt;
+          memberOnly = post.memberOnly;
+          seoTitle = post.seoTitle;
+          seoMetaDescription = post.seoMetaDescription;
         };
       };
     };
   };
 
   public query ({ caller }) func getAllBlogPosts() : async [BlogPost] {
-    let allPosts = blogPostStore.values().toArray();
-    if (AccessControl.isAdmin(accessControlState, caller)) {
-      allPosts;
-    } else {
-      allPosts.filter(func(post) { post.published });
+    let isAdmin = AccessControl.isAdmin(accessControlState, caller);
+    let allPosts = blogPosts.values().toArray();
+
+    if (isAdmin) {
+      return allPosts;
+    };
+
+    allPosts.filter(func(post) { post.published and (not post.memberOnly or hasActiveMembershipLocal(caller)) });
+  };
+
+  public query ({ caller }) func getAllBlogPostPreviews() : async [BlogPostPreview] {
+    let allPosts = blogPosts.values().toArray();
+    allPosts.filter(func(post) { post.published }).map(func(post) { { id = post.id; title = post.title; author = post.author; createdAt = post.createdAt; memberOnly = post.memberOnly; seoTitle = post.seoTitle; seoMetaDescription = post.seoMetaDescription } });
+  };
+
+  public shared ({ caller }) func addAmazonProduct(
+    name : Text,
+    description : Text,
+    imageUrl : Text,
+    category : Text,
+    affiliateLink : Text,
+  ) : async () {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+      Runtime.trap("Unauthorized: Only admins can add products");
+    };
+
+    let product = { id = nextAmazonProductId; name; description; imageUrl; category; affiliateLink };
+    amazonProducts.add(nextAmazonProductId, product);
+    nextAmazonProductId += 1;
+  };
+
+  public shared ({ caller }) func updateAmazonProduct(
+    id : Nat,
+    name : Text,
+    description : Text,
+    imageUrl : Text,
+    category : Text,
+    affiliateLink : Text,
+  ) : async () {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+      Runtime.trap("Unauthorized: Only admins can update products");
+    };
+
+    let product = switch (amazonProducts.get(id)) {
+      case (null) { Runtime.trap("Product not found") };
+      case (?p) { p };
+    };
+
+    let updated = { product with name; description; imageUrl; category; affiliateLink };
+    amazonProducts.add(id, updated);
+  };
+
+  public shared ({ caller }) func deleteAmazonProduct(id : Nat) : async () {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+      Runtime.trap("Unauthorized: Only admins can delete products");
+    };
+
+    let _ = switch (amazonProducts.get(id)) {
+      case (null) { Runtime.trap("Product not found") };
+      case (?prod) { prod };
+    };
+
+    amazonProducts.remove(id);
+  };
+
+  public query func getAllAmazonProducts() : async [AmazonProduct] {
+    amazonProducts.values().toArray();
+  };
+
+  public shared ({ caller }) func addMembership(stripeId : Text) : async () {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+      Runtime.trap("Unauthorized: Only admins can add memberships");
+    };
+
+    let membership : Membership = { principal = caller; active = true; stripeId };
+    memberships.add(caller, membership);
+  };
+
+  public shared ({ caller }) func addMembershipForUser(user : Principal, stripeId : Text) : async () {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+      Runtime.trap("Unauthorized: Only admins can add memberships");
+    };
+
+    let membership : Membership = { principal = user; active = true; stripeId };
+    memberships.add(user, membership);
+  };
+
+  public shared ({ caller }) func updateMembershipStatus(user : Principal, active : Bool) : async () {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+      Runtime.trap("Unauthorized: Only admins can update membership status");
+    };
+
+    let membership = switch (memberships.get(user)) {
+      case (null) { Runtime.trap("Membership not found") };
+      case (?m) { m };
+    };
+    let updated = { membership with active };
+    memberships.add(user, updated);
+  };
+
+  public query ({ caller }) func hasActiveMembership() : async Bool {
+    switch (memberships.get(caller)) {
+      case (null) { false };
+      case (?membership) { membership.active };
     };
   };
 
-  private func getMuscleGroupName(mg : MuscleGroup) : ?Text {
+  public query ({ caller }) func getMembership() : async ?Membership {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only authenticated users can view membership");
+    };
+    memberships.get(caller);
+  };
+
+  public query ({ caller }) func getAllMemberships() : async [Membership] {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+      Runtime.trap("Unauthorized: Only admins can view all memberships");
+    };
+    memberships.values().toArray();
+  };
+
+  public query ({ caller }) func getMuscleGroups() : async [MuscleGroupDetails] {
+    muscleGroups.values().toArray();
+  };
+
+  public shared ({ caller }) func updateMuscleGroup(
+    name : Text,
+    description : Text,
+    imageUrl : Text,
+  ) : async () {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+      Runtime.trap("Unauthorized: Only admins can update muscle groups");
+    };
+
+    let mg = switch (muscleGroups.get(name)) {
+      case (null) { { name; description; imageUrl; exerciseIds = []; card = createDefaultMuscleGroupCardFromName(name) } };
+      case (?existing) { { existing with description; imageUrl } };
+    };
+
+    muscleGroups.add(name, mg);
+  };
+
+  public query ({ caller }) func getMuscleGroupArtists() : async [MuscleGroupCard] {
+    muscleGroupCards.values().toArray();
+  };
+
+  public query ({ caller }) func getMuscleGroupArtist(name : Text) : async ?MuscleGroupCard {
+    muscleGroupCards.get(name);
+  };
+
+  public shared ({ caller }) func updateMuscleGroupArtist(name : Text, card : MuscleGroupCard) : async () {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+      Runtime.trap("Unauthorized: Only admins can update muscle group cards");
+    };
+    muscleGroupCards.add(name, card);
+  };
+
+  func hasActiveMembershipLocal(caller : Principal) : Bool {
+    switch (memberships.get(caller)) {
+      case (null) { false };
+      case (?membership) { membership.active };
+    };
+  };
+
+  func muscleGroupToName(mg : MuscleGroup) : Text {
     switch (mg) {
-      case (#chest) { ?"Chest" };
-      case (#back) { ?"Back" };
-      case (#legs) { ?"Legs" };
-      case (#shoulders) { ?"Shoulders" };
-      case (#arms) { ?"Arms" };
-      case (#core) { ?"Core" };
+      case (#chest) { "Chest" };
+      case (#back) { "Back" };
+      case (#shoulders) { "Shoulders" };
+      case (#biceps) { "Biceps" };
+      case (#triceps) { "Triceps" };
+      case (#quads) { "Quads" };
+      case (#hamstrings) { "Hamstrings" };
+      case (#glutes) { "Glutes" };
+      case (#calves) { "Calves" };
+      case (#core) { "Core" };
     };
   };
 
-  private func getMuscleGroupEnum(groupName : Text) : ?MuscleGroup {
-    if (groupName == "Chest") {
-      ?#chest;
-    } else if (groupName == "Back") {
-      ?#back;
-    } else if (groupName == "Legs") {
-      ?#legs;
-    } else if (groupName == "Shoulders") {
-      ?#shoulders;
-    } else if (groupName == "Arms") {
-      ?#arms;
-    } else if (groupName == "Core") {
-      ?#core;
-    } else {
-      Runtime.trap("Invalid muscle group name: " # groupName);
+  func createDefaultMuscleGroupCard(mg : MuscleGroup) : MuscleGroupCard {
+    {
+      title = muscleGroupToName(mg);
+      description = getDefaultDescription(muscleGroupToName(mg));
+      imageUrl = getDefaultImageUrl(mg);
+      heroImage = null;
     };
+  };
+
+  func createDefaultMuscleGroupCardFromName(name : Text) : MuscleGroupCard {
+    { title = name; description = getDefaultDescription(name); imageUrl = ""; heroImage = null };
+  };
+
+  func getDefaultDescription(name : Text) : Text {
+    "This is the default description for the " # name # " muscle group. Please add a more detailed description.";
+  };
+
+  func getDefaultImageUrl(mg : MuscleGroup) : Text {
+    switch (mg) {
+      case (#chest) { "https://media.discordapp.net/attachments/746090787591151747/1245354939349575801/CP_Chest.png?rl=true" };
+      case (#shoulders) { "https://media.discordapp.net/attachments/746090787591151747/1245354940952635454/CP_Shoulders.png?rl=true" };
+      case (#biceps) { "https://media.discordapp.net/attachments/746090787591151747/1245354939710216272/CP_Biceps.png?rl=true" };
+      case (#triceps) { "https://media.discordapp.net/attachments/746090787591151747/1245354941572986912/CP_Triceps.png?rl=true" };
+      case (#calves) { "https://media.discordapp.net/attachments/746090787591151747/1245354938075947110/CP_Calves.png?rl=true" };
+      case (#quads) { "https://media.discordapp.net/attachments/746090787591151747/1245354941259016242/CP_Quads.png?rl=true" };
+      case (#back) { "https://media.discordapp.net/attachments/746090787591151747/1245354938934306929/CP_Back.png?rl=true" };
+      case (#core) { "https://media.discordapp.net/attachments/746090787591151747/1245354939400689754/CP_Core.png?rl=true" };
+      case (#hamstrings) { "https://media.discordapp.net/attachments/746090787591151747/1245354940676634815/CP_Hamstrings.png?rl=true" };
+      case (#glutes) { "https://cdn.discordapp.com/attachments/746090787591151747/1245354940294127646/CP_Glutes.png?rl=true" };
+    };
+  };
+
+  public query func transform(input : OutCall.TransformationInput) : async OutCall.TransformationOutput {
+    OutCall.transform(input);
+  };
+
+  public query ({ caller }) func getPrivacyPolicy() : async Text {
+    "Your privacy is important to us. All content is copyright of Cerebral Physique LLC. We collect minimal data necessary for service delivery and do not share information with third parties outside of required payment processing. For support please contact us at support@cerebralphysique.com. By using our service, you agree to these terms.";
+  };
+
+  public query ({ caller }) func getAffiliateDisclosure() : async Text {
+    "Cerebral Physique LLC participates in the Amazon Services LLC Associates Program. Purchases are completed on Amazon. By using our affiliate links, you support our platform at no additional cost to you.";
   };
 };

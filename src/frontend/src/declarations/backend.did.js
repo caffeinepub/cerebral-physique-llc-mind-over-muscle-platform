@@ -19,25 +19,22 @@ export const _CaffeineStorageRefillResult = IDL.Record({
   'success' : IDL.Opt(IDL.Bool),
   'topped_up_amount' : IDL.Opt(IDL.Nat),
 });
-export const DifficultyLevel = IDL.Variant({
-  'intermediate' : IDL.Null,
-  'beginner' : IDL.Null,
-  'advanced' : IDL.Null,
-});
 export const MuscleGroup = IDL.Variant({
+  'triceps' : IDL.Null,
   'shoulders' : IDL.Null,
-  'arms' : IDL.Null,
   'back' : IDL.Null,
   'core' : IDL.Null,
   'chest' : IDL.Null,
-  'legs' : IDL.Null,
+  'quads' : IDL.Null,
+  'hamstrings' : IDL.Null,
+  'glutes' : IDL.Null,
+  'calves' : IDL.Null,
+  'biceps' : IDL.Null,
 });
 export const EquipmentType = IDL.Variant({
   'bodyweight' : IDL.Null,
   'cable' : IDL.Null,
-  'barbell' : IDL.Null,
   'dumbbell' : IDL.Null,
-  'bands' : IDL.Null,
   'machine' : IDL.Null,
 });
 export const UserRole = IDL.Variant({
@@ -45,7 +42,31 @@ export const UserRole = IDL.Variant({
   'user' : IDL.Null,
   'guest' : IDL.Null,
 });
+export const ShoppingItem = IDL.Record({
+  'productName' : IDL.Text,
+  'currency' : IDL.Text,
+  'quantity' : IDL.Nat,
+  'priceInCents' : IDL.Nat,
+  'productDescription' : IDL.Text,
+});
+export const AmazonProduct = IDL.Record({
+  'id' : IDL.Nat,
+  'name' : IDL.Text,
+  'description' : IDL.Text,
+  'imageUrl' : IDL.Text,
+  'category' : IDL.Text,
+  'affiliateLink' : IDL.Text,
+});
 export const Time = IDL.Int;
+export const BlogPostPreview = IDL.Record({
+  'id' : IDL.Nat,
+  'title' : IDL.Text,
+  'seoTitle' : IDL.Text,
+  'createdAt' : Time,
+  'author' : IDL.Text,
+  'memberOnly' : IDL.Bool,
+  'seoMetaDescription' : IDL.Text,
+});
 export const BlogPost = IDL.Record({
   'id' : IDL.Nat,
   'title' : IDL.Text,
@@ -56,47 +77,78 @@ export const BlogPost = IDL.Record({
   'createdAt' : Time,
   'author' : IDL.Text,
   'seoKeywords' : IDL.Vec(IDL.Text),
+  'memberOnly' : IDL.Bool,
   'seoMetaDescription' : IDL.Text,
 });
-export const BreathworkPractice = IDL.Record({
+export const ExercisePreview = IDL.Record({
   'id' : IDL.Nat,
-  'difficultyLevel' : DifficultyLevel,
-  'duration' : IDL.Nat,
+  'primaryMuscle' : MuscleGroup,
   'name' : IDL.Text,
-  'mindfulnessBenefits' : IDL.Text,
-  'recommendedExerciseIds' : IDL.Vec(IDL.Nat),
-  'techniqueDescription' : IDL.Text,
-  'mediaUrl' : IDL.Text,
+  'imageUrl' : IDL.Text,
 });
 export const Exercise = IDL.Record({
   'id' : IDL.Nat,
-  'difficultyLevel' : DifficultyLevel,
+  'primaryMuscle' : MuscleGroup,
+  'cues' : IDL.Text,
   'name' : IDL.Text,
   'equipmentType' : EquipmentType,
-  'instructions' : IDL.Text,
-  'mediaUrl' : IDL.Text,
   'imageUrl' : IDL.Text,
-  'benefits' : IDL.Text,
-  'muscleGroup' : MuscleGroup,
+  'isPlaceholder' : IDL.Bool,
+  'videoUrl' : IDL.Text,
+  'secondaryMuscles' : IDL.Vec(MuscleGroup),
+});
+export const Membership = IDL.Record({
+  'principal' : IDL.Principal,
+  'active' : IDL.Bool,
+  'stripeId' : IDL.Text,
+});
+export const UserProfile = IDL.Record({
+  'name' : IDL.Text,
+  'email' : IDL.Opt(IDL.Text),
+  'membershipStatus' : IDL.Opt(IDL.Text),
+});
+export const ExternalBlob = IDL.Vec(IDL.Nat8);
+export const MuscleGroupCard = IDL.Record({
+  'title' : IDL.Text,
+  'description' : IDL.Text,
+  'heroImage' : IDL.Opt(ExternalBlob),
+  'imageUrl' : IDL.Text,
 });
 export const MuscleGroupDetails = IDL.Record({
   'exerciseIds' : IDL.Vec(IDL.Nat),
+  'card' : MuscleGroupCard,
   'name' : IDL.Text,
   'description' : IDL.Text,
   'imageUrl' : IDL.Text,
 });
-export const MusicPreference = IDL.Variant({
-  'on' : IDL.Null,
-  'off' : IDL.Null,
+export const StripeSessionStatus = IDL.Variant({
+  'completed' : IDL.Record({
+    'userPrincipal' : IDL.Opt(IDL.Text),
+    'response' : IDL.Text,
+  }),
+  'failed' : IDL.Record({ 'error' : IDL.Text }),
 });
-export const UserProfile = IDL.Record({
+export const StripeConfiguration = IDL.Record({
+  'allowedCountries' : IDL.Vec(IDL.Text),
+  'secretKey' : IDL.Text,
+});
+export const http_header = IDL.Record({
+  'value' : IDL.Text,
   'name' : IDL.Text,
-  'musicPreference' : MusicPreference,
 });
-export const Routine = IDL.Record({
-  'breathworkPracticeIds' : IDL.Vec(IDL.Nat),
-  'exerciseIds' : IDL.Vec(IDL.Nat),
-  'userId' : IDL.Principal,
+export const http_request_result = IDL.Record({
+  'status' : IDL.Nat,
+  'body' : IDL.Vec(IDL.Nat8),
+  'headers' : IDL.Vec(http_header),
+});
+export const TransformationInput = IDL.Record({
+  'context' : IDL.Vec(IDL.Nat8),
+  'response' : http_request_result,
+});
+export const TransformationOutput = IDL.Record({
+  'status' : IDL.Nat,
+  'body' : IDL.Vec(IDL.Nat8),
+  'headers' : IDL.Vec(http_header),
 });
 
 export const idlService = IDL.Service({
@@ -127,16 +179,8 @@ export const idlService = IDL.Service({
     ),
   '_caffeineStorageUpdateGatewayPrincipals' : IDL.Func([], [], []),
   '_initializeAccessControlWithSecret' : IDL.Func([IDL.Text], [], []),
-  'addBreathworkPractice' : IDL.Func(
-      [
-        IDL.Text,
-        IDL.Text,
-        IDL.Text,
-        IDL.Vec(IDL.Nat),
-        IDL.Text,
-        IDL.Nat,
-        DifficultyLevel,
-      ],
+  'addAmazonProduct' : IDL.Func(
+      [IDL.Text, IDL.Text, IDL.Text, IDL.Text, IDL.Text],
       [],
       [],
     ),
@@ -144,36 +188,25 @@ export const idlService = IDL.Service({
       [
         IDL.Text,
         MuscleGroup,
+        IDL.Vec(MuscleGroup),
         EquipmentType,
-        DifficultyLevel,
         IDL.Text,
         IDL.Text,
         IDL.Text,
-        IDL.Text,
+        IDL.Bool,
       ],
       [],
       [],
     ),
-  'addMuscleGroup' : IDL.Func([IDL.Text, IDL.Text, IDL.Text], [], []),
-  'addToRoutine' : IDL.Func([IDL.Nat, IDL.Bool], [], []),
+  'addMembership' : IDL.Func([IDL.Text], [], []),
+  'addMembershipForUser' : IDL.Func([IDL.Principal, IDL.Text], [], []),
   'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
   'createBlogPost' : IDL.Func(
-      [IDL.Text, IDL.Text, IDL.Text, IDL.Text, IDL.Text, IDL.Vec(IDL.Text)],
-      [IDL.Nat],
-      [],
-    ),
-  'createRoutine' : IDL.Func([], [], []),
-  'deleteBlogPost' : IDL.Func([IDL.Nat], [], []),
-  'deleteBreathworkPractice' : IDL.Func([IDL.Nat], [], []),
-  'deleteExercise' : IDL.Func([IDL.Nat], [], []),
-  'deleteMuscleGroup' : IDL.Func([IDL.Text], [], []),
-  'deleteRoutine' : IDL.Func([], [], []),
-  'editBlogPost' : IDL.Func(
       [
-        IDL.Nat,
         IDL.Text,
         IDL.Text,
         IDL.Text,
+        IDL.Bool,
         IDL.Text,
         IDL.Text,
         IDL.Vec(IDL.Text),
@@ -181,57 +214,47 @@ export const idlService = IDL.Service({
       [],
       [],
     ),
-  'editBreathworkPractice' : IDL.Func(
-      [
-        IDL.Nat,
-        IDL.Text,
-        IDL.Text,
-        IDL.Text,
-        IDL.Vec(IDL.Nat),
-        IDL.Text,
-        IDL.Nat,
-        DifficultyLevel,
-      ],
-      [],
+  'createCheckoutSession' : IDL.Func(
+      [IDL.Vec(ShoppingItem), IDL.Text, IDL.Text],
+      [IDL.Text],
       [],
     ),
-  'editExercise' : IDL.Func(
-      [
-        IDL.Nat,
-        IDL.Text,
-        MuscleGroup,
-        EquipmentType,
-        DifficultyLevel,
-        IDL.Text,
-        IDL.Text,
-        IDL.Text,
-        IDL.Text,
-      ],
+  'deleteAmazonProduct' : IDL.Func([IDL.Nat], [], []),
+  'deleteBlogPost' : IDL.Func([IDL.Nat], [], []),
+  'deleteExercise' : IDL.Func([IDL.Nat], [], []),
+  'getAffiliateDisclosure' : IDL.Func([], [IDL.Text], ['query']),
+  'getAllAmazonProducts' : IDL.Func([], [IDL.Vec(AmazonProduct)], ['query']),
+  'getAllBlogPostPreviews' : IDL.Func(
       [],
-      [],
+      [IDL.Vec(BlogPostPreview)],
+      ['query'],
     ),
-  'editMuscleGroup' : IDL.Func([IDL.Text, IDL.Text, IDL.Text], [], []),
   'getAllBlogPosts' : IDL.Func([], [IDL.Vec(BlogPost)], ['query']),
-  'getAllBreathworkPractices' : IDL.Func(
+  'getAllExercisePreviews' : IDL.Func(
       [],
-      [IDL.Vec(BreathworkPractice)],
+      [IDL.Vec(ExercisePreview)],
       ['query'],
     ),
   'getAllExercises' : IDL.Func([], [IDL.Vec(Exercise)], ['query']),
-  'getAllMuscleGroups' : IDL.Func([], [IDL.Vec(MuscleGroupDetails)], ['query']),
+  'getAllMemberships' : IDL.Func([], [IDL.Vec(Membership)], ['query']),
   'getBlogPost' : IDL.Func([IDL.Nat], [IDL.Opt(BlogPost)], ['query']),
+  'getBlogPostPreview' : IDL.Func(
+      [IDL.Nat],
+      [IDL.Opt(BlogPostPreview)],
+      ['query'],
+    ),
   'getCallerUserProfile' : IDL.Func([], [IDL.Opt(UserProfile)], ['query']),
   'getCallerUserRole' : IDL.Func([], [UserRole], ['query']),
-  'getMuscleGroupDetails' : IDL.Func(
+  'getMembership' : IDL.Func([], [IDL.Opt(Membership)], ['query']),
+  'getMuscleGroupArtist' : IDL.Func(
       [IDL.Text],
-      [
-        IDL.Opt(
-          IDL.Record({
-            'exercises' : IDL.Vec(Exercise),
-            'muscleGroup' : MuscleGroupDetails,
-          })
-        ),
-      ],
+      [IDL.Opt(MuscleGroupCard)],
+      ['query'],
+    ),
+  'getMuscleGroupArtists' : IDL.Func([], [IDL.Vec(MuscleGroupCard)], ['query']),
+  'getMuscleGroupExercisePreviews' : IDL.Func(
+      [MuscleGroup],
+      [IDL.Vec(ExercisePreview)],
       ['query'],
     ),
   'getMuscleGroupExercises' : IDL.Func(
@@ -239,18 +262,63 @@ export const idlService = IDL.Service({
       [IDL.Vec(Exercise)],
       ['query'],
     ),
-  'getRoutine' : IDL.Func([IDL.Principal], [IDL.Opt(Routine)], ['query']),
+  'getMuscleGroups' : IDL.Func([], [IDL.Vec(MuscleGroupDetails)], ['query']),
+  'getPrivacyPolicy' : IDL.Func([], [IDL.Text], ['query']),
+  'getStripeSessionStatus' : IDL.Func([IDL.Text], [StripeSessionStatus], []),
   'getUserProfile' : IDL.Func(
       [IDL.Principal],
       [IDL.Opt(UserProfile)],
       ['query'],
     ),
+  'hasActiveMembership' : IDL.Func([], [IDL.Bool], ['query']),
   'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
+  'isStripeConfigured' : IDL.Func([], [IDL.Bool], ['query']),
   'publishBlogPost' : IDL.Func([IDL.Nat], [], []),
-  'removeFromRoutine' : IDL.Func([IDL.Nat, IDL.Bool], [], []),
   'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
+  'setStripeConfiguration' : IDL.Func([StripeConfiguration], [], []),
+  'transform' : IDL.Func(
+      [TransformationInput],
+      [TransformationOutput],
+      ['query'],
+    ),
   'unpublishBlogPost' : IDL.Func([IDL.Nat], [], []),
-  'updateMusicPreference' : IDL.Func([MusicPreference], [], []),
+  'updateAmazonProduct' : IDL.Func(
+      [IDL.Nat, IDL.Text, IDL.Text, IDL.Text, IDL.Text, IDL.Text],
+      [],
+      [],
+    ),
+  'updateBlogPost' : IDL.Func(
+      [
+        IDL.Nat,
+        IDL.Text,
+        IDL.Text,
+        IDL.Text,
+        IDL.Bool,
+        IDL.Text,
+        IDL.Text,
+        IDL.Vec(IDL.Text),
+      ],
+      [],
+      [],
+    ),
+  'updateExercise' : IDL.Func(
+      [
+        IDL.Nat,
+        IDL.Text,
+        MuscleGroup,
+        IDL.Vec(MuscleGroup),
+        EquipmentType,
+        IDL.Text,
+        IDL.Text,
+        IDL.Text,
+        IDL.Bool,
+      ],
+      [],
+      [],
+    ),
+  'updateMembershipStatus' : IDL.Func([IDL.Principal, IDL.Bool], [], []),
+  'updateMuscleGroup' : IDL.Func([IDL.Text, IDL.Text, IDL.Text], [], []),
+  'updateMuscleGroupArtist' : IDL.Func([IDL.Text, MuscleGroupCard], [], []),
 });
 
 export const idlInitArgs = [];
@@ -267,25 +335,22 @@ export const idlFactory = ({ IDL }) => {
     'success' : IDL.Opt(IDL.Bool),
     'topped_up_amount' : IDL.Opt(IDL.Nat),
   });
-  const DifficultyLevel = IDL.Variant({
-    'intermediate' : IDL.Null,
-    'beginner' : IDL.Null,
-    'advanced' : IDL.Null,
-  });
   const MuscleGroup = IDL.Variant({
+    'triceps' : IDL.Null,
     'shoulders' : IDL.Null,
-    'arms' : IDL.Null,
     'back' : IDL.Null,
     'core' : IDL.Null,
     'chest' : IDL.Null,
-    'legs' : IDL.Null,
+    'quads' : IDL.Null,
+    'hamstrings' : IDL.Null,
+    'glutes' : IDL.Null,
+    'calves' : IDL.Null,
+    'biceps' : IDL.Null,
   });
   const EquipmentType = IDL.Variant({
     'bodyweight' : IDL.Null,
     'cable' : IDL.Null,
-    'barbell' : IDL.Null,
     'dumbbell' : IDL.Null,
-    'bands' : IDL.Null,
     'machine' : IDL.Null,
   });
   const UserRole = IDL.Variant({
@@ -293,7 +358,31 @@ export const idlFactory = ({ IDL }) => {
     'user' : IDL.Null,
     'guest' : IDL.Null,
   });
+  const ShoppingItem = IDL.Record({
+    'productName' : IDL.Text,
+    'currency' : IDL.Text,
+    'quantity' : IDL.Nat,
+    'priceInCents' : IDL.Nat,
+    'productDescription' : IDL.Text,
+  });
+  const AmazonProduct = IDL.Record({
+    'id' : IDL.Nat,
+    'name' : IDL.Text,
+    'description' : IDL.Text,
+    'imageUrl' : IDL.Text,
+    'category' : IDL.Text,
+    'affiliateLink' : IDL.Text,
+  });
   const Time = IDL.Int;
+  const BlogPostPreview = IDL.Record({
+    'id' : IDL.Nat,
+    'title' : IDL.Text,
+    'seoTitle' : IDL.Text,
+    'createdAt' : Time,
+    'author' : IDL.Text,
+    'memberOnly' : IDL.Bool,
+    'seoMetaDescription' : IDL.Text,
+  });
   const BlogPost = IDL.Record({
     'id' : IDL.Nat,
     'title' : IDL.Text,
@@ -304,44 +393,75 @@ export const idlFactory = ({ IDL }) => {
     'createdAt' : Time,
     'author' : IDL.Text,
     'seoKeywords' : IDL.Vec(IDL.Text),
+    'memberOnly' : IDL.Bool,
     'seoMetaDescription' : IDL.Text,
   });
-  const BreathworkPractice = IDL.Record({
+  const ExercisePreview = IDL.Record({
     'id' : IDL.Nat,
-    'difficultyLevel' : DifficultyLevel,
-    'duration' : IDL.Nat,
+    'primaryMuscle' : MuscleGroup,
     'name' : IDL.Text,
-    'mindfulnessBenefits' : IDL.Text,
-    'recommendedExerciseIds' : IDL.Vec(IDL.Nat),
-    'techniqueDescription' : IDL.Text,
-    'mediaUrl' : IDL.Text,
+    'imageUrl' : IDL.Text,
   });
   const Exercise = IDL.Record({
     'id' : IDL.Nat,
-    'difficultyLevel' : DifficultyLevel,
+    'primaryMuscle' : MuscleGroup,
+    'cues' : IDL.Text,
     'name' : IDL.Text,
     'equipmentType' : EquipmentType,
-    'instructions' : IDL.Text,
-    'mediaUrl' : IDL.Text,
     'imageUrl' : IDL.Text,
-    'benefits' : IDL.Text,
-    'muscleGroup' : MuscleGroup,
+    'isPlaceholder' : IDL.Bool,
+    'videoUrl' : IDL.Text,
+    'secondaryMuscles' : IDL.Vec(MuscleGroup),
+  });
+  const Membership = IDL.Record({
+    'principal' : IDL.Principal,
+    'active' : IDL.Bool,
+    'stripeId' : IDL.Text,
+  });
+  const UserProfile = IDL.Record({
+    'name' : IDL.Text,
+    'email' : IDL.Opt(IDL.Text),
+    'membershipStatus' : IDL.Opt(IDL.Text),
+  });
+  const ExternalBlob = IDL.Vec(IDL.Nat8);
+  const MuscleGroupCard = IDL.Record({
+    'title' : IDL.Text,
+    'description' : IDL.Text,
+    'heroImage' : IDL.Opt(ExternalBlob),
+    'imageUrl' : IDL.Text,
   });
   const MuscleGroupDetails = IDL.Record({
     'exerciseIds' : IDL.Vec(IDL.Nat),
+    'card' : MuscleGroupCard,
     'name' : IDL.Text,
     'description' : IDL.Text,
     'imageUrl' : IDL.Text,
   });
-  const MusicPreference = IDL.Variant({ 'on' : IDL.Null, 'off' : IDL.Null });
-  const UserProfile = IDL.Record({
-    'name' : IDL.Text,
-    'musicPreference' : MusicPreference,
+  const StripeSessionStatus = IDL.Variant({
+    'completed' : IDL.Record({
+      'userPrincipal' : IDL.Opt(IDL.Text),
+      'response' : IDL.Text,
+    }),
+    'failed' : IDL.Record({ 'error' : IDL.Text }),
   });
-  const Routine = IDL.Record({
-    'breathworkPracticeIds' : IDL.Vec(IDL.Nat),
-    'exerciseIds' : IDL.Vec(IDL.Nat),
-    'userId' : IDL.Principal,
+  const StripeConfiguration = IDL.Record({
+    'allowedCountries' : IDL.Vec(IDL.Text),
+    'secretKey' : IDL.Text,
+  });
+  const http_header = IDL.Record({ 'value' : IDL.Text, 'name' : IDL.Text });
+  const http_request_result = IDL.Record({
+    'status' : IDL.Nat,
+    'body' : IDL.Vec(IDL.Nat8),
+    'headers' : IDL.Vec(http_header),
+  });
+  const TransformationInput = IDL.Record({
+    'context' : IDL.Vec(IDL.Nat8),
+    'response' : http_request_result,
+  });
+  const TransformationOutput = IDL.Record({
+    'status' : IDL.Nat,
+    'body' : IDL.Vec(IDL.Nat8),
+    'headers' : IDL.Vec(http_header),
   });
   
   return IDL.Service({
@@ -372,16 +492,8 @@ export const idlFactory = ({ IDL }) => {
       ),
     '_caffeineStorageUpdateGatewayPrincipals' : IDL.Func([], [], []),
     '_initializeAccessControlWithSecret' : IDL.Func([IDL.Text], [], []),
-    'addBreathworkPractice' : IDL.Func(
-        [
-          IDL.Text,
-          IDL.Text,
-          IDL.Text,
-          IDL.Vec(IDL.Nat),
-          IDL.Text,
-          IDL.Nat,
-          DifficultyLevel,
-        ],
+    'addAmazonProduct' : IDL.Func(
+        [IDL.Text, IDL.Text, IDL.Text, IDL.Text, IDL.Text],
         [],
         [],
       ),
@@ -389,36 +501,25 @@ export const idlFactory = ({ IDL }) => {
         [
           IDL.Text,
           MuscleGroup,
+          IDL.Vec(MuscleGroup),
           EquipmentType,
-          DifficultyLevel,
           IDL.Text,
           IDL.Text,
           IDL.Text,
-          IDL.Text,
+          IDL.Bool,
         ],
         [],
         [],
       ),
-    'addMuscleGroup' : IDL.Func([IDL.Text, IDL.Text, IDL.Text], [], []),
-    'addToRoutine' : IDL.Func([IDL.Nat, IDL.Bool], [], []),
+    'addMembership' : IDL.Func([IDL.Text], [], []),
+    'addMembershipForUser' : IDL.Func([IDL.Principal, IDL.Text], [], []),
     'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
     'createBlogPost' : IDL.Func(
-        [IDL.Text, IDL.Text, IDL.Text, IDL.Text, IDL.Text, IDL.Vec(IDL.Text)],
-        [IDL.Nat],
-        [],
-      ),
-    'createRoutine' : IDL.Func([], [], []),
-    'deleteBlogPost' : IDL.Func([IDL.Nat], [], []),
-    'deleteBreathworkPractice' : IDL.Func([IDL.Nat], [], []),
-    'deleteExercise' : IDL.Func([IDL.Nat], [], []),
-    'deleteMuscleGroup' : IDL.Func([IDL.Text], [], []),
-    'deleteRoutine' : IDL.Func([], [], []),
-    'editBlogPost' : IDL.Func(
         [
-          IDL.Nat,
           IDL.Text,
           IDL.Text,
           IDL.Text,
+          IDL.Bool,
           IDL.Text,
           IDL.Text,
           IDL.Vec(IDL.Text),
@@ -426,61 +527,51 @@ export const idlFactory = ({ IDL }) => {
         [],
         [],
       ),
-    'editBreathworkPractice' : IDL.Func(
-        [
-          IDL.Nat,
-          IDL.Text,
-          IDL.Text,
-          IDL.Text,
-          IDL.Vec(IDL.Nat),
-          IDL.Text,
-          IDL.Nat,
-          DifficultyLevel,
-        ],
-        [],
+    'createCheckoutSession' : IDL.Func(
+        [IDL.Vec(ShoppingItem), IDL.Text, IDL.Text],
+        [IDL.Text],
         [],
       ),
-    'editExercise' : IDL.Func(
-        [
-          IDL.Nat,
-          IDL.Text,
-          MuscleGroup,
-          EquipmentType,
-          DifficultyLevel,
-          IDL.Text,
-          IDL.Text,
-          IDL.Text,
-          IDL.Text,
-        ],
+    'deleteAmazonProduct' : IDL.Func([IDL.Nat], [], []),
+    'deleteBlogPost' : IDL.Func([IDL.Nat], [], []),
+    'deleteExercise' : IDL.Func([IDL.Nat], [], []),
+    'getAffiliateDisclosure' : IDL.Func([], [IDL.Text], ['query']),
+    'getAllAmazonProducts' : IDL.Func([], [IDL.Vec(AmazonProduct)], ['query']),
+    'getAllBlogPostPreviews' : IDL.Func(
         [],
-        [],
+        [IDL.Vec(BlogPostPreview)],
+        ['query'],
       ),
-    'editMuscleGroup' : IDL.Func([IDL.Text, IDL.Text, IDL.Text], [], []),
     'getAllBlogPosts' : IDL.Func([], [IDL.Vec(BlogPost)], ['query']),
-    'getAllBreathworkPractices' : IDL.Func(
+    'getAllExercisePreviews' : IDL.Func(
         [],
-        [IDL.Vec(BreathworkPractice)],
+        [IDL.Vec(ExercisePreview)],
         ['query'],
       ),
     'getAllExercises' : IDL.Func([], [IDL.Vec(Exercise)], ['query']),
-    'getAllMuscleGroups' : IDL.Func(
-        [],
-        [IDL.Vec(MuscleGroupDetails)],
+    'getAllMemberships' : IDL.Func([], [IDL.Vec(Membership)], ['query']),
+    'getBlogPost' : IDL.Func([IDL.Nat], [IDL.Opt(BlogPost)], ['query']),
+    'getBlogPostPreview' : IDL.Func(
+        [IDL.Nat],
+        [IDL.Opt(BlogPostPreview)],
         ['query'],
       ),
-    'getBlogPost' : IDL.Func([IDL.Nat], [IDL.Opt(BlogPost)], ['query']),
     'getCallerUserProfile' : IDL.Func([], [IDL.Opt(UserProfile)], ['query']),
     'getCallerUserRole' : IDL.Func([], [UserRole], ['query']),
-    'getMuscleGroupDetails' : IDL.Func(
+    'getMembership' : IDL.Func([], [IDL.Opt(Membership)], ['query']),
+    'getMuscleGroupArtist' : IDL.Func(
         [IDL.Text],
-        [
-          IDL.Opt(
-            IDL.Record({
-              'exercises' : IDL.Vec(Exercise),
-              'muscleGroup' : MuscleGroupDetails,
-            })
-          ),
-        ],
+        [IDL.Opt(MuscleGroupCard)],
+        ['query'],
+      ),
+    'getMuscleGroupArtists' : IDL.Func(
+        [],
+        [IDL.Vec(MuscleGroupCard)],
+        ['query'],
+      ),
+    'getMuscleGroupExercisePreviews' : IDL.Func(
+        [MuscleGroup],
+        [IDL.Vec(ExercisePreview)],
         ['query'],
       ),
     'getMuscleGroupExercises' : IDL.Func(
@@ -488,18 +579,63 @@ export const idlFactory = ({ IDL }) => {
         [IDL.Vec(Exercise)],
         ['query'],
       ),
-    'getRoutine' : IDL.Func([IDL.Principal], [IDL.Opt(Routine)], ['query']),
+    'getMuscleGroups' : IDL.Func([], [IDL.Vec(MuscleGroupDetails)], ['query']),
+    'getPrivacyPolicy' : IDL.Func([], [IDL.Text], ['query']),
+    'getStripeSessionStatus' : IDL.Func([IDL.Text], [StripeSessionStatus], []),
     'getUserProfile' : IDL.Func(
         [IDL.Principal],
         [IDL.Opt(UserProfile)],
         ['query'],
       ),
+    'hasActiveMembership' : IDL.Func([], [IDL.Bool], ['query']),
     'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
+    'isStripeConfigured' : IDL.Func([], [IDL.Bool], ['query']),
     'publishBlogPost' : IDL.Func([IDL.Nat], [], []),
-    'removeFromRoutine' : IDL.Func([IDL.Nat, IDL.Bool], [], []),
     'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
+    'setStripeConfiguration' : IDL.Func([StripeConfiguration], [], []),
+    'transform' : IDL.Func(
+        [TransformationInput],
+        [TransformationOutput],
+        ['query'],
+      ),
     'unpublishBlogPost' : IDL.Func([IDL.Nat], [], []),
-    'updateMusicPreference' : IDL.Func([MusicPreference], [], []),
+    'updateAmazonProduct' : IDL.Func(
+        [IDL.Nat, IDL.Text, IDL.Text, IDL.Text, IDL.Text, IDL.Text],
+        [],
+        [],
+      ),
+    'updateBlogPost' : IDL.Func(
+        [
+          IDL.Nat,
+          IDL.Text,
+          IDL.Text,
+          IDL.Text,
+          IDL.Bool,
+          IDL.Text,
+          IDL.Text,
+          IDL.Vec(IDL.Text),
+        ],
+        [],
+        [],
+      ),
+    'updateExercise' : IDL.Func(
+        [
+          IDL.Nat,
+          IDL.Text,
+          MuscleGroup,
+          IDL.Vec(MuscleGroup),
+          EquipmentType,
+          IDL.Text,
+          IDL.Text,
+          IDL.Text,
+          IDL.Bool,
+        ],
+        [],
+        [],
+      ),
+    'updateMembershipStatus' : IDL.Func([IDL.Principal, IDL.Bool], [], []),
+    'updateMuscleGroup' : IDL.Func([IDL.Text, IDL.Text, IDL.Text], [], []),
+    'updateMuscleGroupArtist' : IDL.Func([IDL.Text, MuscleGroupCard], [], []),
   });
 };
 

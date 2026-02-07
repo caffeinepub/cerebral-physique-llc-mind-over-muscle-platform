@@ -10,6 +10,14 @@ import type { ActorMethod } from '@icp-sdk/core/agent';
 import type { IDL } from '@icp-sdk/core/candid';
 import type { Principal } from '@icp-sdk/core/principal';
 
+export interface AmazonProduct {
+  'id' : bigint,
+  'name' : string,
+  'description' : string,
+  'imageUrl' : string,
+  'category' : string,
+  'affiliateLink' : string,
+}
 export interface BlogPost {
   'id' : bigint,
   'title' : string,
@@ -20,61 +28,97 @@ export interface BlogPost {
   'createdAt' : Time,
   'author' : string,
   'seoKeywords' : Array<string>,
+  'memberOnly' : boolean,
   'seoMetaDescription' : string,
 }
-export interface BreathworkPractice {
+export interface BlogPostPreview {
   'id' : bigint,
-  'difficultyLevel' : DifficultyLevel,
-  'duration' : bigint,
-  'name' : string,
-  'mindfulnessBenefits' : string,
-  'recommendedExerciseIds' : Array<bigint>,
-  'techniqueDescription' : string,
-  'mediaUrl' : string,
+  'title' : string,
+  'seoTitle' : string,
+  'createdAt' : Time,
+  'author' : string,
+  'memberOnly' : boolean,
+  'seoMetaDescription' : string,
 }
-export type DifficultyLevel = { 'intermediate' : null } |
-  { 'beginner' : null } |
-  { 'advanced' : null };
 export type EquipmentType = { 'bodyweight' : null } |
   { 'cable' : null } |
-  { 'barbell' : null } |
   { 'dumbbell' : null } |
-  { 'bands' : null } |
   { 'machine' : null };
 export interface Exercise {
   'id' : bigint,
-  'difficultyLevel' : DifficultyLevel,
+  'primaryMuscle' : MuscleGroup,
+  'cues' : string,
   'name' : string,
   'equipmentType' : EquipmentType,
-  'instructions' : string,
-  'mediaUrl' : string,
   'imageUrl' : string,
-  'benefits' : string,
-  'muscleGroup' : MuscleGroup,
+  'isPlaceholder' : boolean,
+  'videoUrl' : string,
+  'secondaryMuscles' : Array<MuscleGroup>,
 }
-export type MuscleGroup = { 'shoulders' : null } |
-  { 'arms' : null } |
+export interface ExercisePreview {
+  'id' : bigint,
+  'primaryMuscle' : MuscleGroup,
+  'name' : string,
+  'imageUrl' : string,
+}
+export type ExternalBlob = Uint8Array;
+export interface Membership {
+  'principal' : Principal,
+  'active' : boolean,
+  'stripeId' : string,
+}
+export type MuscleGroup = { 'triceps' : null } |
+  { 'shoulders' : null } |
   { 'back' : null } |
   { 'core' : null } |
   { 'chest' : null } |
-  { 'legs' : null };
+  { 'quads' : null } |
+  { 'hamstrings' : null } |
+  { 'glutes' : null } |
+  { 'calves' : null } |
+  { 'biceps' : null };
+export interface MuscleGroupCard {
+  'title' : string,
+  'description' : string,
+  'heroImage' : [] | [ExternalBlob],
+  'imageUrl' : string,
+}
 export interface MuscleGroupDetails {
   'exerciseIds' : Array<bigint>,
+  'card' : MuscleGroupCard,
   'name' : string,
   'description' : string,
   'imageUrl' : string,
 }
-export type MusicPreference = { 'on' : null } |
-  { 'off' : null };
-export interface Routine {
-  'breathworkPracticeIds' : Array<bigint>,
-  'exerciseIds' : Array<bigint>,
-  'userId' : Principal,
+export interface ShoppingItem {
+  'productName' : string,
+  'currency' : string,
+  'quantity' : bigint,
+  'priceInCents' : bigint,
+  'productDescription' : string,
 }
+export interface StripeConfiguration {
+  'allowedCountries' : Array<string>,
+  'secretKey' : string,
+}
+export type StripeSessionStatus = {
+    'completed' : { 'userPrincipal' : [] | [string], 'response' : string }
+  } |
+  { 'failed' : { 'error' : string } };
 export type Time = bigint;
+export interface TransformationInput {
+  'context' : Uint8Array,
+  'response' : http_request_result,
+}
+export interface TransformationOutput {
+  'status' : bigint,
+  'body' : Uint8Array,
+  'headers' : Array<http_header>,
+}
 export interface UserProfile {
   'name' : string,
-  'musicPreference' : MusicPreference,
+  'email' : [] | [string],
+  'membershipStatus' : [] | [string],
 }
 export type UserRole = { 'admin' : null } |
   { 'user' : null } |
@@ -89,6 +133,12 @@ export interface _CaffeineStorageRefillInformation {
 export interface _CaffeineStorageRefillResult {
   'success' : [] | [boolean],
   'topped_up_amount' : [] | [bigint],
+}
+export interface http_header { 'value' : string, 'name' : string }
+export interface http_request_result {
+  'status' : bigint,
+  'body' : Uint8Array,
+  'headers' : Array<http_header>,
 }
 export interface _SERVICE {
   '_caffeineStorageBlobIsLive' : ActorMethod<[Uint8Array], boolean>,
@@ -107,88 +157,93 @@ export interface _SERVICE {
   >,
   '_caffeineStorageUpdateGatewayPrincipals' : ActorMethod<[], undefined>,
   '_initializeAccessControlWithSecret' : ActorMethod<[string], undefined>,
-  'addBreathworkPractice' : ActorMethod<
-    [string, string, string, Array<bigint>, string, bigint, DifficultyLevel],
+  'addAmazonProduct' : ActorMethod<
+    [string, string, string, string, string],
     undefined
   >,
   'addExercise' : ActorMethod<
     [
       string,
       MuscleGroup,
+      Array<MuscleGroup>,
       EquipmentType,
-      DifficultyLevel,
       string,
       string,
       string,
-      string,
+      boolean,
     ],
     undefined
   >,
-  'addMuscleGroup' : ActorMethod<[string, string, string], undefined>,
-  'addToRoutine' : ActorMethod<[bigint, boolean], undefined>,
+  'addMembership' : ActorMethod<[string], undefined>,
+  'addMembershipForUser' : ActorMethod<[Principal, string], undefined>,
   'assignCallerUserRole' : ActorMethod<[Principal, UserRole], undefined>,
   'createBlogPost' : ActorMethod<
-    [string, string, string, string, string, Array<string>],
-    bigint
+    [string, string, string, boolean, string, string, Array<string>],
+    undefined
   >,
-  'createRoutine' : ActorMethod<[], undefined>,
+  'createCheckoutSession' : ActorMethod<
+    [Array<ShoppingItem>, string, string],
+    string
+  >,
+  'deleteAmazonProduct' : ActorMethod<[bigint], undefined>,
   'deleteBlogPost' : ActorMethod<[bigint], undefined>,
-  'deleteBreathworkPractice' : ActorMethod<[bigint], undefined>,
   'deleteExercise' : ActorMethod<[bigint], undefined>,
-  'deleteMuscleGroup' : ActorMethod<[string], undefined>,
-  'deleteRoutine' : ActorMethod<[], undefined>,
-  'editBlogPost' : ActorMethod<
-    [bigint, string, string, string, string, string, Array<string>],
+  'getAffiliateDisclosure' : ActorMethod<[], string>,
+  'getAllAmazonProducts' : ActorMethod<[], Array<AmazonProduct>>,
+  'getAllBlogPostPreviews' : ActorMethod<[], Array<BlogPostPreview>>,
+  'getAllBlogPosts' : ActorMethod<[], Array<BlogPost>>,
+  'getAllExercisePreviews' : ActorMethod<[], Array<ExercisePreview>>,
+  'getAllExercises' : ActorMethod<[], Array<Exercise>>,
+  'getAllMemberships' : ActorMethod<[], Array<Membership>>,
+  'getBlogPost' : ActorMethod<[bigint], [] | [BlogPost]>,
+  'getBlogPostPreview' : ActorMethod<[bigint], [] | [BlogPostPreview]>,
+  'getCallerUserProfile' : ActorMethod<[], [] | [UserProfile]>,
+  'getCallerUserRole' : ActorMethod<[], UserRole>,
+  'getMembership' : ActorMethod<[], [] | [Membership]>,
+  'getMuscleGroupArtist' : ActorMethod<[string], [] | [MuscleGroupCard]>,
+  'getMuscleGroupArtists' : ActorMethod<[], Array<MuscleGroupCard>>,
+  'getMuscleGroupExercisePreviews' : ActorMethod<
+    [MuscleGroup],
+    Array<ExercisePreview>
+  >,
+  'getMuscleGroupExercises' : ActorMethod<[MuscleGroup], Array<Exercise>>,
+  'getMuscleGroups' : ActorMethod<[], Array<MuscleGroupDetails>>,
+  'getPrivacyPolicy' : ActorMethod<[], string>,
+  'getStripeSessionStatus' : ActorMethod<[string], StripeSessionStatus>,
+  'getUserProfile' : ActorMethod<[Principal], [] | [UserProfile]>,
+  'hasActiveMembership' : ActorMethod<[], boolean>,
+  'isCallerAdmin' : ActorMethod<[], boolean>,
+  'isStripeConfigured' : ActorMethod<[], boolean>,
+  'publishBlogPost' : ActorMethod<[bigint], undefined>,
+  'saveCallerUserProfile' : ActorMethod<[UserProfile], undefined>,
+  'setStripeConfiguration' : ActorMethod<[StripeConfiguration], undefined>,
+  'transform' : ActorMethod<[TransformationInput], TransformationOutput>,
+  'unpublishBlogPost' : ActorMethod<[bigint], undefined>,
+  'updateAmazonProduct' : ActorMethod<
+    [bigint, string, string, string, string, string],
     undefined
   >,
-  'editBreathworkPractice' : ActorMethod<
-    [
-      bigint,
-      string,
-      string,
-      string,
-      Array<bigint>,
-      string,
-      bigint,
-      DifficultyLevel,
-    ],
+  'updateBlogPost' : ActorMethod<
+    [bigint, string, string, string, boolean, string, string, Array<string>],
     undefined
   >,
-  'editExercise' : ActorMethod<
+  'updateExercise' : ActorMethod<
     [
       bigint,
       string,
       MuscleGroup,
+      Array<MuscleGroup>,
       EquipmentType,
-      DifficultyLevel,
       string,
       string,
       string,
-      string,
+      boolean,
     ],
     undefined
   >,
-  'editMuscleGroup' : ActorMethod<[string, string, string], undefined>,
-  'getAllBlogPosts' : ActorMethod<[], Array<BlogPost>>,
-  'getAllBreathworkPractices' : ActorMethod<[], Array<BreathworkPractice>>,
-  'getAllExercises' : ActorMethod<[], Array<Exercise>>,
-  'getAllMuscleGroups' : ActorMethod<[], Array<MuscleGroupDetails>>,
-  'getBlogPost' : ActorMethod<[bigint], [] | [BlogPost]>,
-  'getCallerUserProfile' : ActorMethod<[], [] | [UserProfile]>,
-  'getCallerUserRole' : ActorMethod<[], UserRole>,
-  'getMuscleGroupDetails' : ActorMethod<
-    [string],
-    [] | [{ 'exercises' : Array<Exercise>, 'muscleGroup' : MuscleGroupDetails }]
-  >,
-  'getMuscleGroupExercises' : ActorMethod<[MuscleGroup], Array<Exercise>>,
-  'getRoutine' : ActorMethod<[Principal], [] | [Routine]>,
-  'getUserProfile' : ActorMethod<[Principal], [] | [UserProfile]>,
-  'isCallerAdmin' : ActorMethod<[], boolean>,
-  'publishBlogPost' : ActorMethod<[bigint], undefined>,
-  'removeFromRoutine' : ActorMethod<[bigint, boolean], undefined>,
-  'saveCallerUserProfile' : ActorMethod<[UserProfile], undefined>,
-  'unpublishBlogPost' : ActorMethod<[bigint], undefined>,
-  'updateMusicPreference' : ActorMethod<[MusicPreference], undefined>,
+  'updateMembershipStatus' : ActorMethod<[Principal, boolean], undefined>,
+  'updateMuscleGroup' : ActorMethod<[string, string, string], undefined>,
+  'updateMuscleGroupArtist' : ActorMethod<[string, MuscleGroupCard], undefined>,
 }
 export declare const idlService: IDL.ServiceClass;
 export declare const idlInitArgs: IDL.Type[];

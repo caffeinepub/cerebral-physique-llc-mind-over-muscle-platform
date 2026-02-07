@@ -1,15 +1,19 @@
 import { Link } from '@tanstack/react-router';
-import { Menu, X, Volume2, VolumeX, LayoutDashboard } from 'lucide-react';
+import { Menu, X, Volume2, VolumeX, LayoutDashboard, User, ShoppingBag } from 'lucide-react';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useMusicPlayer } from '@/hooks/useMusicPlayer';
 import { useIsCallerAdmin } from '@/hooks/useQueries';
+import { useInternetIdentity } from '@/hooks/useInternetIdentity';
 
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { isPlaying, toggle } = useMusicPlayer();
   const { data: isAdmin, isLoading: isAdminLoading } = useIsCallerAdmin();
+  const { identity, login, loginStatus } = useInternetIdentity();
+
+  const isAuthenticated = !!identity;
 
   const navItems = [
     { label: 'Home', path: '/' },
@@ -17,6 +21,7 @@ export default function Header() {
     { label: 'Workout Library', path: '/workout-library' },
     { label: 'Programs', path: '/programs' },
     { label: 'Blog', path: '/blog' },
+    { label: 'Cerebral shop', path: '/store' },
     { label: 'Contact', path: '/contact' },
   ];
 
@@ -55,7 +60,7 @@ export default function Header() {
                 </Link>
               ))}
               
-              {/* Creator Dashboard Link - Always visible to admins with enhanced tooltip */}
+              {/* Creator Dashboard Link - Always visible to admins */}
               {!isAdminLoading && isAdmin && (
                 <TooltipProvider delayDuration={200}>
                   <Tooltip>
@@ -81,12 +86,38 @@ export default function Header() {
                       <div className="space-y-1">
                         <p className="font-semibold text-neon-purple">Creator Dashboard</p>
                         <p className="text-xs text-muted-foreground">
-                          Access your editing tools for exercises, breathwork, and blogs
+                          Manage exercises, blog posts, products, and memberships
                         </p>
                       </div>
                     </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
+              )}
+
+              {/* User Dashboard / Login */}
+              {isAuthenticated ? (
+                <Link
+                  to="/dashboard"
+                  className="rounded-md px-4 py-2 text-sm font-medium text-foreground/80 transition-colors hover:bg-accent hover:text-foreground"
+                  activeProps={{
+                    className: 'bg-accent text-foreground',
+                  }}
+                >
+                  <span className="flex items-center gap-2">
+                    <User className="h-4 w-4" />
+                    Dashboard
+                  </span>
+                </Link>
+              ) : (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={login}
+                  disabled={loginStatus === 'logging-in'}
+                  className="text-sm font-medium"
+                >
+                  {loginStatus === 'logging-in' ? 'Logging in...' : 'Login'}
+                </Button>
               )}
             </div>
             
@@ -169,7 +200,7 @@ export default function Header() {
               </Link>
             ))}
             
-            {/* Creator Dashboard Link - Mobile - Always visible to admins */}
+            {/* Creator Dashboard Link - Mobile */}
             {!isAdminLoading && isAdmin && (
               <Link
                 to="/creator-dashboard"
@@ -184,6 +215,35 @@ export default function Header() {
                   Creator Dashboard
                 </span>
               </Link>
+            )}
+
+            {/* User Dashboard / Login - Mobile */}
+            {isAuthenticated ? (
+              <Link
+                to="/dashboard"
+                className="block rounded-md px-3 py-2 text-base font-medium text-foreground/80 transition-colors hover:bg-accent hover:text-foreground"
+                activeProps={{
+                  className: 'bg-accent text-foreground',
+                }}
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                <span className="flex items-center gap-2">
+                  <User className="h-4 w-4" />
+                  Dashboard
+                </span>
+              </Link>
+            ) : (
+              <Button
+                variant="ghost"
+                className="w-full justify-start"
+                onClick={() => {
+                  login();
+                  setMobileMenuOpen(false);
+                }}
+                disabled={loginStatus === 'logging-in'}
+              >
+                {loginStatus === 'logging-in' ? 'Logging in...' : 'Login'}
+              </Button>
             )}
           </div>
         </div>

@@ -1,23 +1,28 @@
 import { useState } from 'react';
-import { useGetAllBlogPosts, useCreateBlogPost, useEditBlogPost, useDeleteBlogPost, usePublishBlogPost, useUnpublishBlogPost } from '@/hooks/useQueries';
+import { useGetAllBlogPosts, useCreateBlogPost, useUpdateBlogPost, useDeleteBlogPost, usePublishBlogPost, useUnpublishBlogPost } from '@/hooks/useQueries';
 import type { BlogPost } from '@/backend';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Plus, Edit, Trash2, Eye, EyeOff, Loader2, AlertCircle, CheckCircle2, BookOpen } from 'lucide-react';
+import { Plus, Edit, Trash2, Eye, EyeOff, Loader2, AlertCircle, CheckCircle2, BookOpen, Lock } from 'lucide-react';
 import { toast } from 'sonner';
+
+// NOTE: Blog management remains manual only. This component provides tools for admins to manually
+// create, edit, publish, and delete blog posts. No automation, email workflows, or publishing
+// schedules are introduced as part of this add-on task. All blog operations are manual admin actions.
 
 export default function BlogManagement() {
   const { data: blogPosts = [], isLoading, error } = useGetAllBlogPosts();
   const createBlogPost = useCreateBlogPost();
-  const editBlogPost = useEditBlogPost();
+  const updateBlogPost = useUpdateBlogPost();
   const deleteBlogPost = useDeleteBlogPost();
   const publishBlogPost = usePublishBlogPost();
   const unpublishBlogPost = useUnpublishBlogPost();
@@ -33,6 +38,7 @@ export default function BlogManagement() {
     title: '',
     content: '',
     author: '',
+    memberOnly: false,
     seoTitle: '',
     seoMetaDescription: '',
     seoKeywords: '',
@@ -43,6 +49,7 @@ export default function BlogManagement() {
       title: '',
       content: '',
       author: '',
+      memberOnly: false,
       seoTitle: '',
       seoMetaDescription: '',
       seoKeywords: '',
@@ -103,7 +110,7 @@ export default function BlogManagement() {
     }
 
     try {
-      await editBlogPost.mutateAsync({
+      await updateBlogPost.mutateAsync({
         id: editingPost.id,
         ...formData,
         seoKeywords: formData.seoKeywords.split(',').map(k => k.trim()).filter(k => k),
@@ -152,6 +159,7 @@ export default function BlogManagement() {
       title: post.title,
       content: post.content,
       author: post.author,
+      memberOnly: post.memberOnly,
       seoTitle: post.seoTitle,
       seoMetaDescription: post.seoMetaDescription,
       seoKeywords: post.seoKeywords.join(', '),
@@ -166,6 +174,7 @@ export default function BlogManagement() {
       title: formData.title,
       content: formData.content,
       author: formData.author,
+      memberOnly: formData.memberOnly,
       seoTitle: formData.seoTitle,
       seoMetaDescription: formData.seoMetaDescription,
       seoKeywords: formData.seoKeywords.split(',').map(k => k.trim()).filter(k => k),
@@ -285,8 +294,8 @@ export default function BlogManagement() {
               <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>
                 Cancel
               </Button>
-              <Button onClick={handleEdit} disabled={editBlogPost.isPending}>
-                {editBlogPost.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              <Button onClick={handleEdit} disabled={updateBlogPost.isPending}>
+                {updateBlogPost.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 Save Changes
               </Button>
             </div>
@@ -341,7 +350,17 @@ export default function BlogManagement() {
             ) : (
               blogPosts.map((post) => (
                 <TableRow key={post.id.toString()}>
-                  <TableCell className="font-medium">{post.title}</TableCell>
+                  <TableCell className="font-medium">
+                    <div className="flex items-center gap-2">
+                      {post.title}
+                      {post.memberOnly && (
+                        <Badge variant="secondary" className="gap-1">
+                          <Lock className="h-3 w-3" />
+                          Members
+                        </Badge>
+                      )}
+                    </div>
+                  </TableCell>
                   <TableCell>{post.author}</TableCell>
                   <TableCell>
                     <Badge variant={post.published ? 'default' : 'secondary'}>
@@ -415,6 +434,7 @@ interface BlogPostFormProps {
     title: string;
     content: string;
     author: string;
+    memberOnly: boolean;
     seoTitle: string;
     seoMetaDescription: string;
     seoKeywords: string;
@@ -423,6 +443,7 @@ interface BlogPostFormProps {
     title: string;
     content: string;
     author: string;
+    memberOnly: boolean;
     seoTitle: string;
     seoMetaDescription: string;
     seoKeywords: string;
@@ -470,6 +491,17 @@ function BlogPostForm({ formData, setFormData, validationErrors, onValidate }: B
           placeholder="Author name"
           className={validationErrors.some(e => e.includes('Author')) ? 'border-destructive' : ''}
         />
+      </div>
+
+      <div className="flex items-center space-x-2">
+        <Checkbox
+          id="memberOnly"
+          checked={formData.memberOnly}
+          onCheckedChange={(checked) => setFormData({ ...formData, memberOnly: checked as boolean })}
+        />
+        <Label htmlFor="memberOnly" className="cursor-pointer">
+          Members-only content
+        </Label>
       </div>
 
       <div className="space-y-2">
@@ -548,9 +580,17 @@ interface BlogPostPreviewProps {
 function BlogPostPreview({ post }: BlogPostPreviewProps) {
   return (
     <Card className="border-border/40 bg-card/50">
-      <CardHeader>
+      <CardContent className="space-y-4 py-6">
         <div className="space-y-2">
-          <CardTitle className="text-2xl">{post.title}</CardTitle>
+          <div className="flex items-center gap-2">
+            <h3 className="text-2xl font-bold">{post.title}</h3>
+            {post.memberOnly && (
+              <Badge variant="secondary" className="gap-1">
+                <Lock className="h-3 w-3" />
+                Members Only
+              </Badge>
+            )}
+          </div>
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <span>By {post.author}</span>
             <span>•</span>
@@ -559,8 +599,7 @@ function BlogPostPreview({ post }: BlogPostPreviewProps) {
             </Badge>
           </div>
         </div>
-      </CardHeader>
-      <CardContent className="space-y-4">
+        
         <div className="prose prose-sm max-w-none dark:prose-invert">
           <p className="whitespace-pre-wrap">{post.content}</p>
         </div>

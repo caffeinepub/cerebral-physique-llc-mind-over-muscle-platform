@@ -1,0 +1,88 @@
+{
+  "kind": "build_request",
+  "title": "Make Workout Library muscle-group cards + exercises and Blog content regularly editable",
+  "priority": "normal",
+  "requirements": [
+    {
+      "id": "REQ-14",
+      "text": "Make Workout Library muscle-group cards editable by admins so each muscle group card can display admin-managed image and text content (e.g., cover image and description) instead of relying only on hardcoded front-end mappings.",
+      "target": "both",
+      "source": {
+        "messageIds": [
+          "msg-user-1"
+        ],
+        "quotes": [
+          "Can u please make the library and all muscle group cards editable so I can add pics and or clips and texts for each exercise I feature in the library?"
+        ]
+      },
+      "acceptanceCriteria": [
+        "An admin can update each muscle group’s display content (at minimum: image URL and description text) from an admin/creator UI.",
+        "WorkoutLibraryPage muscle-group cards render the admin-managed image/description when present; if missing, they fall back to the current default images/labels.",
+        "Non-admin users cannot edit muscle-group card content.",
+        "Changes persist across refreshes and deployments (uses existing canister state)."
+      ]
+    },
+    {
+      "id": "REQ-15",
+      "text": "Update the Workout Library editing flow so admins can add/update per-exercise media and text content in a practical way for regular updates, including support for externally hosted image/video URLs (not only /assets/* paths).",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-user-1"
+        ],
+        "quotes": [
+          "...so I can add pics and or clips and texts for each exercise I feature in the library?"
+        ]
+      },
+      "acceptanceCriteria": [
+        "ExerciseManagement allows saving exercises with either site asset paths (e.g., /assets/...) or external URLs (e.g., https://...) for imageUrl and videoUrl.",
+        "ExerciseManagement continues to validate required fields (name, cues, imageUrl, videoUrl), but does not block regular updates by requiring /assets/ URLs.",
+        "Workout Library exercise preview cards continue to display each exercise’s imageUrl (with a sensible fallback if missing/unreachable)."
+      ]
+    },
+    {
+      "id": "REQ-16",
+      "text": "Ensure the Blog section is clearly editable by admins for regularly adding and updating articles, using the existing blog management workflow (create/edit/publish/unpublish/delete) and making it easy to find from the Blog area.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-user-1"
+        ],
+        "quotes": [
+          "Same goes for the Blog section.  I need to be able to add articles  for my blogs. Make both sections editable to update regularly."
+        ]
+      },
+      "acceptanceCriteria": [
+        "An admin can create, edit, publish/unpublish, and delete blog posts from the Creator Dashboard using the existing BlogManagement UI.",
+        "From the public Blog page, admins have a clear navigation path to the blog editing area (e.g., a visible “Manage Blog” button/link for admins only).",
+        "Non-admin users do not see admin-only blog editing navigation or controls."
+      ]
+    }
+  ],
+  "constraints": [
+    "Respect the existing single-actor backend architecture (all Motoko logic in backend/main.mo).",
+    "Do not edit files under frontend immutable paths (e.g., frontend/src/hooks/useInternetIdentity.ts(x), frontend/src/hooks/useActor.ts, frontend/src/main.tsx, frontend/src/components/ui).",
+    "Use English for any user-facing text.",
+    "Do not introduce any email functionality."
+  ],
+  "nonGoals": [
+    "Adding third-party CMS integrations.",
+    "Adding new authentication methods beyond Internet Identity.",
+    "Implementing real-time collaboration or live editing.",
+    "Building a rich-text editor or media transcoding pipeline (plain text + URL-based media is sufficient unless separately requested)."
+  ],
+  "imageRequirements": {
+    "required": [],
+    "edits": []
+  },
+  "userProfileUpdate": {
+    "goalsToAdd": [],
+    "goalsToRemove": [],
+    "preferencesToAdd": [],
+    "preferencesToRemove": [],
+    "miscToAdd": [],
+    "miscToRemove": [],
+    "fieldsToSet": {},
+    "fieldsToDelete": []
+  }
+}

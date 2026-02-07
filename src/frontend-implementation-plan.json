@@ -1,0 +1,76 @@
+{
+  "kind": "implementation_plan",
+  "version": "1.0",
+  "title": "Admin-editable Workout Library muscle-group cards, flexible exercise media URLs, and clearer Blog edit access",
+  "requirements": [
+    {
+      "id": "REQ-14",
+      "summary": "Add an admin UI for managing muscle-group card display content and render admin-managed image/description in Workout Library with fallbacks.",
+      "acceptanceCriteria": [
+        "An admin can update each muscle group’s display content (at minimum: image URL and description text) from an admin/creator UI.",
+        "WorkoutLibraryPage muscle-group cards render the admin-managed image/description when present; if missing, they fall back to the current default images/labels.",
+        "Non-admin users cannot edit muscle-group card content.",
+        "Changes persist across refreshes and deployments (uses existing canister state)."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/hooks/useQueries.ts",
+          "operation": "modify",
+          "description": "Add React Query hooks for fetching muscle-group card details and saving admin edits (read via existing backend capabilities for muscle groups; write via the existing admin-only update capability)."
+        },
+        {
+          "path": "frontend/src/components/creator/MuscleGroupManagement.tsx",
+          "operation": "create",
+          "description": "Create an admin-only MuscleGroupManagement UI to edit per-muscle-group card fields (image URL and description at minimum) and save updates through existing backend capabilities. If using stored blobs, use the blob-storage ExternalBlob direct URL for previews (verify the component's usage instructions before implementing)."
+        },
+        {
+          "path": "frontend/src/pages/CreatorDashboardPage.tsx",
+          "operation": "modify",
+          "description": "Wire the new MuscleGroupManagement into the Creator Dashboard (e.g., as a new tab/section alongside existing management tools) so admins can find and update muscle-group card content."
+        },
+        {
+          "path": "frontend/src/pages/WorkoutLibraryPage.tsx",
+          "operation": "modify",
+          "description": "Load muscle-group display content from backend-driven muscle-group card data and render it on each muscle-group card (image + description). Preserve current hardcoded mapping as fallback when admin-managed values are missing; keep non-admin users read-only."
+        }
+      ]
+    },
+    {
+      "id": "REQ-15",
+      "summary": "Update the exercise editing flow to accept externally hosted image/video URLs while keeping required-field validation and improving preview fallbacks.",
+      "acceptanceCriteria": [
+        "ExerciseManagement allows saving exercises with either site asset paths (e.g., /assets/...) or external URLs (e.g., https://...) for imageUrl and videoUrl.",
+        "ExerciseManagement continues to validate required fields (name, cues, imageUrl, videoUrl), but does not block regular updates by requiring /assets/ URLs.",
+        "Workout Library exercise preview cards continue to display each exercise’s imageUrl (with a sensible fallback if missing/unreachable)."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/creator/ExerciseManagement.tsx",
+          "operation": "modify",
+          "description": "Relax URL validation to allow external http(s) URLs for imageUrl/videoUrl (still require non-empty values). Update helper text to reflect that external URLs are supported and ensure regular updates are not blocked by /assets-only rules."
+        },
+        {
+          "path": "frontend/src/pages/WorkoutLibraryPage.tsx",
+          "operation": "modify",
+          "description": "Harden exercise preview card rendering to use a sensible fallback when an exercise image URL is missing or fails to load (fall back to the muscle-group card image)."
+        }
+      ]
+    },
+    {
+      "id": "REQ-16",
+      "summary": "Make Blog editing easy to discover for admins by adding an admin-only navigation affordance from the public Blog page to the existing Creator Dashboard BlogManagement workflow.",
+      "acceptanceCriteria": [
+        "An admin can create, edit, publish/unpublish, and delete blog posts from the Creator Dashboard using the existing BlogManagement UI.",
+        "From the public Blog page, admins have a clear navigation path to the blog editing area (e.g., a visible “Manage Blog” button/link for admins only).",
+        "Non-admin users do not see admin-only blog editing navigation or controls."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/pages/BlogPage.tsx",
+          "operation": "modify",
+          "description": "Use the existing admin-check query to conditionally render a clear admin-only “Manage Blog” action that routes to the Creator Dashboard area where BlogManagement already exists."
+        }
+      ]
+    }
+  ]
+}

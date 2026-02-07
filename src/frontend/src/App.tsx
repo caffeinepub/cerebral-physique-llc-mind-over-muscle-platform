@@ -7,8 +7,13 @@ import AboutPage from './pages/AboutPage';
 import WorkoutLibraryPage from './pages/WorkoutLibraryPage';
 import ProgramsPage from './pages/ProgramsPage';
 import BlogPage from './pages/BlogPage';
+import BlogPostPage from './pages/BlogPostPage';
 import ContactPage from './pages/ContactPage';
 import CreatorDashboardPage from './pages/CreatorDashboardPage';
+import UserDashboardPage from './pages/UserDashboardPage';
+import AffiliateStorePage from './pages/AffiliateStorePage';
+import PaymentSuccessPage from './pages/PaymentSuccessPage';
+import PaymentFailurePage from './pages/PaymentFailurePage';
 
 const rootRoute = createRootRoute({
   component: Layout,
@@ -44,6 +49,12 @@ const blogRoute = createRoute({
   component: BlogPage,
 });
 
+const blogPostRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/blog/$id',
+  component: BlogPostPage,
+});
+
 const contactRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/contact',
@@ -56,14 +67,46 @@ const creatorDashboardRoute = createRoute({
   component: CreatorDashboardPage,
 });
 
+const userDashboardRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/dashboard',
+  component: UserDashboardPage,
+});
+
+// NOTE: The existing /store route provides the Shop/Affiliate page functionality.
+// This add-on task preserves the existing Store page unchanged. No new /shop route is added,
+// no checkout flow is introduced, and no Amazon affiliate links are added as part of this task.
+const affiliateStoreRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/store',
+  component: AffiliateStorePage,
+});
+
+const paymentSuccessRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/payment-success',
+  component: PaymentSuccessPage,
+});
+
+const paymentFailureRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/payment-failure',
+  component: PaymentFailurePage,
+});
+
 const routeTree = rootRoute.addChildren([
   indexRoute,
   aboutRoute,
   workoutLibraryRoute,
   programsRoute,
   blogRoute,
+  blogPostRoute,
   contactRoute,
   creatorDashboardRoute,
+  userDashboardRoute,
+  affiliateStoreRoute,
+  paymentSuccessRoute,
+  paymentFailureRoute,
 ]);
 
 const router = createRouter({ routeTree });

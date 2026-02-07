@@ -1,22 +1,10 @@
 import { useNavigate } from '@tanstack/react-router';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
 import { Brain, Heart, Dumbbell, Wind } from 'lucide-react';
-import { useState } from 'react';
-import { toast } from 'sonner';
 
 export default function HomePage() {
   const navigate = useNavigate();
-  const [email, setEmail] = useState('');
-
-  const handleEmailSignup = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (email) {
-      toast.success('Thank you for signing up! We\'ll be in touch soon.');
-      setEmail('');
-    }
-  };
 
   return (
     <div className="flex flex-col">
@@ -40,17 +28,17 @@ export default function HomePage() {
               <Button
                 size="lg"
                 className="bg-neon-purple text-white hover:bg-neon-purple/90"
-                onClick={() => navigate({ to: '/programs' })}
+                onClick={() => navigate({ to: '/dashboard' })}
               >
-                7-Day Challenge
+                Become a Member
               </Button>
               <Button
                 size="lg"
                 variant="outline"
                 className="border-neon-purple text-neon-purple hover:bg-neon-purple/10"
-                onClick={() => navigate({ to: '/programs' })}
+                onClick={() => navigate({ to: '/workout-library' })}
               >
-                Explore Audiobooks
+                Explore Library
               </Button>
             </div>
           </div>
@@ -185,7 +173,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Email Signup */}
+      {/* Membership CTA */}
       <section className="relative bg-gradient-to-b from-deep-blue/10 to-background py-16 md:py-24">
         <div 
           className="absolute inset-0 animate-subtle-zoom bg-cover bg-center opacity-15"
@@ -194,24 +182,18 @@ export default function HomePage() {
         <div className="container relative mx-auto px-4">
           <div className="mx-auto max-w-2xl text-center">
             <h2 className="mb-4 text-3xl font-bold tracking-tight md:text-4xl">
-              Join the Community
+              Unlock the Library
             </h2>
             <p className="mb-8 text-lg text-muted-foreground">
-              Get exclusive insights, training tips, and early access to new programs.
+              Get full access to our comprehensive exercise library, exclusive blog content, and member-only resources.
             </p>
-            <form onSubmit={handleEmailSignup} className="flex flex-col gap-4 sm:flex-row">
-              <Input
-                type="email"
-                placeholder="Enter your email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="flex-1"
-                required
-              />
-              <Button type="submit" size="lg" className="bg-neon-purple hover:bg-neon-purple/90">
-                Sign Up
-              </Button>
-            </form>
+            <Button 
+              size="lg" 
+              className="bg-neon-purple hover:bg-neon-purple/90"
+              onClick={() => navigate({ to: '/dashboard' })}
+            >
+              Become a Member
+            </Button>
           </div>
         </div>
       </section>

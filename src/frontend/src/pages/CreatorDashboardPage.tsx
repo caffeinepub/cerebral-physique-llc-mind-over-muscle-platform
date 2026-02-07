@@ -4,10 +4,11 @@ import { useIsCallerAdmin } from '@/hooks/useQueries';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Loader2, Dumbbell, BookOpen, ShieldAlert, Wind } from 'lucide-react';
+import { Loader2, Dumbbell, BookOpen, ShieldAlert, ShoppingBag, Image } from 'lucide-react';
 import ExerciseManagement from '@/components/creator/ExerciseManagement';
 import BlogManagement from '@/components/creator/BlogManagement';
-import BreathworkManagement from '@/components/creator/BreathworkManagement';
+import AffiliateStoreManagement from '@/components/creator/AffiliateStoreManagement';
+import MuscleGroupManagement from '@/components/creator/MuscleGroupManagement';
 
 export default function CreatorDashboardPage() {
   const navigate = useNavigate();
@@ -45,7 +46,7 @@ export default function CreatorDashboardPage() {
               Creator Dashboard
             </h1>
             <p className="text-lg text-muted-foreground">
-              Manage your workout library, breathwork practices, and blog content with full control
+              Manage your workout library, blog content, affiliate products, and memberships
             </p>
           </div>
         </div>
@@ -55,18 +56,22 @@ export default function CreatorDashboardPage() {
       <section className="py-12">
         <div className="container mx-auto px-4">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="mx-auto max-w-7xl">
-            <TabsList className="grid w-full grid-cols-3 bg-card/50">
+            <TabsList className="grid w-full grid-cols-4 bg-card/50">
               <TabsTrigger value="exercises" className="flex items-center gap-2">
                 <Dumbbell className="h-4 w-4" />
                 Exercises
               </TabsTrigger>
-              <TabsTrigger value="breathwork" className="flex items-center gap-2">
-                <Wind className="h-4 w-4" />
-                Breathwork
+              <TabsTrigger value="muscle-groups" className="flex items-center gap-2">
+                <Image className="h-4 w-4" />
+                Muscle Groups
               </TabsTrigger>
               <TabsTrigger value="blog" className="flex items-center gap-2">
                 <BookOpen className="h-4 w-4" />
                 Blog
+              </TabsTrigger>
+              <TabsTrigger value="store" className="flex items-center gap-2">
+                <ShoppingBag className="h-4 w-4" />
+                Store
               </TabsTrigger>
             </TabsList>
 
@@ -84,16 +89,16 @@ export default function CreatorDashboardPage() {
               </Card>
             </TabsContent>
 
-            <TabsContent value="breathwork" className="mt-6">
+            <TabsContent value="muscle-groups" className="mt-6">
               <Card className="border-border/40 bg-card/50 backdrop-blur">
                 <CardHeader>
-                  <CardTitle className="text-2xl text-neon-purple">Breathwork Management</CardTitle>
+                  <CardTitle className="text-2xl text-neon-purple">Muscle Group Cards</CardTitle>
                   <CardDescription>
-                    Create and manage breathwork practices for the Mind Over Muscle philosophy
+                    Customize the display content for each muscle group card in the Workout Library
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <BreathworkManagement />
+                  <MuscleGroupManagement />
                 </CardContent>
               </Card>
             </TabsContent>
@@ -108,6 +113,20 @@ export default function CreatorDashboardPage() {
                 </CardHeader>
                 <CardContent>
                   <BlogManagement />
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="store" className="mt-6">
+              <Card className="border-border/40 bg-card/50 backdrop-blur">
+                <CardHeader>
+                  <CardTitle className="text-2xl text-neon-purple">Affiliate Store Management</CardTitle>
+                  <CardDescription>
+                    Manage Amazon affiliate products and categories
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <AffiliateStoreManagement />
                 </CardContent>
               </Card>
             </TabsContent>
