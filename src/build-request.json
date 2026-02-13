@@ -1,33 +1,37 @@
 {
   "kind": "build_request",
-  "title": "Deploy current draft to Live and provide .icp0.io link",
-  "priority": "high",
+  "title": "Trigger rebuild by adding a period on the Contact page",
+  "priority": "normal",
   "requirements": [
     {
       "id": "REQ-1",
-      "text": "Deploy the current draft (Draft Version 35) to Live on the Internet Computer and return the resulting Live URL ending in .icp0.io (including the canister ID in the hostname).",
-      "target": "unknown",
+      "text": "Update the Contact page by adding a single period character to existing visible text (one-character-only change) without changing layout, styling, routing, or functionality.",
+      "target": "frontend",
       "source": {
         "messageIds": [
-          "recent-messages-3"
+          "recent-messages"
         ],
         "quotes": [
-          "Yes, please. Yes."
+          "Apply a period.",
+          "Start the build. Start the build."
         ]
       },
       "acceptanceCriteria": [
-        "A Live deployment completes successfully (no deployment error).",
-        "A publicly accessible Live URL in the form https://<canister-id>.icp0.io is produced and shared back to the user.",
-        "Opening the .icp0.io URL loads the app successfully."
+        "`frontend/src/pages/ContactPage.tsx` contains exactly one additional `.` character compared to the current version (e.g., add a trailing period to an existing sentence).",
+        "No other functional changes are introduced (no new components, routes, links, or logic changes).",
+        "The app builds successfully after the change."
       ]
     }
   ],
   "constraints": [
-    "Use English for any user-facing text in the build request."
+    "Do not modify any files under `frontend/src/components/ui` (read-only UI component sources must be composed, not edited).",
+    "Do not edit immutable hook/entry files: `frontend/src/hooks/useInternetIdentity.ts`, `frontend/src/hooks/useInternetIdentity.tsx`, `frontend/src/hooks/useActor.ts`, `frontend/src/main.tsx`.",
+    "Keep backend unchanged (single-actor Motoko canister; no schema/state changes)."
   ],
   "nonGoals": [
-    "Do not add or change application features unrelated to deployment.",
-    "Do not change DNS records or generate registrar-specific DNS instructions as part of this request."
+    "Fixing deployment/canister generation logic directly; this change is only meant to trigger a rebuild/publish.",
+    "Any redesign or content rewrite of the Contact page beyond a single added period.",
+    "Adding new pages, routes, or features."
   ],
   "imageRequirements": {
     "required": [],

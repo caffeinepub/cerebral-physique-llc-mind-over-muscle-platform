@@ -182,7 +182,7 @@ export default function HomePage() {
         <div className="container relative mx-auto px-4">
           <div className="mx-auto max-w-2xl text-center">
             <h2 className="mb-4 text-3xl font-bold tracking-tight md:text-4xl">
-              Unlock the Library
+              Unlock the Library!
             </h2>
             <p className="mb-8 text-lg text-muted-foreground">
               Get full access to our comprehensive exercise library, exclusive blog content, and member-only resources.

@@ -2,11 +2,10 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-deploy-the-current-draft-draft-version-35-to-live-on-the-internet-computer-and-return-the-resulting-live-url-ending-in-icp0-io-including-the-canister-id-in-the-hostname",
-      "featureTitle": "Deploy the current draft (Draft Version 35) to Live on the Internet Computer and return the resulting Live URL ending in .icp0.io (including the canister ID in the hostname).",
+      "featureId": "feature-update-the-contact-page-by-adding-a-single-period-character-to-existing-visible-text-one-character-only-change-without-changing-layout-styling-routing-or-functionality",
+      "featureTitle": "Update the Contact page by adding a single period character to existing visible text (one-character-only change) without changing layout, styling, routing, or functionality.",
       "files": [
-        "frontend/DEPLOYMENT.md",
-        "frontend/src/pages/DomainSetupPage.tsx"
+        "frontend/src/pages/ContactPage.tsx"
       ],
       "components": [
         "blob-storage@4.0.0",

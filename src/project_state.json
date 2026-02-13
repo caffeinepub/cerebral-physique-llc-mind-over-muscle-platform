@@ -1,29 +1,24 @@
 {
   "schemaVersion": "1.0.0",
   "projectStateVersion": 3,
-  "summary": "New project",
+  "summary": "Troubleshooting Caffeine deployment: force a rebuild to generate the missing frontend canister and public .icp0.io live URL (\"Live app web page\" button currently has no link).",
   "architectural_notes": [],
-  "known_issues": [],
-  "isFixRequest": false,
+  "known_issues": [
+    "\"Live app web page\" button shows no URL on hover and opens only a caffeine.xyz admin/preview URL; indicates the frontend canister/public .icp0.io site has not been generated yet."
+  ],
+  "isFixRequest": true,
   "existing_features": [
     {
-      "id": "feature-deploy-the-current-draft-draft-version-35-to-live-on-the-internet-computer-and-return-the-resulting-live-url-ending-in-icp0-io-including-the-canister-id-in-the-hostname",
-      "title": "Deploy the current draft (Draft Version 35) to Live on the Internet Computer and return the resulting Live URL ending in .icp0.io (including the canister ID in the hostname).",
+      "id": "feature-update-the-contact-page-by-adding-a-single-period-character-to-existing-visible-text-one-character-only-change-without-changing-layout-styling-routing-or-functionality",
+      "title": "Update the Contact page by adding a single period character to existing visible text (one-character-only change) without changing layout, styling, routing, or functionality.",
       "reqIds": [
         "REQ-1"
       ],
       "version": 1
     }
   ],
-  "new_feature_requests": [
-    {
-      "id": "AR-1",
-      "summary": "Deploy current build to Live and provide the .icp0.io link",
-      "reqIds": [],
-      "status": "pending"
-    }
-  ],
-  "projectName": "Deploy current draft to Live and provide .icp0.io link",
+  "new_feature_requests": [],
+  "projectName": "Trigger rebuild by adding a period on the Contact page",
   "clarification_mode": "instant",
   "clarification_rounds": 0
 }

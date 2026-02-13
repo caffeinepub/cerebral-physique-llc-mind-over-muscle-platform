@@ -1,26 +1,21 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Surface Live .icp0.io URL in UI and add deployment reference",
+  "title": "Contact page one-character text tweak to trigger rebuild",
   "requirements": [
     {
       "id": "REQ-1",
-      "summary": "Make it easy to obtain and share the Live .icp0.io URL after deploying Draft Version 35 by improving in-app visibility and adding a deployment reference doc.",
+      "summary": "Add exactly one visible period character to existing Contact page text without changing layout, styling, routing, or functionality.",
       "acceptanceCriteria": [
-        "A Live deployment completes successfully (no deployment error).",
-        "A publicly accessible Live URL in the form https://<canister-id>.icp0.io is produced and shared back to the user.",
-        "Opening the .icp0.io URL loads the app successfully."
+        "`frontend/src/pages/ContactPage.tsx` contains exactly one additional `.` character compared to the current version (e.g., add a trailing period to an existing sentence).",
+        "No other functional changes are introduced (no new components, routes, links, or logic changes).",
+        "The app builds successfully after the change."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/pages/DomainSetupPage.tsx",
+          "path": "frontend/src/pages/ContactPage.tsx",
           "operation": "modify",
-          "description": "Enhance the \"Your Deployed Site Information\" section to include a copy-to-clipboard control for the computed Live URL (https://<canister-id>.icp0.io) alongside the existing open-in-new-tab control, so the Live .icp0.io link can be quickly copied and shared."
-        },
-        {
-          "path": "frontend/DEPLOYMENT.md",
-          "operation": "create",
-          "description": "Add a short deployment reference describing how to deploy the current draft to Live and where to retrieve the resulting https://<canister-id>.icp0.io URL (including pointing users to the in-app /domain-setup page as the canonical place to copy the Live URL). Keep the doc focused on deployment and URL retrieval (no DNS-record instructions)."
+          "description": "Make a one-character-only change by adding a single `.` to an existing visible text string (e.g., add a trailing period to an existing sentence) while leaving all layout, styling, routing, imports, and functionality unchanged."
         }
       ]
     }

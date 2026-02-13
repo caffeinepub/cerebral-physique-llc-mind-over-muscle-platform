@@ -123,7 +123,7 @@ export default function ContactPage() {
           <CardHeader>
             <CardTitle className="text-neon-purple">Become a Member</CardTitle>
             <CardDescription>
-              Unlock full access to our comprehensive training library and exclusive content
+              Unlock full access to our comprehensive training library and exclusive content.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
