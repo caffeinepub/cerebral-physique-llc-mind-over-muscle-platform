@@ -1,7 +1,22 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useActor } from './useActor';
-import { MuscleGroup, EquipmentType, type Exercise, type UserProfile, type BlogPost, type AmazonProduct, type Membership, type ShoppingItem, type MuscleGroupCard, type MuscleGroupDetails } from '@/backend';
-import type { Principal } from '@icp-sdk/core/principal';
+import type {
+  Exercise,
+  ExercisePreview,
+  MuscleGroup,
+  EquipmentType,
+  BlogPost,
+  BlogPostPreview,
+  AmazonProduct,
+  Membership,
+  MuscleGroupDetails,
+  MuscleGroupCard,
+  UserProfile,
+  ShoppingItem,
+  StripeConfiguration,
+  StripeSessionStatus,
+} from '../backend';
+import { Principal } from '@dfinity/principal';
 
 // Exercise Queries
 export function useGetAllExercises() {
@@ -14,21 +29,19 @@ export function useGetAllExercises() {
       return actor.getAllExercises();
     },
     enabled: !!actor && !isFetching,
-    staleTime: 30000,
   });
 }
 
 export function useGetAllExercisePreviews() {
   const { actor, isFetching } = useActor();
 
-  return useQuery({
+  return useQuery<ExercisePreview[]>({
     queryKey: ['exercisePreviews'],
     queryFn: async () => {
       if (!actor) return [];
       return actor.getAllExercisePreviews();
     },
     enabled: !!actor && !isFetching,
-    staleTime: 30000,
   });
 }
 
@@ -36,27 +49,440 @@ export function useGetMuscleGroupExercises(muscleGroup: MuscleGroup) {
   const { actor, isFetching } = useActor();
 
   return useQuery<Exercise[]>({
-    queryKey: ['exercises', muscleGroup],
+    queryKey: ['muscleGroupExercises', muscleGroup],
     queryFn: async () => {
       if (!actor) return [];
       return actor.getMuscleGroupExercises(muscleGroup);
     },
     enabled: !!actor && !isFetching,
-    staleTime: 30000,
   });
 }
 
 export function useGetMuscleGroupExercisePreviews(muscleGroup: MuscleGroup) {
   const { actor, isFetching } = useActor();
 
-  return useQuery({
-    queryKey: ['exercisePreviews', muscleGroup],
+  return useQuery<ExercisePreview[]>({
+    queryKey: ['muscleGroupExercisePreviews', muscleGroup],
     queryFn: async () => {
       if (!actor) return [];
       return actor.getMuscleGroupExercisePreviews(muscleGroup);
     },
     enabled: !!actor && !isFetching,
-    staleTime: 30000,
+  });
+}
+
+// Exercise Mutations
+export function useAddExercise() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (exercise: {
+      name: string;
+      primaryMuscle: MuscleGroup;
+      secondaryMuscles: MuscleGroup[];
+      equipmentType: EquipmentType;
+      videoUrl: string;
+      cues: string;
+      imageUrl: string;
+      isPlaceholder: boolean;
+    }) => {
+      if (!actor) throw new Error('Actor not available');
+      return actor.addExercise(
+        exercise.name,
+        exercise.primaryMuscle,
+        exercise.secondaryMuscles,
+        exercise.equipmentType,
+        exercise.videoUrl,
+        exercise.cues,
+        exercise.imageUrl,
+        exercise.isPlaceholder
+      );
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['exercises'] });
+      queryClient.invalidateQueries({ queryKey: ['exercisePreviews'] });
+      queryClient.invalidateQueries({ queryKey: ['muscleGroupExercises'] });
+      queryClient.invalidateQueries({ queryKey: ['muscleGroupExercisePreviews'] });
+      queryClient.invalidateQueries({ queryKey: ['muscleGroups'] });
+    },
+  });
+}
+
+export function useUpdateExercise() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (exercise: {
+      id: bigint;
+      name: string;
+      primaryMuscle: MuscleGroup;
+      secondaryMuscles: MuscleGroup[];
+      equipmentType: EquipmentType;
+      videoUrl: string;
+      cues: string;
+      imageUrl: string;
+      isPlaceholder: boolean;
+    }) => {
+      if (!actor) throw new Error('Actor not available');
+      return actor.updateExercise(
+        exercise.id,
+        exercise.name,
+        exercise.primaryMuscle,
+        exercise.secondaryMuscles,
+        exercise.equipmentType,
+        exercise.videoUrl,
+        exercise.cues,
+        exercise.imageUrl,
+        exercise.isPlaceholder
+      );
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['exercises'] });
+      queryClient.invalidateQueries({ queryKey: ['exercisePreviews'] });
+      queryClient.invalidateQueries({ queryKey: ['muscleGroupExercises'] });
+      queryClient.invalidateQueries({ queryKey: ['muscleGroupExercisePreviews'] });
+      queryClient.invalidateQueries({ queryKey: ['muscleGroups'] });
+    },
+  });
+}
+
+export function useDeleteExercise() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (id: bigint) => {
+      if (!actor) throw new Error('Actor not available');
+      return actor.deleteExercise(id);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['exercises'] });
+      queryClient.invalidateQueries({ queryKey: ['exercisePreviews'] });
+      queryClient.invalidateQueries({ queryKey: ['muscleGroupExercises'] });
+      queryClient.invalidateQueries({ queryKey: ['muscleGroupExercisePreviews'] });
+      queryClient.invalidateQueries({ queryKey: ['muscleGroups'] });
+    },
+  });
+}
+
+// Blog Post Queries
+export function useGetAllBlogPosts() {
+  const { actor, isFetching } = useActor();
+
+  return useQuery<BlogPost[]>({
+    queryKey: ['blogPosts'],
+    queryFn: async () => {
+      if (!actor) return [];
+      return actor.getAllBlogPosts();
+    },
+    enabled: !!actor && !isFetching,
+  });
+}
+
+export function useGetAllBlogPostPreviews() {
+  const { actor, isFetching } = useActor();
+
+  return useQuery<BlogPostPreview[]>({
+    queryKey: ['blogPostPreviews'],
+    queryFn: async () => {
+      if (!actor) return [];
+      return actor.getAllBlogPostPreviews();
+    },
+    enabled: !!actor && !isFetching,
+  });
+}
+
+export function useGetBlogPost(id: bigint) {
+  const { actor, isFetching } = useActor();
+
+  return useQuery<BlogPost | null>({
+    queryKey: ['blogPost', id.toString()],
+    queryFn: async () => {
+      if (!actor) return null;
+      return actor.getBlogPost(id);
+    },
+    enabled: !!actor && !isFetching,
+  });
+}
+
+// Blog Post Mutations
+export function useCreateBlogPost() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (post: {
+      title: string;
+      content: string;
+      author: string;
+      memberOnly: boolean;
+      seoTitle: string;
+      seoMetaDescription: string;
+      seoKeywords: string[];
+    }) => {
+      if (!actor) throw new Error('Actor not available');
+      return actor.createBlogPost(
+        post.title,
+        post.content,
+        post.author,
+        post.memberOnly,
+        post.seoTitle,
+        post.seoMetaDescription,
+        post.seoKeywords
+      );
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['blogPosts'] });
+      queryClient.invalidateQueries({ queryKey: ['blogPostPreviews'] });
+    },
+  });
+}
+
+export function useUpdateBlogPost() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (post: {
+      id: bigint;
+      title: string;
+      content: string;
+      author: string;
+      memberOnly: boolean;
+      seoTitle: string;
+      seoMetaDescription: string;
+      seoKeywords: string[];
+    }) => {
+      if (!actor) throw new Error('Actor not available');
+      return actor.updateBlogPost(
+        post.id,
+        post.title,
+        post.content,
+        post.author,
+        post.memberOnly,
+        post.seoTitle,
+        post.seoMetaDescription,
+        post.seoKeywords
+      );
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['blogPosts'] });
+      queryClient.invalidateQueries({ queryKey: ['blogPostPreviews'] });
+      queryClient.invalidateQueries({ queryKey: ['blogPost', variables.id.toString()] });
+    },
+  });
+}
+
+export function useDeleteBlogPost() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (id: bigint) => {
+      if (!actor) throw new Error('Actor not available');
+      return actor.deleteBlogPost(id);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['blogPosts'] });
+      queryClient.invalidateQueries({ queryKey: ['blogPostPreviews'] });
+    },
+  });
+}
+
+export function usePublishBlogPost() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (id: bigint) => {
+      if (!actor) throw new Error('Actor not available');
+      return actor.publishBlogPost(id);
+    },
+    onSuccess: (_, id) => {
+      queryClient.invalidateQueries({ queryKey: ['blogPosts'] });
+      queryClient.invalidateQueries({ queryKey: ['blogPostPreviews'] });
+      queryClient.invalidateQueries({ queryKey: ['blogPost', id.toString()] });
+    },
+  });
+}
+
+export function useUnpublishBlogPost() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (id: bigint) => {
+      if (!actor) throw new Error('Actor not available');
+      return actor.unpublishBlogPost(id);
+    },
+    onSuccess: (_, id) => {
+      queryClient.invalidateQueries({ queryKey: ['blogPosts'] });
+      queryClient.invalidateQueries({ queryKey: ['blogPostPreviews'] });
+      queryClient.invalidateQueries({ queryKey: ['blogPost', id.toString()] });
+    },
+  });
+}
+
+// Amazon Product Queries
+export function useGetAllAmazonProducts() {
+  const { actor, isFetching } = useActor();
+
+  return useQuery<AmazonProduct[]>({
+    queryKey: ['amazonProducts'],
+    queryFn: async () => {
+      if (!actor) return [];
+      return actor.getAllAmazonProducts();
+    },
+    enabled: !!actor && !isFetching,
+  });
+}
+
+// Amazon Product Mutations
+export function useAddAmazonProduct() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (product: {
+      name: string;
+      description: string;
+      imageUrl: string;
+      category: string;
+      affiliateLink: string;
+    }) => {
+      if (!actor) throw new Error('Actor not available');
+      return actor.addAmazonProduct(
+        product.name,
+        product.description,
+        product.imageUrl,
+        product.category,
+        product.affiliateLink
+      );
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['amazonProducts'] });
+    },
+  });
+}
+
+export function useUpdateAmazonProduct() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (product: {
+      id: bigint;
+      name: string;
+      description: string;
+      imageUrl: string;
+      category: string;
+      affiliateLink: string;
+    }) => {
+      if (!actor) throw new Error('Actor not available');
+      return actor.updateAmazonProduct(
+        product.id,
+        product.name,
+        product.description,
+        product.imageUrl,
+        product.category,
+        product.affiliateLink
+      );
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['amazonProducts'] });
+    },
+  });
+}
+
+export function useDeleteAmazonProduct() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (id: bigint) => {
+      if (!actor) throw new Error('Actor not available');
+      return actor.deleteAmazonProduct(id);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['amazonProducts'] });
+    },
+  });
+}
+
+// Membership Queries
+export function useGetMembership() {
+  const { actor, isFetching } = useActor();
+
+  return useQuery<Membership | null>({
+    queryKey: ['membership'],
+    queryFn: async () => {
+      if (!actor) return null;
+      return actor.getMembership();
+    },
+    enabled: !!actor && !isFetching,
+  });
+}
+
+export function useHasActiveMembership() {
+  const { actor, isFetching } = useActor();
+
+  return useQuery<boolean>({
+    queryKey: ['hasActiveMembership'],
+    queryFn: async () => {
+      if (!actor) return false;
+      return actor.hasActiveMembership();
+    },
+    enabled: !!actor && !isFetching,
+  });
+}
+
+export function useGetAllMemberships() {
+  const { actor, isFetching } = useActor();
+
+  return useQuery<Membership[]>({
+    queryKey: ['allMemberships'],
+    queryFn: async () => {
+      if (!actor) return [];
+      return actor.getAllMemberships();
+    },
+    enabled: !!actor && !isFetching,
+  });
+}
+
+// Membership Mutations
+export function useAddMembershipForUser() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ user, stripeId }: { user: Principal; stripeId: string }) => {
+      if (!actor) throw new Error('Actor not available');
+      return actor.addMembershipForUser(user, stripeId);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['membership'] });
+      queryClient.invalidateQueries({ queryKey: ['hasActiveMembership'] });
+      queryClient.invalidateQueries({ queryKey: ['allMemberships'] });
+    },
+  });
+}
+
+export function useUpdateMembershipStatus() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ user, active }: { user: Principal; active: boolean }) => {
+      if (!actor) throw new Error('Actor not available');
+      return actor.updateMembershipStatus(user, active);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['membership'] });
+      queryClient.invalidateQueries({ queryKey: ['hasActiveMembership'] });
+      queryClient.invalidateQueries({ queryKey: ['allMemberships'] });
+    },
   });
 }
 
@@ -71,7 +497,6 @@ export function useGetMuscleGroups() {
       return actor.getMuscleGroups();
     },
     enabled: !!actor && !isFetching,
-    staleTime: 30000,
   });
 }
 
@@ -85,21 +510,35 @@ export function useGetMuscleGroupCards() {
       return actor.getMuscleGroupArtists();
     },
     enabled: !!actor && !isFetching,
-    staleTime: 30000,
   });
 }
 
-export function useGetMuscleGroupCard(name: string) {
+export function useGetMuscleGroupArtist(name: string) {
   const { actor, isFetching } = useActor();
 
   return useQuery<MuscleGroupCard | null>({
-    queryKey: ['muscleGroupCard', name],
+    queryKey: ['muscleGroupArtist', name],
     queryFn: async () => {
       if (!actor) return null;
       return actor.getMuscleGroupArtist(name);
     },
     enabled: !!actor && !isFetching && !!name,
-    staleTime: 30000,
+  });
+}
+
+// Muscle Group Mutations
+export function useUpdateMuscleGroup() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (muscleGroup: { name: string; description: string; imageUrl: string }) => {
+      if (!actor) throw new Error('Actor not available');
+      return actor.updateMuscleGroup(muscleGroup.name, muscleGroup.description, muscleGroup.imageUrl);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['muscleGroups'] });
+    },
   });
 }
 
@@ -108,13 +547,13 @@ export function useUpdateMuscleGroupCard() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (params: { name: string; card: MuscleGroupCard }) => {
-      if (!actor) throw new Error('Actor not initialized');
-      return actor.updateMuscleGroupArtist(params.name, params.card);
+    mutationFn: async ({ name, card }: { name: string; card: MuscleGroupCard }) => {
+      if (!actor) throw new Error('Actor not available');
+      return actor.updateMuscleGroupArtist(name, card);
     },
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['muscleGroupCards'] });
-      queryClient.invalidateQueries({ queryKey: ['muscleGroupCard'] });
+      queryClient.invalidateQueries({ queryKey: ['muscleGroupArtist', variables.name] });
       queryClient.invalidateQueries({ queryKey: ['muscleGroups'] });
     },
   });
@@ -141,13 +580,14 @@ export function useGetCallerUserProfile() {
   };
 }
 
+// User Profile Mutations
 export function useSaveCallerUserProfile() {
   const { actor } = useActor();
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async (profile: UserProfile) => {
-      if (!actor) throw new Error('Actor not initialized');
+      if (!actor) throw new Error('Actor not available');
       return actor.saveCallerUserProfile(profile);
     },
     onSuccess: () => {
@@ -156,443 +596,21 @@ export function useSaveCallerUserProfile() {
   });
 }
 
-// Admin/Authorization Queries
+// Admin Queries
 export function useIsCallerAdmin() {
   const { actor, isFetching } = useActor();
 
   return useQuery<boolean>({
-    queryKey: ['isAdmin'],
+    queryKey: ['isCallerAdmin'],
     queryFn: async () => {
       if (!actor) return false;
-      try {
-        return await actor.isCallerAdmin();
-      } catch (error) {
-        return false;
-      }
-    },
-    enabled: !!actor && !isFetching,
-    staleTime: 60000,
-  });
-}
-
-// Blog Queries
-export function useGetAllBlogPosts() {
-  const { actor, isFetching } = useActor();
-
-  return useQuery<BlogPost[]>({
-    queryKey: ['blogPosts'],
-    queryFn: async () => {
-      if (!actor) return [];
-      return actor.getAllBlogPosts();
-    },
-    enabled: !!actor && !isFetching,
-    staleTime: 30000,
-  });
-}
-
-export function useGetAllBlogPostPreviews() {
-  const { actor, isFetching } = useActor();
-
-  return useQuery({
-    queryKey: ['blogPostPreviews'],
-    queryFn: async () => {
-      if (!actor) return [];
-      return actor.getAllBlogPostPreviews();
-    },
-    enabled: !!actor && !isFetching,
-    staleTime: 30000,
-  });
-}
-
-export function useGetBlogPost(id: bigint | undefined) {
-  const { actor, isFetching } = useActor();
-
-  return useQuery<BlogPost | null>({
-    queryKey: ['blogPost', id?.toString()],
-    queryFn: async () => {
-      if (!actor || id === undefined) return null;
-      return actor.getBlogPost(id);
-    },
-    enabled: !!actor && !isFetching && id !== undefined,
-  });
-}
-
-export function useGetBlogPostPreview(id: bigint | undefined) {
-  const { actor, isFetching } = useActor();
-
-  return useQuery({
-    queryKey: ['blogPostPreview', id?.toString()],
-    queryFn: async () => {
-      if (!actor || id === undefined) return null;
-      return actor.getBlogPostPreview(id);
-    },
-    enabled: !!actor && !isFetching && id !== undefined,
-  });
-}
-
-// Admin Exercise Mutations
-export function useAddExercise() {
-  const { actor } = useActor();
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async (params: {
-      name: string;
-      primaryMuscle: MuscleGroup;
-      secondaryMuscles: MuscleGroup[];
-      equipmentType: EquipmentType;
-      videoUrl: string;
-      cues: string;
-      imageUrl: string;
-      isPlaceholder: boolean;
-    }) => {
-      if (!actor) throw new Error('Actor not initialized');
-      return actor.addExercise(
-        params.name,
-        params.primaryMuscle,
-        params.secondaryMuscles,
-        params.equipmentType,
-        params.videoUrl,
-        params.cues,
-        params.imageUrl,
-        params.isPlaceholder
-      );
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['exercises'] });
-      queryClient.invalidateQueries({ queryKey: ['exercisePreviews'] });
-      queryClient.invalidateQueries({ queryKey: ['muscleGroups'] });
-    },
-  });
-}
-
-export function useUpdateExercise() {
-  const { actor } = useActor();
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async (params: {
-      id: bigint;
-      name: string;
-      primaryMuscle: MuscleGroup;
-      secondaryMuscles: MuscleGroup[];
-      equipmentType: EquipmentType;
-      videoUrl: string;
-      cues: string;
-      imageUrl: string;
-      isPlaceholder: boolean;
-    }) => {
-      if (!actor) throw new Error('Actor not initialized');
-      return actor.updateExercise(
-        params.id,
-        params.name,
-        params.primaryMuscle,
-        params.secondaryMuscles,
-        params.equipmentType,
-        params.videoUrl,
-        params.cues,
-        params.imageUrl,
-        params.isPlaceholder
-      );
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['exercises'] });
-      queryClient.invalidateQueries({ queryKey: ['exercisePreviews'] });
-      queryClient.invalidateQueries({ queryKey: ['muscleGroups'] });
-    },
-  });
-}
-
-export function useDeleteExercise() {
-  const { actor } = useActor();
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async (exerciseId: bigint) => {
-      if (!actor) throw new Error('Actor not initialized');
-      return actor.deleteExercise(exerciseId);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['exercises'] });
-      queryClient.invalidateQueries({ queryKey: ['exercisePreviews'] });
-      queryClient.invalidateQueries({ queryKey: ['muscleGroups'] });
-    },
-  });
-}
-
-// Admin Blog Mutations
-export function useCreateBlogPost() {
-  const { actor } = useActor();
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async (params: {
-      title: string;
-      content: string;
-      author: string;
-      memberOnly: boolean;
-      seoTitle: string;
-      seoMetaDescription: string;
-      seoKeywords: string[];
-    }) => {
-      if (!actor) throw new Error('Actor not initialized');
-      return actor.createBlogPost(
-        params.title,
-        params.content,
-        params.author,
-        params.memberOnly,
-        params.seoTitle,
-        params.seoMetaDescription,
-        params.seoKeywords
-      );
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['blogPosts'] });
-      queryClient.invalidateQueries({ queryKey: ['blogPostPreviews'] });
-    },
-  });
-}
-
-export function useUpdateBlogPost() {
-  const { actor } = useActor();
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async (params: {
-      id: bigint;
-      title: string;
-      content: string;
-      author: string;
-      memberOnly: boolean;
-      seoTitle: string;
-      seoMetaDescription: string;
-      seoKeywords: string[];
-    }) => {
-      if (!actor) throw new Error('Actor not initialized');
-      return actor.updateBlogPost(
-        params.id,
-        params.title,
-        params.content,
-        params.author,
-        params.memberOnly,
-        params.seoTitle,
-        params.seoMetaDescription,
-        params.seoKeywords
-      );
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['blogPosts'] });
-      queryClient.invalidateQueries({ queryKey: ['blogPostPreviews'] });
-      queryClient.invalidateQueries({ queryKey: ['blogPost'] });
-      queryClient.invalidateQueries({ queryKey: ['blogPostPreview'] });
-    },
-  });
-}
-
-export function useDeleteBlogPost() {
-  const { actor } = useActor();
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async (id: bigint) => {
-      if (!actor) throw new Error('Actor not initialized');
-      return actor.deleteBlogPost(id);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['blogPosts'] });
-      queryClient.invalidateQueries({ queryKey: ['blogPostPreviews'] });
-    },
-  });
-}
-
-export function usePublishBlogPost() {
-  const { actor } = useActor();
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async (id: bigint) => {
-      if (!actor) throw new Error('Actor not initialized');
-      return actor.publishBlogPost(id);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['blogPosts'] });
-      queryClient.invalidateQueries({ queryKey: ['blogPostPreviews'] });
-      queryClient.invalidateQueries({ queryKey: ['blogPost'] });
-      queryClient.invalidateQueries({ queryKey: ['blogPostPreview'] });
-    },
-  });
-}
-
-export function useUnpublishBlogPost() {
-  const { actor } = useActor();
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async (id: bigint) => {
-      if (!actor) throw new Error('Actor not initialized');
-      return actor.unpublishBlogPost(id);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['blogPosts'] });
-      queryClient.invalidateQueries({ queryKey: ['blogPostPreviews'] });
-      queryClient.invalidateQueries({ queryKey: ['blogPost'] });
-      queryClient.invalidateQueries({ queryKey: ['blogPostPreview'] });
-    },
-  });
-}
-
-// Amazon Affiliate Product Queries
-export function useGetAllAmazonProducts() {
-  const { actor, isFetching } = useActor();
-
-  return useQuery<AmazonProduct[]>({
-    queryKey: ['amazonProducts'],
-    queryFn: async () => {
-      if (!actor) return [];
-      return actor.getAllAmazonProducts();
-    },
-    enabled: !!actor && !isFetching,
-    staleTime: 30000,
-  });
-}
-
-export function useAddAmazonProduct() {
-  const { actor } = useActor();
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async (params: {
-      name: string;
-      description: string;
-      imageUrl: string;
-      category: string;
-      affiliateLink: string;
-    }) => {
-      if (!actor) throw new Error('Actor not initialized');
-      return actor.addAmazonProduct(
-        params.name,
-        params.description,
-        params.imageUrl,
-        params.category,
-        params.affiliateLink
-      );
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['amazonProducts'] });
-    },
-  });
-}
-
-export function useUpdateAmazonProduct() {
-  const { actor } = useActor();
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async (params: {
-      id: bigint;
-      name: string;
-      description: string;
-      imageUrl: string;
-      category: string;
-      affiliateLink: string;
-    }) => {
-      if (!actor) throw new Error('Actor not initialized');
-      return actor.updateAmazonProduct(
-        params.id,
-        params.name,
-        params.description,
-        params.imageUrl,
-        params.category,
-        params.affiliateLink
-      );
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['amazonProducts'] });
-    },
-  });
-}
-
-export function useDeleteAmazonProduct() {
-  const { actor } = useActor();
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async (id: bigint) => {
-      if (!actor) throw new Error('Actor not initialized');
-      return actor.deleteAmazonProduct(id);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['amazonProducts'] });
-    },
-  });
-}
-
-// Membership Queries
-export function useGetMembership() {
-  const { actor, isFetching } = useActor();
-
-  return useQuery<Membership | null>({
-    queryKey: ['membership'],
-    queryFn: async () => {
-      if (!actor) return null;
-      try {
-        return await actor.getMembership();
-      } catch (error) {
-        return null;
-      }
+      return actor.isCallerAdmin();
     },
     enabled: !!actor && !isFetching,
   });
 }
 
-export function useHasActiveMembership() {
-  const { actor, isFetching } = useActor();
-
-  return useQuery<boolean>({
-    queryKey: ['hasActiveMembership'],
-    queryFn: async () => {
-      if (!actor) return false;
-      try {
-        return await actor.hasActiveMembership();
-      } catch (error) {
-        return false;
-      }
-    },
-    enabled: !!actor && !isFetching,
-  });
-}
-
-export function useGetAllMemberships() {
-  const { actor, isFetching } = useActor();
-
-  return useQuery<Membership[]>({
-    queryKey: ['allMemberships'],
-    queryFn: async () => {
-      if (!actor) return [];
-      return actor.getAllMemberships();
-    },
-    enabled: !!actor && !isFetching,
-  });
-}
-
-export function useUpdateMembershipStatus() {
-  const { actor } = useActor();
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async (params: { user: Principal; active: boolean }) => {
-      if (!actor) throw new Error('Actor not initialized');
-      return actor.updateMembershipStatus(params.user, params.active);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['membership'] });
-      queryClient.invalidateQueries({ queryKey: ['allMemberships'] });
-      queryClient.invalidateQueries({ queryKey: ['hasActiveMembership'] });
-    },
-  });
-}
-
-// Stripe/Payment Queries
+// Stripe Queries
 export function useIsStripeConfigured() {
   const { actor, isFetching } = useActor();
 
@@ -606,21 +624,10 @@ export function useIsStripeConfigured() {
   });
 }
 
-export function useCreateCheckoutSession() {
-  const { actor } = useActor();
-
-  return useMutation({
-    mutationFn: async (params: { items: ShoppingItem[]; successUrl: string; cancelUrl: string }) => {
-      if (!actor) throw new Error('Actor not initialized');
-      return actor.createCheckoutSession(params.items, params.successUrl, params.cancelUrl);
-    },
-  });
-}
-
 export function useGetStripeSessionStatus(sessionId: string | undefined) {
   const { actor, isFetching } = useActor();
 
-  return useQuery({
+  return useQuery<StripeSessionStatus | null>({
     queryKey: ['stripeSessionStatus', sessionId],
     queryFn: async () => {
       if (!actor || !sessionId) return null;
@@ -630,7 +637,42 @@ export function useGetStripeSessionStatus(sessionId: string | undefined) {
   });
 }
 
-// Affiliate Disclosure
+// Stripe Mutations
+export function useSetStripeConfiguration() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (config: StripeConfiguration) => {
+      if (!actor) throw new Error('Actor not available');
+      return actor.setStripeConfiguration(config);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['isStripeConfigured'] });
+    },
+  });
+}
+
+export function useCreateCheckoutSession() {
+  const { actor } = useActor();
+
+  return useMutation({
+    mutationFn: async (items: ShoppingItem[]) => {
+      if (!actor) throw new Error('Actor not available');
+      const baseUrl = `${window.location.protocol}//${window.location.host}`;
+      const successUrl = `${baseUrl}/payment-success`;
+      const cancelUrl = `${baseUrl}/payment-failure`;
+      const result = await actor.createCheckoutSession(items, successUrl, cancelUrl);
+      const session = JSON.parse(result) as { id: string; url: string };
+      if (!session?.url) {
+        throw new Error('Stripe session missing url');
+      }
+      return session;
+    },
+  });
+}
+
+// Affiliate Disclosure Query
 export function useGetAffiliateDisclosure() {
   const { actor, isFetching } = useActor();
 
@@ -644,16 +686,30 @@ export function useGetAffiliateDisclosure() {
   });
 }
 
-// Privacy Policy
-export function useGetPrivacyPolicy() {
+// Canister ID Query
+export function useGetCanisterId() {
   const { actor, isFetching } = useActor();
 
   return useQuery<string>({
-    queryKey: ['privacyPolicy'],
+    queryKey: ['canisterId'],
     queryFn: async () => {
-      if (!actor) return '';
-      return actor.getPrivacyPolicy();
+      if (!actor) throw new Error('Actor not available');
+      // Extract canister ID from the window location or config
+      // This is a workaround until backend implements getCanisterId()
+      const hostname = window.location.hostname;
+      
+      // Check if we're on an IC deployment (*.icp0.io or *.ic0.app)
+      const icMatch = hostname.match(/^([a-z0-9-]+)\.(icp0\.io|ic0\.app)$/);
+      if (icMatch) {
+        return icMatch[1];
+      }
+      
+      // Fallback: try to get from environment or return a placeholder
+      // In production, the backend should implement getCanisterId()
+      return 'unknown-canister-id';
     },
     enabled: !!actor && !isFetching,
+    staleTime: Infinity,
+    gcTime: Infinity,
   });
 }

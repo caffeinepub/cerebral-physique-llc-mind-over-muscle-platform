@@ -8,10 +8,6 @@ export default function StartMembershipCheckoutButton() {
 
   const handleStartCheckout = async () => {
     try {
-      const baseUrl = `${window.location.protocol}//${window.location.host}`;
-      const successUrl = `${baseUrl}/payment-success`;
-      const cancelUrl = `${baseUrl}/payment-failure`;
-
       const items = [
         {
           productName: 'Monthly Membership',
@@ -22,8 +18,7 @@ export default function StartMembershipCheckoutButton() {
         },
       ];
 
-      const result = await createCheckoutSession.mutateAsync({ items, successUrl, cancelUrl });
-      const session = JSON.parse(result);
+      const session = await createCheckoutSession.mutateAsync(items);
       
       if (!session?.url) {
         throw new Error('Stripe session missing url');

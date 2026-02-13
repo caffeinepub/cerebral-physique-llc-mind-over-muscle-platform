@@ -2,13 +2,11 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-make-workout-library-muscle-group-cards-editable-by-admins-so-each-muscle-group-card-can-display-admin-managed-image-and-text-content-e-g-cover-image-and-description-instead-of-relying-only-on-hardcoded-front-end-mappings",
-      "featureTitle": "Make Workout Library muscle-group cards editable by admins so each muscle group card can display admin-managed image and text content (e.g., cover image and description) instead of relying only on hardcoded front-end mappings.",
+      "featureId": "feature-deploy-the-current-draft-draft-version-35-to-live-on-the-internet-computer-and-return-the-resulting-live-url-ending-in-icp0-io-including-the-canister-id-in-the-hostname",
+      "featureTitle": "Deploy the current draft (Draft Version 35) to Live on the Internet Computer and return the resulting Live URL ending in .icp0.io (including the canister ID in the hostname).",
       "files": [
-        "frontend/src/components/creator/MuscleGroupManagement.tsx",
-        "frontend/src/hooks/useQueries.ts",
-        "frontend/src/pages/CreatorDashboardPage.tsx",
-        "frontend/src/pages/WorkoutLibraryPage.tsx"
+        "frontend/DEPLOYMENT.md",
+        "frontend/src/pages/DomainSetupPage.tsx"
       ],
       "components": [
         "blob-storage@4.0.0",
@@ -22,52 +20,7 @@
         "stripe@3.0.0"
       ],
       "testIds": [
-        "REQ-14"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-update-the-workout-library-editing-flow-so-admins-can-add-update-per-exercise-media-and-text-content-in-a-practical-way-for-regular-updates-including-support-for-externally-hosted-image-video-urls-not-only-assets-paths",
-      "featureTitle": "Update the Workout Library editing flow so admins can add/update per-exercise media and text content in a practical way for regular updates, including support for externally hosted image/video URLs (not only /assets/* paths).",
-      "files": [
-        "frontend/src/components/creator/ExerciseManagement.tsx",
-        "frontend/src/pages/WorkoutLibraryPage.tsx"
-      ],
-      "components": [
-        "blob-storage@4.0.0",
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "authorization@4.0.0",
-        "http-outcalls@3.0.0",
-        "github-export-icp-cli@1.0.0",
-        "stripe@3.0.0"
-      ],
-      "testIds": [
-        "REQ-15"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-ensure-the-blog-section-is-clearly-editable-by-admins-for-regularly-adding-and-updating-articles-using-the-existing-blog-management-workflow-create-edit-publish-unpublish-delete-and-making-it-easy-to-find-from-the-blog-area",
-      "featureTitle": "Ensure the Blog section is clearly editable by admins for regularly adding and updating articles, using the existing blog management workflow (create/edit/publish/unpublish/delete) and making it easy to find from the Blog area.",
-      "files": [
-        "frontend/src/pages/BlogPage.tsx"
-      ],
-      "components": [
-        "blob-storage@4.0.0",
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "authorization@4.0.0",
-        "http-outcalls@3.0.0",
-        "github-export-icp-cli@1.0.0",
-        "stripe@3.0.0"
-      ],
-      "testIds": [
-        "REQ-16"
+        "REQ-1"
       ],
       "confidence": "high"
     }

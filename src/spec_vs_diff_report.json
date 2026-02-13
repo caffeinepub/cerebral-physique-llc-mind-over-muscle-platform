@@ -1,50 +1,48 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-07T18:05:36.478Z",
-  "summary": "Diff adds admin-editable muscle group card management (new backend types/state + migration + Creator Dashboard UI) and adds an admin-only “Manage Blog” navigation button on the public Blog page. Exercise management validation appears relaxed to accept any non-empty URLs (including external URLs). However, the diff summary does not provide enough evidence that the backend exposes the required muscle-group-card CRUD/query methods with admin-only authorization, nor that exercise preview cards implement an image fallback when missing/unreachable.",
+  "generatedAt": "2026-02-13T06:43:07.116Z",
+  "summary": "The diff adds documentation and UI guidance around finding a canister-based .icp0.io URL (Domain Setup page, deployment guide), but it does not show an actual Live deployment being performed nor does it provide/return a concrete live https://<canister-id>.icp0.io URL as required. It also introduces custom-domain/DNS-related instructions, which the BuildRequest explicitly lists as non-goals.",
   "missing_requirements": [
     {
-      "id": "REQ-14",
-      "requirement": "Backend support for persisting and serving admin-managed muscle-group card content with admin-only update permissions (query/get + update endpoints, authorization enforcement).",
-      "reason": "While backend state/types and a migration are shown, the diff summary is truncated and does not show any public canister methods to get/update muscle group cards, nor any explicit admin-only authorization checks around those methods.",
+      "id": "REQ-1",
+      "requirement": "Deploy the current draft (Draft Version 35) to Live on the Internet Computer and return the resulting Live URL ending in .icp0.io (including the canister ID in the hostname).",
+      "reason": "No evidence in the diff of a successful Live deployment occurring or of a specific resulting .icp0.io URL (with an actual canister-id hostname) being produced and shared back. Changes are limited to a deployment guide and UI text that describes the expected URL format and attempts to infer the canister id at runtime.",
       "evidence": [
-        "backend/main.mo (truncated)",
-        "frontend/src/hooks/useQueries.ts (calls actor.getMuscleGroupArtists/getMuscleGroupArtist/updateMuscleGroupArtist, but backend methods are not evidenced)"
-      ]
-    },
-    {
-      "id": "REQ-15",
-      "requirement": "Workout Library exercise preview cards continue to display each exercise’s imageUrl with a sensible fallback if missing/unreachable.",
-      "reason": "The diff shows muscle-group card image fallbacks, and ExerciseManagement requires imageUrl/videoUrl be non-empty, but the truncated WorkoutLibraryPage does not provide evidence of a fallback behavior for exercise preview images specifically (e.g., onError handling or placeholder image).",
-      "evidence": [
-        "frontend/src/pages/WorkoutLibraryPage.tsx (truncated)",
-        "frontend/src/components/creator/ExerciseManagement.tsx (truncated)"
+        "frontend/DEPLOYMENT.md",
+        "frontend/src/pages/DomainSetupPage.tsx",
+        "frontend/src/hooks/useQueries.ts (mentioned in frontend-file-summaries.txt: canister ID retrieval workaround)"
       ]
     }
   ],
   "hallucinated_features": [
     {
-      "description": "Introduces a new optional `heroImage : ?Storage.ExternalBlob` field for muscle group cards and corresponding blob-storage integration/migration scaffolding.",
-      "reason": "REQ-14 only requires admin-managed image URL and description (minimum), and does not request blob-stored hero images or external blob fields for muscle group cards.",
+      "description": "Added a Deployment Guide document describing how to deploy and how to find the live .icp0.io URL via an in-app Domain Setup page, including references to custom domain setup.",
+      "reason": "The request was to perform a Live deployment and return the resulting .icp0.io link, not to add documentation or new/expanded deployment instructions.",
       "evidence": [
-        "backend/migration.mo (NewMuscleGroupCard.heroImage)",
-        "backend/main.mo (public type MuscleGroupCard includes heroImage : ?Storage.ExternalBlob)",
-        "frontend/src/components/creator/MuscleGroupManagement.tsx (formData includes heroImage)"
+        "frontend/DEPLOYMENT.md"
+      ]
+    },
+    {
+      "description": "Added/expanded Domain Setup UI content explaining preview vs deployed URLs and providing DNS setup prerequisites guidance (registrar access, DNS propagation).",
+      "reason": "Non-goals explicitly say not to add/change application features unrelated to deployment and not to change DNS records or generate registrar-specific DNS instructions; the diff adds DNS-related guidance and expands the Domain Setup feature/UI rather than performing deployment.",
+      "evidence": [
+        "frontend/src/pages/DomainSetupPage.tsx"
+      ]
+    },
+    {
+      "description": "Project state tracking updates that mark deployment-related feature requests as pending (AR-1/AR-2) rather than completing the requested deployment and returning a URL.",
+      "reason": "Not requested as part of the BuildRequest deliverable; also indicates the requested deployment work was not completed within the diff.",
+      "evidence": [
+        "project_state.json"
       ]
     }
   ],
-  "confidence": 0.62,
+  "confidence": 0.74,
   "changed_files": [
-    "backend/main.mo",
-    "backend/migration.mo",
     "frontend-file-summaries.txt",
-    "frontend/src/components/creator/ExerciseManagement.tsx",
-    "frontend/src/components/creator/MuscleGroupManagement.tsx",
-    "frontend/src/hooks/useQueries.ts",
-    "frontend/src/pages/BlogPage.tsx",
-    "frontend/src/pages/CreatorDashboardPage.tsx",
-    "frontend/src/pages/WorkoutLibraryPage.tsx",
+    "frontend/DEPLOYMENT.md",
+    "frontend/src/pages/DomainSetupPage.tsx",
     "project_state.json"
   ]
 }

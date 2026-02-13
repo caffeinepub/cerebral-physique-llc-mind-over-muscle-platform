@@ -14,6 +14,7 @@ import UserDashboardPage from './pages/UserDashboardPage';
 import AffiliateStorePage from './pages/AffiliateStorePage';
 import PaymentSuccessPage from './pages/PaymentSuccessPage';
 import PaymentFailurePage from './pages/PaymentFailurePage';
+import DomainSetupPage from './pages/DomainSetupPage';
 
 const rootRoute = createRootRoute({
   component: Layout,
@@ -94,6 +95,12 @@ const paymentFailureRoute = createRoute({
   component: PaymentFailurePage,
 });
 
+const domainSetupRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/domain-setup',
+  component: DomainSetupPage,
+});
+
 const routeTree = rootRoute.addChildren([
   indexRoute,
   aboutRoute,
@@ -107,6 +114,7 @@ const routeTree = rootRoute.addChildren([
   affiliateStoreRoute,
   paymentSuccessRoute,
   paymentFailureRoute,
+  domainSetupRoute,
 ]);
 
 const router = createRouter({ routeTree });

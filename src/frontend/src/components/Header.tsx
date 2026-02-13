@@ -1,5 +1,5 @@
 import { Link } from '@tanstack/react-router';
-import { Menu, X, Volume2, VolumeX, LayoutDashboard, User, ShoppingBag } from 'lucide-react';
+import { Menu, X, Volume2, VolumeX, LayoutDashboard, User, Globe } from 'lucide-react';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
@@ -23,6 +23,7 @@ export default function Header() {
     { label: 'Blog', path: '/blog' },
     { label: 'Cerebral shop', path: '/store' },
     { label: 'Contact', path: '/contact' },
+    { label: 'Domain Setup', path: '/domain-setup' },
   ];
 
   return (

@@ -1,150 +1,158 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { MessageSquare } from 'lucide-react';
+import { MessageSquare, Mail, BookOpen, Dumbbell, ShoppingBag, LayoutDashboard } from 'lucide-react';
+import { Link, useNavigate } from '@tanstack/react-router';
 
 export default function ContactPage() {
-  return (
-    <div className="flex flex-col">
-      {/* Hero Section with energetic workout background */}
-      <section className="relative overflow-hidden bg-gradient-to-b from-deep-blue/20 to-background py-16 md:py-24">
-        <div 
-          className="absolute inset-0 animate-subtle-pan bg-cover bg-center opacity-15"
-          style={{ backgroundImage: 'url(/assets/generated/dynamic-movement.dim_1920x1080.jpg)' }}
-        />
-        <div className="absolute inset-0 bg-gradient-to-br from-deep-blue/40 via-background/70 to-neon-purple/20" />
-        <div className="container relative mx-auto px-4">
-          <div className="mx-auto max-w-4xl text-center">
-            <h1 className="mb-6 text-4xl font-bold tracking-tight md:text-5xl lg:text-6xl">
-              Get in <span className="text-neon-purple">Touch</span>
-            </h1>
-            <p className="text-lg text-muted-foreground md:text-xl">
-              Have questions about our programs or training philosophy? We're here to help.
-            </p>
-          </div>
-        </div>
-      </section>
+  const navigate = useNavigate();
 
-      {/* Fitness Quote Overlay */}
-      <section className="relative border-b border-border/40 bg-card py-6">
-        <div 
-          className="absolute inset-0 bg-cover bg-center opacity-15"
-          style={{ backgroundImage: 'url(/assets/generated/discipline-quote-overlay-transparent.dim_800x200.png)' }}
-        />
-        <div className="container relative mx-auto px-4 text-center">
-          <p className="text-base font-semibold italic text-neon-purple md:text-lg">
-            "Your questions are the first step toward transformation."
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-background via-background to-accent/5">
+      <div className="container mx-auto px-4 py-12">
+        {/* Header */}
+        <div className="mb-12 text-center">
+          <div className="mb-4 flex justify-center">
+            <div className="rounded-full bg-neon-purple/10 p-4">
+              <MessageSquare className="h-12 w-12 text-neon-purple" />
+            </div>
+          </div>
+          <h1 className="mb-4 text-4xl font-bold tracking-tight">Get in Touch</h1>
+          <p className="mx-auto max-w-2xl text-lg text-muted-foreground">
+            Have questions about our programs, need support, or want to learn more about the Cerebral Physique approach? We're here to help.
           </p>
         </div>
-      </section>
 
-      {/* Contact Info */}
-      <section className="relative py-16 md:py-24">
-        <div 
-          className="absolute inset-0 bg-cover bg-center opacity-5"
-          style={{ backgroundImage: 'url(/assets/generated/gym-training-scene.dim_1920x1080.jpg)' }}
-        />
-        <div className="container relative mx-auto px-4">
-          <div className="mx-auto grid max-w-5xl gap-12 lg:grid-cols-2">
-            {/* Info Cards */}
-            <div className="space-y-6">
-              <Card className="border-border/40">
-                <CardHeader>
-                  <MessageSquare className="mb-2 h-8 w-8 text-neon-purple" />
-                  <CardTitle>Support</CardTitle>
-                  <CardDescription>
-                    For questions about memberships, content, or technical support
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-muted-foreground">
-                    We typically respond within 24-48 hours during business days.
-                  </p>
-                </CardContent>
-              </Card>
+        {/* Contact Information */}
+        <div className="mb-12 grid gap-6 md:grid-cols-2">
+          <Card className="border-neon-purple/20">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Mail className="h-5 w-5 text-neon-purple" />
+                Support
+              </CardTitle>
+              <CardDescription>For membership and technical support</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <a
+                href="mailto:support@cerebralphysique.com"
+                className="text-neon-purple transition-colors hover:text-neon-purple/80"
+              >
+                support@cerebralphysique.com
+              </a>
+            </CardContent>
+          </Card>
 
-              <Card className="border-border/40 bg-gradient-to-br from-deep-blue/20 to-background">
-                <CardHeader>
-                  <CardTitle>Looking for Training Guidance?</CardTitle>
-                  <CardDescription>
-                    Check out our programs and workout library first
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  <Button
-                    variant="outline"
-                    className="w-full"
-                    onClick={() => (window.location.href = '/programs')}
-                  >
-                    View Programs
-                  </Button>
-                  <Button
-                    variant="outline"
-                    className="w-full"
-                    onClick={() => (window.location.href = '/workout-library')}
-                  >
-                    Browse Exercises
-                  </Button>
-                  <Button
-                    variant="outline"
-                    className="w-full"
-                    onClick={() => (window.location.href = '/store')}
-                  >
-                    Shop Recommended Gear
-                  </Button>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Social & Resources */}
-            <div className="space-y-6">
-              <Card className="border-border/40">
-                <CardHeader>
-                  <CardTitle>Connect With Us</CardTitle>
-                  <CardDescription>
-                    Follow us on social media for training tips and updates
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-muted-foreground">
-                    Stay connected for the latest content, training insights, and community updates.
-                  </p>
-                </CardContent>
-              </Card>
-
-              <Card className="border-border/40">
-                <CardHeader>
-                  <CardTitle>Membership Benefits</CardTitle>
-                  <CardDescription>
-                    Unlock full access to our platform
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  <ul className="space-y-2 text-sm text-muted-foreground">
-                    <li className="flex items-start gap-2">
-                      <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-neon-purple" />
-                      <span>Complete exercise library with video demonstrations</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-neon-purple" />
-                      <span>Exclusive member-only blog content</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-neon-purple" />
-                      <span>Monthly recurring access for $19.99/month</span>
-                    </li>
-                  </ul>
-                  <Button
-                    className="w-full bg-neon-purple hover:bg-neon-purple/90"
-                    onClick={() => (window.location.href = '/dashboard')}
-                  >
-                    Become a Member
-                  </Button>
-                </CardContent>
-              </Card>
-            </div>
-          </div>
+          <Card className="border-deep-blue/20">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <MessageSquare className="h-5 w-5 text-deep-blue" />
+                General Inquiries
+              </CardTitle>
+              <CardDescription>For partnerships and general questions</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <a
+                href="mailto:info@cerebralphysique.com"
+                className="text-deep-blue transition-colors hover:text-deep-blue/80"
+              >
+                info@cerebralphysique.com
+              </a>
+            </CardContent>
+          </Card>
         </div>
-      </section>
+
+        {/* Quick Links */}
+        <Card className="mb-12">
+          <CardHeader>
+            <CardTitle>Quick Links</CardTitle>
+            <CardDescription>Explore our platform and resources</CardDescription>
+          </CardHeader>
+          <CardContent className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <Button
+              variant="outline"
+              className="h-auto flex-col items-start gap-2 p-4"
+              onClick={() => navigate({ to: '/programs' })}
+            >
+              <BookOpen className="h-5 w-5 text-neon-purple" />
+              <div className="text-left">
+                <div className="font-semibold">Programs</div>
+                <div className="text-xs text-muted-foreground">View our training programs</div>
+              </div>
+            </Button>
+
+            <Button
+              variant="outline"
+              className="h-auto flex-col items-start gap-2 p-4"
+              onClick={() => navigate({ to: '/workout-library' })}
+            >
+              <Dumbbell className="h-5 w-5 text-neon-purple" />
+              <div className="text-left">
+                <div className="font-semibold">Workout Library</div>
+                <div className="text-xs text-muted-foreground">Browse exercises</div>
+              </div>
+            </Button>
+
+            <Button
+              variant="outline"
+              className="h-auto flex-col items-start gap-2 p-4"
+              onClick={() => navigate({ to: '/store' })}
+            >
+              <ShoppingBag className="h-5 w-5 text-neon-purple" />
+              <div className="text-left">
+                <div className="font-semibold">Cerebral Shop</div>
+                <div className="text-xs text-muted-foreground">Recommended products</div>
+              </div>
+            </Button>
+
+            <Button
+              variant="outline"
+              className="h-auto flex-col items-start gap-2 p-4"
+              onClick={() => navigate({ to: '/dashboard' })}
+            >
+              <LayoutDashboard className="h-5 w-5 text-neon-purple" />
+              <div className="text-left">
+                <div className="font-semibold">Dashboard</div>
+                <div className="text-xs text-muted-foreground">Manage your account</div>
+              </div>
+            </Button>
+          </CardContent>
+        </Card>
+
+        {/* Membership Benefits */}
+        <Card className="border-neon-purple/20 bg-gradient-to-br from-neon-purple/5 to-deep-blue/5">
+          <CardHeader>
+            <CardTitle className="text-neon-purple">Become a Member</CardTitle>
+            <CardDescription>
+              Unlock full access to our comprehensive training library and exclusive content
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <ul className="space-y-2 text-sm">
+              <li className="flex items-start gap-2">
+                <span className="mt-1 text-neon-purple">✓</span>
+                <span>Complete exercise library with detailed video demonstrations</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="mt-1 text-neon-purple">✓</span>
+                <span>Exclusive member-only blog content and training insights</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="mt-1 text-neon-purple">✓</span>
+                <span>Access to premium programs and breathwork practices</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="mt-1 text-neon-purple">✓</span>
+                <span>Personalized dashboard to track your progress</span>
+              </li>
+            </ul>
+            <Link to="/dashboard">
+              <Button className="w-full bg-neon-purple hover:bg-neon-purple/90">
+                Get Started Today
+              </Button>
+            </Link>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }

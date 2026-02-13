@@ -12,9 +12,7 @@ import MixinAuthorization "authorization/MixinAuthorization";
 import Stripe "stripe/stripe";
 import OutCall "http-outcalls/outcall";
 import Storage "blob-storage/Storage";
-import Migration "migration";
 
-(with migration = Migration.run)
 actor {
   include MixinStorage();
   let accessControlState = AccessControl.initState();
@@ -176,7 +174,10 @@ actor {
     await Stripe.createCheckoutSession(config, caller, items, successUrl, cancelUrl, transform);
   };
 
-  public query func isStripeConfigured() : async Bool {
+  public query ({ caller }) func isStripeConfigured() : async Bool {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+      Runtime.trap("Unauthorized: Only admins can check Stripe configuration status");
+    };
     stripeConfig != null;
   };
 
@@ -188,6 +189,9 @@ actor {
   };
 
   public shared ({ caller }) func getStripeSessionStatus(sessionId : Text) : async Stripe.StripeSessionStatus {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only authenticated users can check session status");
+    };
     switch (stripeConfig) {
       case (null) { Runtime.trap("Stripe needs to be first configured") };
       case (?config) { await Stripe.getSessionStatus(config, sessionId, transform) };

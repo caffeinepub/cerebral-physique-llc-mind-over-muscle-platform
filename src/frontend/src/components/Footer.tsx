@@ -1,5 +1,6 @@
 import { Heart } from 'lucide-react';
 import { SiFacebook, SiInstagram, SiX, SiYoutube } from 'react-icons/si';
+import { Link } from '@tanstack/react-router';
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
@@ -32,29 +33,34 @@ export default function Footer() {
             </h3>
             <ul className="space-y-2 text-sm">
               <li>
-                <a href="/about" className="text-muted-foreground transition-colors hover:text-neon-purple">
+                <Link to="/about" className="text-muted-foreground transition-colors hover:text-neon-purple">
                   About
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="/workout-library" className="text-muted-foreground transition-colors hover:text-neon-purple">
+                <Link to="/workout-library" className="text-muted-foreground transition-colors hover:text-neon-purple">
                   Workout Library
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="/programs" className="text-muted-foreground transition-colors hover:text-neon-purple">
+                <Link to="/programs" className="text-muted-foreground transition-colors hover:text-neon-purple">
                   Programs
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="/blog" className="text-muted-foreground transition-colors hover:text-neon-purple">
+                <Link to="/blog" className="text-muted-foreground transition-colors hover:text-neon-purple">
                   Blog
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="/contact" className="text-muted-foreground transition-colors hover:text-neon-purple">
+                <Link to="/contact" className="text-muted-foreground transition-colors hover:text-neon-purple">
                   Contact
-                </a>
+                </Link>
+              </li>
+              <li>
+                <Link to="/domain-setup" className="text-muted-foreground transition-colors hover:text-neon-purple">
+                  Custom Domain Setup
+                </Link>
               </li>
             </ul>
           </div>
@@ -101,7 +107,7 @@ export default function Footer() {
           <p>
             © {currentYear}. Built with <Heart className="inline h-4 w-4 text-neon-purple" /> using{' '}
             <a
-              href="https://caffeine.ai"
+              href={`https://caffeine.ai/?utm_source=Caffeine-footer&utm_medium=referral&utm_content=${encodeURIComponent(window.location.hostname)}`}
               target="_blank"
               rel="noopener noreferrer"
               className="text-neon-purple transition-colors hover:text-neon-purple/80"
