@@ -1,36 +1,16 @@
 {
   "schemaVersion": "1.0.0",
   "projectStateVersion": 3,
-  "summary": "Cerebral Physique website - a fitness/wellness site being connected to cerebralphysique.com domain",
-  "architectural_notes": [
-    "Domain: cerebralphysique.com (currently on GoDaddy, to be connected to .icp0.io URL)"
-  ],
-  "known_issues": [
-    "Volume icon in header appears muted with no audio playing"
-  ],
-  "isFixRequest": true,
+  "summary": "New project",
+  "architectural_notes": [],
+  "known_issues": [],
+  "isFixRequest": false,
   "existing_features": [
     {
-      "id": "feature-add-background-music-audio-file-that-plays-faintly-on-the-homepage-when-the-page-loads",
-      "title": "Add background music audio file that plays faintly on the homepage when the page loads",
+      "id": "feature-update-the-membership-price-from-19-99-to-24-99-in-the-startmembershipcheckoutbutton-component",
+      "title": "Update the membership price from $19.99 to $24.99 in the StartMembershipCheckoutButton component",
       "reqIds": [
         "REQ-1"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-connect-the-existing-volume-icon-in-the-header-to-control-the-homepage-background-music-playback-state",
-      "title": "Connect the existing volume icon in the header to control the homepage background music playback state",
-      "reqIds": [
-        "REQ-2"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-ensure-background-music-only-plays-on-the-homepage-and-stops-when-navigating-to-other-pages",
-      "title": "Ensure background music only plays on the homepage and stops when navigating to other pages",
-      "reqIds": [
-        "REQ-3"
       ],
       "version": 1
     }
@@ -38,12 +18,20 @@
   "new_feature_requests": [
     {
       "id": "AR-1",
-      "summary": "Add background music to homepage with working volume control",
+      "summary": "Update membership price from $19.99 to $24.99 or $25",
       "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-3",
+      "summary": "Update the membership price to $24.99 in the backend Membership data structure and any related storage or validation logic",
+      "reqIds": [
+        "REQ-2"
+      ],
       "status": "pending"
     }
   ],
-  "projectName": "Cerebral Physique",
+  "projectName": "Update membership price to $24.99",
   "clarification_mode": "instant",
   "clarification_rounds": 0
 }

@@ -19,7 +19,7 @@ export const useMusicPlayerStore = create<MusicPlayerState>()(
   persist(
     (set, get) => ({
       isPlaying: false,
-      volume: 0.15, // Low volume for subtle background music
+      volume: 0.3, // Increased from 0.15 to 0.3 for more audible playback
       userMuted: false,
       audioElement: null,
       setIsPlaying: (playing) => set({ isPlaying: playing }),
@@ -47,11 +47,15 @@ export const useMusicPlayerStore = create<MusicPlayerState>()(
         const audio = get().audioElement;
         if (audio) {
           try {
+            // Ensure volume is set before playing
+            audio.volume = get().volume;
             await audio.play();
-            set({ isPlaying: true });
-          } catch (error) {
+            set({ isPlaying: true, userMuted: false });
+          } catch (error: any) {
             console.log('Audio playback prevented by browser:', error);
             set({ isPlaying: false });
+            // Re-throw error so caller can handle it (e.g., show prompt)
+            throw error;
           }
         }
       },

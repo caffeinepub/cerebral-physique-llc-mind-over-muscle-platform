@@ -65,6 +65,7 @@ export type ExternalBlob = Uint8Array;
 export interface Membership {
   'principal' : Principal,
   'active' : boolean,
+  'price' : bigint,
   'stripeId' : string,
 }
 export type MuscleGroup = { 'triceps' : null } |
@@ -174,8 +175,8 @@ export interface _SERVICE {
     ],
     undefined
   >,
-  'addMembership' : ActorMethod<[string], undefined>,
-  'addMembershipForUser' : ActorMethod<[Principal, string], undefined>,
+  'addMembership' : ActorMethod<[string, bigint], undefined>,
+  'addMembershipForUser' : ActorMethod<[Principal, string, bigint], undefined>,
   'assignCallerUserRole' : ActorMethod<[Principal, UserRole], undefined>,
   'createBlogPost' : ActorMethod<
     [string, string, string, boolean, string, string, Array<string>],

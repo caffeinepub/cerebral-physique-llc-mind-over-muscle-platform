@@ -12,7 +12,7 @@ export default function StartMembershipCheckoutButton() {
         {
           productName: 'Monthly Membership',
           productDescription: 'Full access to exercise library and exclusive content',
-          priceInCents: BigInt(1999), // $19.99
+          priceInCents: BigInt(2499), // $24.99
           currency: 'usd',
           quantity: BigInt(1),
         },
@@ -38,7 +38,7 @@ export default function StartMembershipCheckoutButton() {
       className="bg-neon-purple hover:bg-neon-purple/90"
     >
       {createCheckoutSession.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-      Become a Member - $19.99/month
+      Become a Member - $24.99/month
     </Button>
   );
 }

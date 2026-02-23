@@ -1,69 +1,20 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Add background music to homepage with working volume control",
+  "title": "Update membership price to $24.99",
   "requirements": [
     {
       "id": "REQ-1",
-      "summary": "Add background music audio file that plays faintly on the homepage when the page loads",
+      "summary": "Update the membership price from $19.99 to $24.99 in the StartMembershipCheckoutButton component",
       "acceptanceCriteria": [
-        "Background music plays automatically when homepage loads",
-        "Music volume is set to a low, non-intrusive level by default",
-        "Music loops continuously while user remains on homepage"
+        "The membership checkout button displays $24.99 as the price",
+        "The Stripe checkout session is created with the correct $24.99 amount"
       ],
       "file_operations": [
         {
-          "path": "frontend/public/assets/background-music.mp3",
-          "operation": "create",
-          "description": "Add background music audio file to public assets directory. This file will be referenced by the HomePage component and played at low volume."
-        },
-        {
-          "path": "frontend/src/pages/HomePage.tsx",
+          "path": "frontend/src/components/membership/StartMembershipCheckoutButton.tsx",
           "operation": "modify",
-          "description": "Import and use the useMusicPlayer hook from frontend/src/hooks/useMusicPlayer.tsx to initialize and play background music when the component mounts. Set the audio source to '/assets/background-music.mp3', enable looping, set initial volume to 0.15 (15% for subtle playback), and call play() in a useEffect. Handle autoplay restrictions gracefully with error handling. Clean up audio on unmount."
-        }
-      ]
-    },
-    {
-      "id": "REQ-2",
-      "summary": "Connect the existing volume icon in the header to control the homepage background music playback state",
-      "acceptanceCriteria": [
-        "Volume icon correctly reflects playing/muted state of background music",
-        "Clicking volume icon toggles music playback on/off",
-        "Volume icon state persists across page navigation within the site",
-        "Volume icon shows unmuted state when music is playing"
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/hooks/useMusicPlayer.tsx",
-          "operation": "modify",
-          "description": "Review the existing useMusicPlayer hook implementation to ensure it properly exposes play(), pause(), togglePlayback(), isPlaying state, and volume controls. Verify that the Zustand store persists playback state across navigation. If state persistence is missing, add it using localStorage or sessionStorage."
-        },
-        {
-          "path": "frontend/src/components/Header.tsx",
-          "operation": "modify",
-          "description": "Review the existing music toggle button implementation in the Header component. Ensure it uses the useMusicPlayer hook's togglePlayback() function and isPlaying state. Update the volume icon to reflect the current playback state (muted when paused, unmuted when playing). Verify the button correctly toggles between play and pause states when clicked."
-        }
-      ]
-    },
-    {
-      "id": "REQ-3",
-      "summary": "Ensure background music only plays on the homepage and stops when navigating to other pages",
-      "acceptanceCriteria": [
-        "Music starts playing when user lands on homepage",
-        "Music stops or pauses when user navigates away from homepage",
-        "Music resumes when user returns to homepage if not manually muted"
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/pages/HomePage.tsx",
-          "operation": "modify",
-          "description": "Add navigation detection logic using useEffect with cleanup. When the HomePage component unmounts (user navigates away), pause the music using the useMusicPlayer hook's pause() method. When mounting, check if the user previously muted the music manually (via the header button); if not muted, resume playback. Store manual mute state separately from navigation-triggered pauses to respect user preference."
-        },
-        {
-          "path": "frontend/src/hooks/useMusicPlayer.tsx",
-          "operation": "modify",
-          "description": "Add a 'userMuted' flag to the Zustand store to distinguish between user-initiated muting (via header button) and automatic pausing (when leaving homepage). Expose methods to check and update this flag. Ensure the HomePage respects this flag when deciding whether to resume playback on mount."
+          "description": "Update the priceInCents value from 1999 (representing $19.99) to 2499 (representing $24.99) in the ShoppingItem object passed to the createCheckoutSession mutation. Ensure the button text or any displayed price information also reflects $24.99 instead of $19.99."
         }
       ]
     }

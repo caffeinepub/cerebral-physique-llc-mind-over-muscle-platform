@@ -2,10 +2,10 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-add-background-music-audio-file-that-plays-faintly-on-the-homepage-when-the-page-loads",
-      "featureTitle": "Add background music audio file that plays faintly on the homepage when the page loads",
+      "featureId": "feature-update-the-membership-price-from-19-99-to-24-99-in-the-startmembershipcheckoutbutton-component",
+      "featureTitle": "Update the membership price from $19.99 to $24.99 in the StartMembershipCheckoutButton component",
       "files": [
-        "frontend/src/pages/HomePage.tsx"
+        "frontend/src/components/membership/StartMembershipCheckoutButton.tsx"
       ],
       "components": [
         "blob-storage@4.0.0",
@@ -20,52 +20,6 @@
       ],
       "testIds": [
         "REQ-1"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-connect-the-existing-volume-icon-in-the-header-to-control-the-homepage-background-music-playback-state",
-      "featureTitle": "Connect the existing volume icon in the header to control the homepage background music playback state",
-      "files": [
-        "frontend/src/components/Header.tsx",
-        "frontend/src/hooks/useMusicPlayer.tsx"
-      ],
-      "components": [
-        "blob-storage@4.0.0",
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "authorization@4.0.0",
-        "http-outcalls@3.0.0",
-        "github-export-icp-cli@1.0.0",
-        "stripe@3.0.0"
-      ],
-      "testIds": [
-        "REQ-2"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-ensure-background-music-only-plays-on-the-homepage-and-stops-when-navigating-to-other-pages",
-      "featureTitle": "Ensure background music only plays on the homepage and stops when navigating to other pages",
-      "files": [
-        "frontend/src/hooks/useMusicPlayer.tsx",
-        "frontend/src/pages/HomePage.tsx"
-      ],
-      "components": [
-        "blob-storage@4.0.0",
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "authorization@4.0.0",
-        "http-outcalls@3.0.0",
-        "github-export-icp-cli@1.0.0",
-        "stripe@3.0.0"
-      ],
-      "testIds": [
-        "REQ-3"
       ],
       "confidence": "high"
     }

@@ -1,13 +1,11 @@
 # Specification
 
 ## Summary
-**Goal:** Add background music to the homepage with working volume control using the existing header volume icon.
+**Goal:** Update the membership price from $19.99 to $24.99 across the application.
 
 **Planned changes:**
-- Add background music audio file that plays automatically at low volume when homepage loads
-- Connect existing volume icon in header to control background music playback
-- Ensure music only plays on homepage and stops when navigating to other pages
-- Music loops continuously while on homepage unless manually muted
-- Volume icon reflects current playback state (playing/muted)
+- Update membership price to $24.99 in the StartMembershipCheckoutButton component
+- Update membership price to $24.99 in backend data structures and Stripe integration
+- Ensure price consistency across all components that display or reference membership pricing
 
-**User-visible outcome:** Users will hear subtle background music when visiting the homepage, with the ability to toggle it on/off using the volume icon in the header.
+**User-visible outcome:** Users will see the updated membership price of $24.99 when viewing or purchasing a membership.

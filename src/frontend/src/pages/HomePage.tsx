@@ -1,19 +1,23 @@
 import { useNavigate } from '@tanstack/react-router';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Brain, Heart, Dumbbell, Wind } from 'lucide-react';
-import { useEffect, useRef } from 'react';
+import { Brain, Heart, Dumbbell, Wind, Volume2 } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
 import { useMusicPlayer } from '@/hooks/useMusicPlayer';
+import { toast } from 'sonner';
 
 export default function HomePage() {
   const navigate = useNavigate();
   const { play, pause, setAudioElement, userMuted, volume } = useMusicPlayer();
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const hasAttemptedPlayRef = useRef(false);
+  const [showEnableAudioPrompt, setShowEnableAudioPrompt] = useState(false);
 
   useEffect(() => {
     // Create and configure audio element
     if (!audioRef.current) {
+      // Note: No background-music.mp3 file exists in assets yet
+      // Using a placeholder path - admin should add the audio file to /assets/
       const audio = new Audio('/assets/background-music.mp3');
       audio.loop = true;
       audio.volume = volume;
@@ -22,7 +26,17 @@ export default function HomePage() {
 
       // Handle audio loading errors gracefully
       audio.addEventListener('error', (e) => {
-        console.log('Background music file not found or failed to load. Please add background-music.mp3 to /assets/');
+        console.warn('Background music file not found. Please add background-music.mp3 to frontend/public/assets/');
+      });
+
+      // Listen for successful play
+      audio.addEventListener('play', () => {
+        setShowEnableAudioPrompt(false);
+      });
+
+      // Listen for pause
+      audio.addEventListener('pause', () => {
+        // Don't show prompt if user manually paused
       });
     }
 
@@ -30,8 +44,17 @@ export default function HomePage() {
     if (!hasAttemptedPlayRef.current && !userMuted) {
       hasAttemptedPlayRef.current = true;
       // Small delay to improve autoplay success rate
-      const timer = setTimeout(() => {
-        play();
+      const timer = setTimeout(async () => {
+        try {
+          await play();
+          // If play succeeds, hide any prompt
+          setShowEnableAudioPrompt(false);
+        } catch (error: any) {
+          // Autoplay was blocked by browser
+          console.log('Autoplay blocked by browser. User interaction required.');
+          // Show prompt to enable audio
+          setShowEnableAudioPrompt(true);
+        }
       }, 100);
       return () => clearTimeout(timer);
     }
@@ -49,8 +72,47 @@ export default function HomePage() {
     }
   }, [volume]);
 
+  const handleEnableAudio = async () => {
+    try {
+      await play();
+      setShowEnableAudioPrompt(false);
+      toast.success('Background music enabled');
+    } catch (error) {
+      toast.error('Unable to play audio. Please check your browser settings.');
+    }
+  };
+
   return (
     <div className="flex flex-col">
+      {/* Enable Audio Prompt - shown when autoplay is blocked */}
+      {showEnableAudioPrompt && (
+        <div className="fixed bottom-6 right-6 z-50 animate-in slide-in-from-bottom-5">
+          <Card className="border-neon-purple/30 bg-card/95 shadow-lg shadow-neon-purple/10 backdrop-blur">
+            <CardContent className="flex items-center gap-4 p-4">
+              <Volume2 className="h-6 w-6 text-neon-purple" />
+              <div className="flex-1">
+                <p className="text-sm font-medium">Enable Background Music?</p>
+                <p className="text-xs text-muted-foreground">Click to start the experience</p>
+              </div>
+              <Button
+                size="sm"
+                onClick={handleEnableAudio}
+                className="bg-neon-purple text-white hover:bg-neon-purple/90"
+              >
+                Enable
+              </Button>
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={() => setShowEnableAudioPrompt(false)}
+              >
+                Dismiss
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
       {/* Hero Section with energetic gym background */}
       <section className="relative overflow-hidden bg-gradient-to-b from-deep-blue/20 to-background">
         <div 

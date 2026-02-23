@@ -459,7 +459,7 @@ export function useAddMembershipForUser() {
   return useMutation({
     mutationFn: async ({ user, stripeId }: { user: Principal; stripeId: string }) => {
       if (!actor) throw new Error('Actor not available');
-      return actor.addMembershipForUser(user, stripeId);
+      return actor.addMembershipForUser(user, stripeId, BigInt(2499));
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['membership'] });
@@ -610,6 +610,34 @@ export function useIsCallerAdmin() {
   });
 }
 
+// Canister ID Query
+export function useGetCanisterId() {
+  const { actor, isFetching } = useActor();
+
+  return useQuery<string>({
+    queryKey: ['canisterId'],
+    queryFn: async () => {
+      if (!actor) throw new Error('Actor not available');
+      // Extract canister ID from the hostname
+      const hostname = window.location.hostname;
+      // Pattern: <canister-id>.icp0.io or <canister-id>.ic0.app
+      const match = hostname.match(/^([a-z0-9-]+)\.(icp0\.io|ic0\.app)$/);
+      if (match) {
+        return match[1];
+      }
+      // Fallback: try to get from actor's canister ID if available
+      // @ts-ignore - accessing internal property
+      const canisterId = actor._canisterId?.toString() || actor.canisterId?.toString();
+      if (canisterId) {
+        return canisterId;
+      }
+      throw new Error('Unable to determine canister ID');
+    },
+    enabled: !!actor && !isFetching,
+    retry: 1,
+  });
+}
+
 // Stripe Queries
 export function useIsStripeConfigured() {
   const { actor, isFetching } = useActor();
@@ -653,17 +681,22 @@ export function useSetStripeConfiguration() {
   });
 }
 
+export type CheckoutSession = {
+  id: string;
+  url: string;
+};
+
 export function useCreateCheckoutSession() {
   const { actor } = useActor();
 
   return useMutation({
-    mutationFn: async (items: ShoppingItem[]) => {
+    mutationFn: async (items: ShoppingItem[]): Promise<CheckoutSession> => {
       if (!actor) throw new Error('Actor not available');
       const baseUrl = `${window.location.protocol}//${window.location.host}`;
       const successUrl = `${baseUrl}/payment-success`;
       const cancelUrl = `${baseUrl}/payment-failure`;
       const result = await actor.createCheckoutSession(items, successUrl, cancelUrl);
-      const session = JSON.parse(result) as { id: string; url: string };
+      const session = JSON.parse(result) as CheckoutSession;
       if (!session?.url) {
         throw new Error('Stripe session missing url');
       }
@@ -683,33 +716,5 @@ export function useGetAffiliateDisclosure() {
       return actor.getAffiliateDisclosure();
     },
     enabled: !!actor && !isFetching,
-  });
-}
-
-// Canister ID Query
-export function useGetCanisterId() {
-  const { actor, isFetching } = useActor();
-
-  return useQuery<string>({
-    queryKey: ['canisterId'],
-    queryFn: async () => {
-      if (!actor) throw new Error('Actor not available');
-      // Extract canister ID from the window location or config
-      // This is a workaround until backend implements getCanisterId()
-      const hostname = window.location.hostname;
-      
-      // Check if we're on an IC deployment (*.icp0.io or *.ic0.app)
-      const icMatch = hostname.match(/^([a-z0-9-]+)\.(icp0\.io|ic0\.app)$/);
-      if (icMatch) {
-        return icMatch[1];
-      }
-      
-      // Fallback: try to get from environment or return a placeholder
-      // In production, the backend should implement getCanisterId()
-      return 'unknown-canister-id';
-    },
-    enabled: !!actor && !isFetching,
-    staleTime: Infinity,
-    gcTime: Infinity,
   });
 }

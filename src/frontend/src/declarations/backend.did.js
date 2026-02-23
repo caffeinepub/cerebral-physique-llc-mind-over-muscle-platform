@@ -100,6 +100,7 @@ export const Exercise = IDL.Record({
 export const Membership = IDL.Record({
   'principal' : IDL.Principal,
   'active' : IDL.Bool,
+  'price' : IDL.Nat,
   'stripeId' : IDL.Text,
 });
 export const UserProfile = IDL.Record({
@@ -198,8 +199,8 @@ export const idlService = IDL.Service({
       [],
       [],
     ),
-  'addMembership' : IDL.Func([IDL.Text], [], []),
-  'addMembershipForUser' : IDL.Func([IDL.Principal, IDL.Text], [], []),
+  'addMembership' : IDL.Func([IDL.Text, IDL.Nat], [], []),
+  'addMembershipForUser' : IDL.Func([IDL.Principal, IDL.Text, IDL.Nat], [], []),
   'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
   'createBlogPost' : IDL.Func(
       [
@@ -416,6 +417,7 @@ export const idlFactory = ({ IDL }) => {
   const Membership = IDL.Record({
     'principal' : IDL.Principal,
     'active' : IDL.Bool,
+    'price' : IDL.Nat,
     'stripeId' : IDL.Text,
   });
   const UserProfile = IDL.Record({
@@ -511,8 +513,12 @@ export const idlFactory = ({ IDL }) => {
         [],
         [],
       ),
-    'addMembership' : IDL.Func([IDL.Text], [], []),
-    'addMembershipForUser' : IDL.Func([IDL.Principal, IDL.Text], [], []),
+    'addMembership' : IDL.Func([IDL.Text, IDL.Nat], [], []),
+    'addMembershipForUser' : IDL.Func(
+        [IDL.Principal, IDL.Text, IDL.Nat],
+        [],
+        [],
+      ),
     'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
     'createBlogPost' : IDL.Func(
         [

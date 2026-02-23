@@ -12,7 +12,10 @@ import MixinAuthorization "authorization/MixinAuthorization";
 import Stripe "stripe/stripe";
 import OutCall "http-outcalls/outcall";
 import Storage "blob-storage/Storage";
+import Migration "migration";
 
+// Data migration on upgrade
+(with migration = Migration.run)
 actor {
   include MixinStorage();
   let accessControlState = AccessControl.initState();
@@ -94,6 +97,7 @@ actor {
     principal : Principal;
     active : Bool;
     stripeId : Text;
+    price : Nat; // Price in cents
   };
 
   public type MuscleGroupCard = {
@@ -528,21 +532,21 @@ actor {
     amazonProducts.values().toArray();
   };
 
-  public shared ({ caller }) func addMembership(stripeId : Text) : async () {
+  public shared ({ caller }) func addMembership(stripeId : Text, price : Nat) : async () {
     if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
       Runtime.trap("Unauthorized: Only admins can add memberships");
     };
 
-    let membership : Membership = { principal = caller; active = true; stripeId };
+    let membership : Membership = { principal = caller; active = true; stripeId; price };
     memberships.add(caller, membership);
   };
 
-  public shared ({ caller }) func addMembershipForUser(user : Principal, stripeId : Text) : async () {
+  public shared ({ caller }) func addMembershipForUser(user : Principal, stripeId : Text, price : Nat) : async () {
     if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
       Runtime.trap("Unauthorized: Only admins can add memberships");
     };
 
-    let membership : Membership = { principal = user; active = true; stripeId };
+    let membership : Membership = { principal = user; active = true; stripeId; price };
     memberships.add(user, membership);
   };
 

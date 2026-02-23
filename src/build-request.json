@@ -1,75 +1,51 @@
 {
   "kind": "build_request",
-  "title": "Add background music to homepage with working volume control",
-  "projectName": "Cerebral Physique",
+  "title": "Update membership price to $24.99",
   "priority": "normal",
   "requirements": [
     {
       "id": "REQ-1",
-      "text": "Add background music audio file that plays faintly on the homepage when the page loads",
+      "text": "Update the membership price from $19.99 to $24.99 in the StartMembershipCheckoutButton component",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-recent"
+          "msg-latest"
         ],
         "quotes": [
-          "I do want music playing faintly when on the website"
+          "Instead of $19.99 for the membership, the price I believe should be $24.99 or just $25."
         ]
       },
       "acceptanceCriteria": [
-        "Background music plays automatically when homepage loads",
-        "Music volume is set to a low, non-intrusive level by default",
-        "Music loops continuously while user remains on homepage"
+        "The membership checkout button displays $24.99 as the price",
+        "The Stripe checkout session is created with the correct $24.99 amount"
       ]
     },
     {
       "id": "REQ-2",
-      "text": "Connect the existing volume icon in the header to control the homepage background music playback state",
-      "target": "frontend",
+      "text": "Update the membership price to $24.99 in the backend Membership data structure and any related storage or validation logic",
+      "target": "backend",
       "source": {
         "messageIds": [
-          "msg-recent"
+          "msg-latest"
         ],
         "quotes": [
-          "Please fix that button so music plays when in the homepage of my website"
+          "Instead of $19.99 for the membership, the price I believe should be $24.99 or just $25."
         ]
       },
       "acceptanceCriteria": [
-        "Volume icon correctly reflects playing/muted state of background music",
-        "Clicking volume icon toggles music playback on/off",
-        "Volume icon state persists across page navigation within the site",
-        "Volume icon shows unmuted state when music is playing"
-      ]
-    },
-    {
-      "id": "REQ-3",
-      "text": "Ensure background music only plays on the homepage and stops when navigating to other pages",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-recent"
-        ],
-        "quotes": [
-          "music plays when in the homepage of my website"
-        ]
-      },
-      "acceptanceCriteria": [
-        "Music starts playing when user lands on homepage",
-        "Music stops or pauses when user navigates away from homepage",
-        "Music resumes when user returns to homepage if not manually muted"
+        "Backend returns $24.99 as the membership price when queried",
+        "Any price validation or business logic uses $24.99 as the correct value"
       ]
     }
   ],
   "constraints": [
-    "Use the existing useMusicPlayer hook and music toggle functionality in Header.tsx",
-    "Background music must be subtle and not interfere with user experience",
-    "Respect browser autoplay policies and handle autoplay restrictions gracefully"
+    "Ensure price consistency across all components that display or reference membership pricing",
+    "Update both display prices and Stripe integration amounts"
   ],
   "nonGoals": [
-    "Adding music to pages other than the homepage",
-    "Implementing a full music playlist or multiple tracks",
-    "Creating a custom audio player UI with progress bars or track selection",
-    "Adding volume slider controls"
+    "Changing any other membership features or functionality",
+    "Modifying existing member subscriptions or billing cycles",
+    "Adding new pricing tiers or membership options"
   ],
   "imageRequirements": {
     "required": [],

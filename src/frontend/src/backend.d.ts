@@ -119,6 +119,7 @@ export interface StripeConfiguration {
 export interface Membership {
     principal: Principal;
     active: boolean;
+    price: bigint;
     stripeId: string;
 }
 export interface UserProfile {
@@ -152,8 +153,8 @@ export enum UserRole {
 export interface backendInterface {
     addAmazonProduct(name: string, description: string, imageUrl: string, category: string, affiliateLink: string): Promise<void>;
     addExercise(name: string, primaryMuscle: MuscleGroup, secondaryMuscles: Array<MuscleGroup>, equipmentType: EquipmentType, videoUrl: string, cues: string, imageUrl: string, isPlaceholder: boolean): Promise<void>;
-    addMembership(stripeId: string): Promise<void>;
-    addMembershipForUser(user: Principal, stripeId: string): Promise<void>;
+    addMembership(stripeId: string, price: bigint): Promise<void>;
+    addMembershipForUser(user: Principal, stripeId: string, price: bigint): Promise<void>;
     assignCallerUserRole(user: Principal, role: UserRole): Promise<void>;
     createBlogPost(title: string, content: string, author: string, memberOnly: boolean, seoTitle: string, seoMetaDescription: string, seoKeywords: Array<string>): Promise<void>;
     createCheckoutSession(items: Array<ShoppingItem>, successUrl: string, cancelUrl: string): Promise<string>;
