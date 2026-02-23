@@ -1,5 +1,5 @@
 import { Link } from '@tanstack/react-router';
-import { Menu, X, Volume2, VolumeX, LayoutDashboard, User, Globe } from 'lucide-react';
+import { Menu, X, Volume2, VolumeX, LayoutDashboard, User } from 'lucide-react';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
@@ -124,18 +124,30 @@ export default function Header() {
             
             {/* Music Toggle - positioned to the right */}
             <div className="ml-4 border-l border-border/40 pl-4">
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={toggle}
-                aria-label={isPlaying ? 'Pause music' : 'Play music'}
-              >
-                {isPlaying ? (
-                  <Volume2 className="h-5 w-5 text-neon-purple" />
-                ) : (
-                  <VolumeX className="h-5 w-5 text-muted-foreground" />
-                )}
-              </Button>
+              <TooltipProvider delayDuration={200}>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={toggle}
+                      aria-label={isPlaying ? 'Pause music' : 'Play music'}
+                      className="transition-all hover:scale-110"
+                    >
+                      {isPlaying ? (
+                        <Volume2 className="h-5 w-5 text-neon-purple" />
+                      ) : (
+                        <VolumeX className="h-5 w-5 text-muted-foreground" />
+                      )}
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent side="bottom" sideOffset={8}>
+                    <p className="text-xs">
+                      {isPlaying ? 'Pause background music' : 'Play background music'}
+                    </p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
             </div>
           </div>
         </div>
@@ -161,6 +173,7 @@ export default function Header() {
               size="icon"
               onClick={toggle}
               aria-label={isPlaying ? 'Pause music' : 'Play music'}
+              className="transition-all hover:scale-110"
             >
               {isPlaying ? (
                 <Volume2 className="h-5 w-5 text-neon-purple" />

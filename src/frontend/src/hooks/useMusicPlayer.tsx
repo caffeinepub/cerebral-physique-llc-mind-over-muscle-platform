@@ -1,73 +1,100 @@
 import { create } from 'zustand';
-import { useEffect, useRef } from 'react';
+import { persist } from 'zustand/middleware';
 
 interface MusicPlayerState {
   isPlaying: boolean;
   volume: number;
+  userMuted: boolean;
+  audioElement: HTMLAudioElement | null;
   setIsPlaying: (playing: boolean) => void;
   setVolume: (volume: number) => void;
+  setUserMuted: (muted: boolean) => void;
+  setAudioElement: (audio: HTMLAudioElement | null) => void;
   toggle: () => void;
+  play: () => Promise<void>;
+  pause: () => void;
 }
 
-const useMusicPlayerStore = create<MusicPlayerState>((set) => ({
-  isPlaying: false,
-  volume: 0.3,
-  setIsPlaying: (playing) => set({ isPlaying: playing }),
-  setVolume: (volume) => set({ volume }),
-  toggle: () => set((state) => ({ isPlaying: !state.isPlaying })),
-}));
+export const useMusicPlayerStore = create<MusicPlayerState>()(
+  persist(
+    (set, get) => ({
+      isPlaying: false,
+      volume: 0.15, // Low volume for subtle background music
+      userMuted: false,
+      audioElement: null,
+      setIsPlaying: (playing) => set({ isPlaying: playing }),
+      setVolume: (volume) => {
+        set({ volume });
+        const audio = get().audioElement;
+        if (audio) {
+          audio.volume = volume;
+        }
+      },
+      setUserMuted: (muted) => set({ userMuted: muted }),
+      setAudioElement: (audio) => set({ audioElement: audio }),
+      toggle: () => {
+        const state = get();
+        const newPlayingState = !state.isPlaying;
+        set({ isPlaying: newPlayingState, userMuted: !newPlayingState });
+        
+        if (newPlayingState) {
+          state.play();
+        } else {
+          state.pause();
+        }
+      },
+      play: async () => {
+        const audio = get().audioElement;
+        if (audio) {
+          try {
+            await audio.play();
+            set({ isPlaying: true });
+          } catch (error) {
+            console.log('Audio playback prevented by browser:', error);
+            set({ isPlaying: false });
+          }
+        }
+      },
+      pause: () => {
+        const audio = get().audioElement;
+        if (audio) {
+          audio.pause();
+          set({ isPlaying: false });
+        }
+      },
+    }),
+    {
+      name: 'music-player-storage',
+      partialize: (state) => ({ 
+        volume: state.volume, 
+        userMuted: state.userMuted 
+      }),
+    }
+  )
+);
 
 export function useMusicPlayer() {
-  const { isPlaying, volume, setIsPlaying, setVolume, toggle } = useMusicPlayerStore();
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-
-  useEffect(() => {
-    // Create audio element if it doesn't exist
-    if (!audioRef.current) {
-      // Create a simple ambient background music using Web Audio API
-      // Since we don't have an actual audio file, we'll create a placeholder
-      // In production, you would use: audioRef.current = new Audio('/assets/ambient-music.mp3');
-      audioRef.current = new Audio();
-      audioRef.current.loop = true;
-      audioRef.current.volume = volume;
-      
-      // Try to load the audio file - it will fail silently if not present
-      audioRef.current.src = '/assets/ambient-music.mp3';
-      audioRef.current.load();
-    }
-
-    const audio = audioRef.current;
-
-    // Handle play/pause
-    if (isPlaying) {
-      const playPromise = audio.play();
-      if (playPromise !== undefined) {
-        playPromise.catch((error) => {
-          console.log('Audio playback prevented by browser:', error);
-          // Browsers often block autoplay - this is expected behavior
-          setIsPlaying(false);
-        });
-      }
-    } else {
-      audio.pause();
-    }
-
-    // Update volume
-    audio.volume = volume;
-
-    return () => {
-      // Cleanup on unmount
-      if (audio) {
-        audio.pause();
-        audio.currentTime = 0;
-      }
-    };
-  }, [isPlaying, volume, setIsPlaying]);
+  const { 
+    isPlaying, 
+    volume, 
+    userMuted,
+    setVolume, 
+    toggle, 
+    play, 
+    pause,
+    setAudioElement,
+    audioElement
+  } = useMusicPlayerStore();
 
   return {
     isPlaying,
     volume,
+    userMuted,
+    audioElement,
     setVolume,
     toggle,
+    play,
+    pause,
+    setAudioElement,
   };
 }

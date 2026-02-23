@@ -2,9 +2,52 @@ import { useNavigate } from '@tanstack/react-router';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Brain, Heart, Dumbbell, Wind } from 'lucide-react';
+import { useEffect, useRef } from 'react';
+import { useMusicPlayer } from '@/hooks/useMusicPlayer';
 
 export default function HomePage() {
   const navigate = useNavigate();
+  const { play, pause, setAudioElement, userMuted, volume } = useMusicPlayer();
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const hasAttemptedPlayRef = useRef(false);
+
+  useEffect(() => {
+    // Create and configure audio element
+    if (!audioRef.current) {
+      const audio = new Audio('/assets/background-music.mp3');
+      audio.loop = true;
+      audio.volume = volume;
+      audioRef.current = audio;
+      setAudioElement(audio);
+
+      // Handle audio loading errors gracefully
+      audio.addEventListener('error', (e) => {
+        console.log('Background music file not found or failed to load. Please add background-music.mp3 to /assets/');
+      });
+    }
+
+    // Auto-play music when homepage loads (if not manually muted by user)
+    if (!hasAttemptedPlayRef.current && !userMuted) {
+      hasAttemptedPlayRef.current = true;
+      // Small delay to improve autoplay success rate
+      const timer = setTimeout(() => {
+        play();
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+
+    // Cleanup: pause music when leaving homepage
+    return () => {
+      pause();
+    };
+  }, []);
+
+  // Update volume when it changes
+  useEffect(() => {
+    if (audioRef.current) {
+      audioRef.current.volume = volume;
+    }
+  }, [volume]);
 
   return (
     <div className="flex flex-col">
@@ -133,68 +176,58 @@ export default function HomePage() {
                 Science-Informed Training
               </h2>
               <p className="mb-6 text-lg text-muted-foreground">
-                Every exercise, every breath, every rep is designed with purpose. Our approach combines cutting-edge exercise science with time-tested principles of mindful movement.
+                Every exercise, every technique, every principle is backed by research and refined through practice. We don't chase trends—we build foundations.
               </p>
-              <p className="mb-8 text-lg text-muted-foreground">
-                No gimmicks. No shortcuts. Just intelligent, disciplined training that builds both body and mind.
-              </p>
-              <Button
-                size="lg"
-                variant="outline"
-                onClick={() => navigate({ to: '/workout-library' })}
-              >
-                Explore Workout Library
-              </Button>
+              <ul className="space-y-4 text-muted-foreground">
+                <li className="flex items-start gap-3">
+                  <div className="mt-1 h-2 w-2 shrink-0 rounded-full bg-neon-purple" />
+                  <span>Evidence-based exercise selection and programming</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <div className="mt-1 h-2 w-2 shrink-0 rounded-full bg-neon-purple" />
+                  <span>Biomechanics-focused movement patterns</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <div className="mt-1 h-2 w-2 shrink-0 rounded-full bg-neon-purple" />
+                  <span>Nervous system optimization through breathwork</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <div className="mt-1 h-2 w-2 shrink-0 rounded-full bg-neon-purple" />
+                  <span>Recovery protocols for sustainable progress</span>
+                </li>
+              </ul>
             </div>
             <div className="relative">
-              <div className="overflow-hidden rounded-lg shadow-2xl">
-                <img
-                  src="/assets/generated/mind-muscle-visual.dim_800x600.jpg"
-                  alt="mind-muscle visual"
-                  className="h-full w-full object-cover"
-                />
-              </div>
-              <div className="absolute -bottom-6 -right-6 h-32 w-32 rounded-full bg-neon-purple/20 blur-3xl" />
+              <img
+                src="/assets/generated/mind-muscle-visual.dim_800x600.jpg"
+                alt="Mind-muscle connection visualization"
+                className="rounded-lg shadow-2xl"
+              />
             </div>
           </div>
-        </div>
-      </section>
-
-      {/* Fitness Quote Overlay */}
-      <section className="relative border-y border-border/40 bg-card py-6">
-        <div 
-          className="absolute inset-0 bg-cover bg-center opacity-15"
-          style={{ backgroundImage: 'url(/assets/generated/longevity-quote-overlay-transparent.dim_800x200.png)' }}
-        />
-        <div className="container relative mx-auto px-4 text-center">
-          <p className="text-base font-semibold italic text-neon-purple md:text-lg">
-            "Train for longevity, not just intensity."
-          </p>
         </div>
       </section>
 
       {/* Membership CTA */}
-      <section className="relative bg-gradient-to-b from-deep-blue/10 to-background py-16 md:py-24">
+      <section className="relative overflow-hidden bg-gradient-to-br from-neon-purple/10 via-background to-deep-blue/10 py-16 md:py-24">
         <div 
-          className="absolute inset-0 animate-subtle-zoom bg-cover bg-center opacity-15"
-          style={{ backgroundImage: 'url(/assets/generated/gym-training-scene.dim_1920x1080.jpg)' }}
+          className="absolute inset-0 bg-cover bg-center opacity-10"
+          style={{ backgroundImage: 'url(/assets/generated/hero-background.dim_1920x1080.jpg)' }}
         />
-        <div className="container relative mx-auto px-4">
-          <div className="mx-auto max-w-2xl text-center">
-            <h2 className="mb-4 text-3xl font-bold tracking-tight md:text-4xl">
-              Unlock the Library!
-            </h2>
-            <p className="mb-8 text-lg text-muted-foreground">
-              Get full access to our comprehensive exercise library, exclusive blog content, and member-only resources.
-            </p>
-            <Button 
-              size="lg" 
-              className="bg-neon-purple hover:bg-neon-purple/90"
-              onClick={() => navigate({ to: '/dashboard' })}
-            >
-              Become a Member
-            </Button>
-          </div>
+        <div className="container relative mx-auto px-4 text-center">
+          <h2 className="mb-6 text-3xl font-bold tracking-tight md:text-4xl lg:text-5xl">
+            Unlock the Library!
+          </h2>
+          <p className="mx-auto mb-8 max-w-2xl text-lg text-muted-foreground">
+            Get full access to our comprehensive exercise library, exclusive programs, and member-only content. Start your transformation today.
+          </p>
+          <Button
+            size="lg"
+            className="bg-neon-purple text-white hover:bg-neon-purple/90"
+            onClick={() => navigate({ to: '/dashboard' })}
+          >
+            Become a Member
+          </Button>
         </div>
       </section>
     </div>

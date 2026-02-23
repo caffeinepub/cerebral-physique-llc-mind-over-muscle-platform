@@ -1,24 +1,49 @@
 {
   "schemaVersion": "1.0.0",
   "projectStateVersion": 3,
-  "summary": "Troubleshooting Caffeine deployment: force a rebuild to generate the missing frontend canister and public .icp0.io live URL (\"Live app web page\" button currently has no link).",
-  "architectural_notes": [],
+  "summary": "Cerebral Physique website - a fitness/wellness site being connected to cerebralphysique.com domain",
+  "architectural_notes": [
+    "Domain: cerebralphysique.com (currently on GoDaddy, to be connected to .icp0.io URL)"
+  ],
   "known_issues": [
-    "\"Live app web page\" button shows no URL on hover and opens only a caffeine.xyz admin/preview URL; indicates the frontend canister/public .icp0.io site has not been generated yet."
+    "Volume icon in header appears muted with no audio playing"
   ],
   "isFixRequest": true,
   "existing_features": [
     {
-      "id": "feature-update-the-contact-page-by-adding-a-single-period-character-to-existing-visible-text-one-character-only-change-without-changing-layout-styling-routing-or-functionality",
-      "title": "Update the Contact page by adding a single period character to existing visible text (one-character-only change) without changing layout, styling, routing, or functionality.",
+      "id": "feature-add-background-music-audio-file-that-plays-faintly-on-the-homepage-when-the-page-loads",
+      "title": "Add background music audio file that plays faintly on the homepage when the page loads",
       "reqIds": [
         "REQ-1"
       ],
       "version": 1
+    },
+    {
+      "id": "feature-connect-the-existing-volume-icon-in-the-header-to-control-the-homepage-background-music-playback-state",
+      "title": "Connect the existing volume icon in the header to control the homepage background music playback state",
+      "reqIds": [
+        "REQ-2"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-ensure-background-music-only-plays-on-the-homepage-and-stops-when-navigating-to-other-pages",
+      "title": "Ensure background music only plays on the homepage and stops when navigating to other pages",
+      "reqIds": [
+        "REQ-3"
+      ],
+      "version": 1
     }
   ],
-  "new_feature_requests": [],
-  "projectName": "Trigger rebuild by adding a period on the Contact page",
+  "new_feature_requests": [
+    {
+      "id": "AR-1",
+      "summary": "Add background music to homepage with working volume control",
+      "reqIds": [],
+      "status": "pending"
+    }
+  ],
+  "projectName": "Cerebral Physique",
   "clarification_mode": "instant",
   "clarification_rounds": 0
 }

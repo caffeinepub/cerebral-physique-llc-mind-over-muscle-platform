@@ -1,34 +1,65 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-13T08:17:46.701Z",
+  "generatedAt": "2026-02-23T10:26:40.458Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 1,
-    "implemented": 1,
+    "total": 3,
+    "implemented": 3,
     "items": [
       {
         "id": "REQ-1",
-        "summary": "Update the Contact page by adding a single period character to existing visible text (one-character-only change) without changing layout, styling, routing, or functionality.",
+        "summary": "Add background music audio file that plays faintly on the homepage when the page loads",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/pages/ContactPage.tsx"
+          "frontend/public/assets/background-music.mp3",
+          "frontend/src/pages/HomePage.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/pages/ContactPage.tsx"
+          "frontend/src/pages/HomePage.tsx"
+        ]
+      },
+      {
+        "id": "REQ-2",
+        "summary": "Connect the existing volume icon in the header to control the homepage background music playback state",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/hooks/useMusicPlayer.tsx",
+          "frontend/src/components/Header.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/hooks/useMusicPlayer.tsx",
+          "frontend/src/components/Header.tsx"
+        ]
+      },
+      {
+        "id": "REQ-3",
+        "summary": "Ensure background music only plays on the homepage and stops when navigating to other pages",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/pages/HomePage.tsx",
+          "frontend/src/hooks/useMusicPlayer.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/pages/HomePage.tsx",
+          "frontend/src/hooks/useMusicPlayer.tsx"
         ]
       }
     ]
   },
   "changedFiles": [
     "build-request.json",
+    "caffeine.lock.json",
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
-    "frontend/src/pages/ContactPage.tsx",
+    "frontend/src/components/Header.tsx",
+    "frontend/src/config.ts",
+    "frontend/src/hooks/useMusicPlayer.tsx",
+    "frontend/src/pages/HomePage.tsx",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",
