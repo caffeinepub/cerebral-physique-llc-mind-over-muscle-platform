@@ -1,0 +1,185 @@
+{
+  "kind": "implementation_plan",
+  "version": "1.0",
+  "title": "Restore Version 42 design, logo, and music player functionality",
+  "requirements": [
+    {
+      "id": "REQ-1",
+      "summary": "Restore website logo display to match Version 42 exactly in Header component",
+      "acceptanceCriteria": [
+        "Logo is visible in the header",
+        "Logo matches the appearance from Version 42",
+        "Logo displays correctly on both desktop and mobile views"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/Header.tsx",
+          "operation": "modify",
+          "description": "Restore the logo image source path to Version 42 configuration. Verify the logo file path references `frontend/public/assets/generated/cerebral-physique-logo.dim_200x200.png` correctly. Ensure the img element has proper alt text, responsive sizing classes, and visibility on both desktop and mobile navigation menus. Check that the logo is not hidden by CSS or conditional rendering logic that may have been introduced in Version 43."
+        },
+        {
+          "path": "frontend/src/components/Header.tsx",
+          "operation": "modify",
+          "description": "Review and restore Version 42 header layout structure, including logo positioning, navigation alignment, and responsive behavior. Ensure the logo container has correct flexbox/grid properties and z-index values to maintain visibility."
+        }
+      ]
+    },
+    {
+      "id": "REQ-2",
+      "summary": "Restore MusicPlayer component functionality exactly as it existed in Version 42",
+      "acceptanceCriteria": [
+        "Music player is visible and functional",
+        "Play/pause button works correctly",
+        "Volume controls (slider and mute) operate as expected",
+        "Music playback state persists as in Version 42"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/MusicPlayer.tsx",
+          "operation": "modify",
+          "description": "Restore the MusicPlayer component to Version 42 state. Verify that the audio element references the correct music file path. Ensure play/pause toggle functionality works properly with the useMusicPlayer hook. Restore any UI elements (buttons, sliders) that may have been modified or removed in Version 43. Check that the component's fixed positioning and z-index values match Version 42 for proper visibility."
+        },
+        {
+          "path": "frontend/src/hooks/useMusicPlayer.tsx",
+          "operation": "modify",
+          "description": "Restore the useMusicPlayer Zustand store to Version 42 implementation. Ensure state management for isPlaying, volume, isMuted, and audioRef matches the original logic. Verify localStorage persistence keys and default values align with Version 42. Restore any action methods (togglePlay, setVolume, toggleMute) to their Version 42 behavior."
+        },
+        {
+          "path": "frontend/src/components/Layout.tsx",
+          "operation": "modify",
+          "description": "Verify that the MusicPlayer component is properly rendered in the Layout component as it was in Version 42. Ensure it's not conditionally hidden or removed from the component tree. Check the rendering order and positioning relative to Header, Footer, and Outlet components."
+        }
+      ]
+    },
+    {
+      "id": "REQ-3",
+      "summary": "Revert all visual design changes from Version 43 and restore complete Version 42 design system",
+      "acceptanceCriteria": [
+        "All pages match Version 42 visual appearance",
+        "Color scheme matches Version 42 exactly",
+        "Typography and spacing match Version 42",
+        "Layout and component styling match Version 42",
+        "No visual remnants of Version 43 changes remain"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/index.css",
+          "operation": "modify",
+          "description": "Restore all global CSS to Version 42 state. Revert any color variable changes in the :root selector, particularly OKLCH values for background, foreground, primary, secondary, accent, and other theme colors. Restore original gradient definitions, animation keyframes, and utility class definitions. Ensure Tailwind directives (@tailwind base, components, utilities) match Version 42 configuration."
+        },
+        {
+          "path": "frontend/tailwind.config.js",
+          "operation": "modify",
+          "description": "Restore Tailwind configuration to Version 42 settings. Revert any changes to the theme.extend.colors object, ensuring deep-blue, neon-purple, and other custom color definitions match Version 42 values. Restore original borderRadius, animation, and other theme extension settings. Verify that plugins array matches Version 42 (typography, container-queries)."
+        },
+        {
+          "path": "frontend/src/pages/HomePage.tsx",
+          "operation": "modify",
+          "description": "Restore HomePage component styling and layout to Version 42. Revert any className changes, background gradient modifications, or layout structure alterations introduced in Version 43. Ensure hero section, principles cards, and CTA buttons match Version 42 appearance. Restore original spacing, typography, and animation classes."
+        },
+        {
+          "path": "frontend/src/pages/AboutPage.tsx",
+          "operation": "modify",
+          "description": "Restore AboutPage component to Version 42 visual design. Revert any styling changes to the founder story section, philosophy content, and background images. Ensure gradient overlays, text colors, and layout structure match Version 42."
+        },
+        {
+          "path": "frontend/src/pages/WorkoutLibraryPage.tsx",
+          "operation": "modify",
+          "description": "Restore WorkoutLibraryPage styling to Version 42. Revert any changes to muscle group card layouts, collapsible sections, exercise preview cards, and color schemes. Ensure spacing and typography match Version 42."
+        },
+        {
+          "path": "frontend/src/pages/ProgramsPage.tsx",
+          "operation": "modify",
+          "description": "Restore ProgramsPage visual design to Version 42. Revert styling changes to hero section, featured challenge card, and purchase buttons. Ensure background animations and gradient overlays match Version 42 appearance."
+        },
+        {
+          "path": "frontend/src/pages/BlogPage.tsx",
+          "operation": "modify",
+          "description": "Restore BlogPage styling to Version 42. Revert any changes to article preview cards, member-only badges, and layout grid. Ensure colors, spacing, and typography match Version 42 design."
+        },
+        {
+          "path": "frontend/src/pages/BlogPostPage.tsx",
+          "operation": "modify",
+          "description": "Restore BlogPostPage styling to Version 42. Revert changes to content layout, membership gate UI, and typography. Ensure formatting matches Version 42 appearance."
+        },
+        {
+          "path": "frontend/src/pages/UserDashboardPage.tsx",
+          "operation": "modify",
+          "description": "Restore UserDashboardPage styling to Version 42. Revert any changes to membership status display, profile setup dialog, and dashboard layout. Ensure colors and spacing match Version 42."
+        },
+        {
+          "path": "frontend/src/pages/CreatorDashboardPage.tsx",
+          "operation": "modify",
+          "description": "Restore CreatorDashboardPage styling to Version 42. Revert changes to tabbed interface, management sections, and overall layout. Ensure admin panel appearance matches Version 42 design."
+        },
+        {
+          "path": "frontend/src/pages/AffiliateStorePage.tsx",
+          "operation": "modify",
+          "description": "Restore AffiliateStorePage styling to Version 42. Revert any changes to product card layouts, category badges, and affiliate disclosure styling. Ensure colors and spacing match Version 42."
+        },
+        {
+          "path": "frontend/src/pages/ContactPage.tsx",
+          "operation": "modify",
+          "description": "Restore ContactPage styling to Version 42. Revert changes to email display sections and quick navigation links layout. Ensure typography and colors match Version 42."
+        },
+        {
+          "path": "frontend/src/components/Footer.tsx",
+          "operation": "modify",
+          "description": "Restore Footer component styling to Version 42. Revert any changes to brand logo display, navigation links layout, social media icons, and copyright section. Ensure colors, spacing, and responsive grid match Version 42 design."
+        }
+      ]
+    },
+    {
+      "id": "REQ-4",
+      "summary": "Compare Version 44 against Version 42 baseline and revert any frontend file discrepancies",
+      "acceptanceCriteria": [
+        "All frontend files match Version 42 state",
+        "CSS and styling files restored to Version 42",
+        "Component files restored to Version 42 structure",
+        "No unintended changes from Version 43 or 44 remain"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Verify App component configuration matches Version 42. Check that router configuration, theme provider settings, and route definitions align with Version 42 structure. Ensure no new routes or theme modifications were introduced in Version 43."
+        },
+        {
+          "path": "frontend/src/components/Layout.tsx",
+          "operation": "modify",
+          "description": "Compare current Layout component with Version 42 to identify any structural or rendering changes. Ensure Header, Footer, and MusicPlayer are rendered in the correct order and with proper props as in Version 42. Verify no conditional logic or styling was added in Version 43."
+        },
+        {
+          "path": "frontend/index.html",
+          "operation": "modify",
+          "description": "Verify that the HTML entry point matches Version 42 configuration. Check meta tags, page title, and any inline styles or scripts. Ensure no modifications were introduced in Version 43 that could affect styling or component loading."
+        },
+        {
+          "path": "frontend/src/components/creator/ExerciseManagement.tsx",
+          "operation": "modify",
+          "description": "Restore ExerciseManagement component styling and structure to Version 42. Revert any UI changes to forms, dialogs, or table layouts introduced in Version 43."
+        },
+        {
+          "path": "frontend/src/components/creator/MuscleGroupManagement.tsx",
+          "operation": "modify",
+          "description": "Restore MuscleGroupManagement component to Version 42 state. Revert any styling or structural changes to edit dialogs and grid displays."
+        },
+        {
+          "path": "frontend/src/components/creator/BlogManagement.tsx",
+          "operation": "modify",
+          "description": "Restore BlogManagement component to Version 42. Revert any changes to admin interface styling, forms, or table layouts introduced in Version 43."
+        },
+        {
+          "path": "frontend/src/components/creator/AffiliateStoreManagement.tsx",
+          "operation": "modify",
+          "description": "Restore AffiliateStoreManagement component to Version 42. Revert styling changes to product management forms and table displays."
+        },
+        {
+          "path": "frontend/src/components/membership/StartMembershipCheckoutButton.tsx",
+          "operation": "modify",
+          "description": "Restore membership checkout button styling to Version 42. Revert any button appearance or layout changes from Version 43."
+        }
+      ]
+    }
+  ]
+}

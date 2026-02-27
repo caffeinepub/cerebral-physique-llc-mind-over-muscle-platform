@@ -1,0 +1,98 @@
+{
+  "kind": "build_request",
+  "title": "Restore Version 42 design, logo, and music player functionality",
+  "projectName": "Cerebral Physique",
+  "priority": "high",
+  "requirements": [
+    {
+      "id": "REQ-1",
+      "text": "Restore the website logo display to match Version 42 exactly, ensuring it appears in the Header component with correct positioning, sizing, and visibility",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-4"
+        ],
+        "quotes": [
+          "The logo is not showing"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Logo is visible in the header",
+        "Logo matches the appearance from Version 42",
+        "Logo displays correctly on both desktop and mobile views"
+      ]
+    },
+    {
+      "id": "REQ-2",
+      "text": "Restore the MusicPlayer component functionality exactly as it existed in Version 42, including play/pause controls, volume slider, mute toggle, and background music playback",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-4"
+        ],
+        "quotes": [
+          "there's no music"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Music player is visible and functional",
+        "Play/pause button works correctly",
+        "Volume controls (slider and mute) operate as expected",
+        "Music playback state persists as in Version 42"
+      ]
+    },
+    {
+      "id": "REQ-3",
+      "text": "Revert all visual design changes introduced in Version 43 and restore the complete design system from Version 42, including colors, typography, layout, spacing, gradients, and component styling across all pages",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-4"
+        ],
+        "quotes": [
+          "the design of the website has been changed, and it's still changed, like it hasn't gone back to the way I asked for it to"
+        ]
+      },
+      "acceptanceCriteria": [
+        "All pages match Version 42 visual appearance",
+        "Color scheme matches Version 42 exactly",
+        "Typography and spacing match Version 42",
+        "Layout and component styling match Version 42",
+        "No visual remnants of Version 43 changes remain"
+      ]
+    },
+    {
+      "id": "REQ-4",
+      "text": "Compare Version 44 against Version 42 as the authoritative baseline to identify and revert any discrepancies in frontend files, including CSS, component structure, and configuration",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-4"
+        ],
+        "quotes": [
+          "Version 43 was the one that changed the website. Version 42 is where you get back the website the way it was"
+        ]
+      },
+      "acceptanceCriteria": [
+        "All frontend files match Version 42 state",
+        "CSS and styling files restored to Version 42",
+        "Component files restored to Version 42 structure",
+        "No unintended changes from Version 43 or 44 remain"
+      ]
+    }
+  ],
+  "constraints": [
+    "Use Version 42 as the exact reference point for all restorations",
+    "Do not introduce any new features or changes beyond restoring Version 42 state",
+    "Maintain backend functionality without modifications"
+  ],
+  "nonGoals": [
+    "Adding new features or enhancements",
+    "Modifying backend logic or data structures",
+    "Implementing design improvements beyond Version 42 state"
+  ],
+  "imageRequirements": {
+    "required": [],
+    "edits": []
+  }
+}

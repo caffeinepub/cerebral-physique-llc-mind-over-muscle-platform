@@ -1,0 +1,56 @@
+{
+  "schemaVersion": "1.0.0",
+  "projectStateVersion": 3,
+  "summary": "Website project requiring restoration to Version 42 state",
+  "architectural_notes": [
+    "Version 42 represents the correct/desired state of the website",
+    "Version 43 introduced unwanted changes to the website design",
+    "Version 44 failed to restore the original design, logo, and music player"
+  ],
+  "known_issues": [
+    "Logo not displaying in current version",
+    "Music player functionality missing",
+    "Website design has been altered from Version 42 baseline",
+    "Version 44 deployment did not successfully restore Version 42 state"
+  ],
+  "isFixRequest": true,
+  "existing_features": [
+    {
+      "id": "feature-revert-all-visual-design-changes-introduced-in-version-43-and-restore-the-complete-design-system-from-version-42-including-colors-typography-layout-spacing-gradients-and-component-styling-across-all-pages",
+      "title": "Revert all visual design changes introduced in Version 43 and restore the complete design system from Version 42, including colors, typography, layout, spacing, gradients, and component styling across all pages",
+      "reqIds": [
+        "REQ-3"
+      ],
+      "version": 1
+    }
+  ],
+  "new_feature_requests": [
+    {
+      "id": "AR-1",
+      "summary": "Restore the website logo display to match Version 42 exactly, ensuring it appears in the Header component with correct positioning, sizing, and visibility",
+      "reqIds": [
+        "REQ-1"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-2",
+      "summary": "Restore the MusicPlayer component functionality exactly as it existed in Version 42, including play/pause controls, volume slider, mute toggle, and background music playback",
+      "reqIds": [
+        "REQ-2"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-4",
+      "summary": "Compare Version 44 against Version 42 as the authoritative baseline to identify and revert any discrepancies in frontend files, including CSS, component structure, and configuration",
+      "reqIds": [
+        "REQ-4"
+      ],
+      "status": "pending"
+    }
+  ],
+  "projectName": "Cerebral Physique",
+  "clarification_mode": "instant",
+  "clarification_rounds": 0
+}
