@@ -1,84 +1,97 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-23T12:13:35.718Z",
+  "generatedAt": "2026-03-03T09:30:11.116Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 4,
-    "implemented": 1,
+    "total": 6,
+    "implemented": 0,
     "items": [
       {
         "id": "REQ-1",
-        "summary": "Restore the website logo display to match Version 42 exactly, ensuring it appears in the Header component with correct positioning, sizing, and visibility",
-        "status": "missing",
-        "plannedFiles": [
-          "frontend/src/components/Header.tsx",
-          "frontend/src/components/Header.tsx"
-        ],
+        "summary": "Expand the backend exercise data to include approximately 20 real, factual exercises per muscle group (covering all existing muscle groups: chest, back, shoulders, biceps, triceps, legs, glutes, core, forearms, calves). Each exercise must include: name, targeted muscle group, a concise list of benefits (3–5 bullet points with accurate physiological/functional benefits), a description of correct form/technique, difficulty level, equipment needed, and at least one image URL and one video URL demonstrating correct form. All exercise names, benefits, and descriptions must be accurate and based on well-established exercise science.",
+        "status": "unknown",
+        "plannedFiles": [],
         "matchedFiles": []
       },
       {
         "id": "REQ-2",
-        "summary": "Restore the MusicPlayer component functionality exactly as it existed in Version 42, including play/pause controls, volume slider, mute toggle, and background music playback",
+        "summary": "Generate semi-realistic to realistic exercise illustration images for each exercise. Each image should clearly depict the human body performing the specific exercise with proper form, using a semi-realistic to realistic art style (not cartoonish). Images should show muscle engagement visually. Produce one image per exercise (approximately 200 total across all muscle groups).",
         "status": "missing",
         "plannedFiles": [
-          "frontend/src/components/MusicPlayer.tsx",
-          "frontend/src/hooks/useMusicPlayer.tsx",
-          "frontend/src/components/Layout.tsx"
+          "frontend/src/pages/WorkoutLibraryPage.tsx"
         ],
         "matchedFiles": []
       },
       {
         "id": "REQ-3",
-        "summary": "Revert all visual design changes introduced in Version 43 and restore the complete design system from Version 42, including colors, typography, layout, spacing, gradients, and component styling across all pages",
-        "status": "implemented",
+        "summary": "Update the WorkoutLibraryPage to display all exercises for each muscle group in a grid or list layout. Each exercise card must show: (1) the exercise image in a semi-realistic to realistic style, (2) the exercise name prominently, and (3) a concise benefits summary. Cards must be visually polished and consistent across all muscle groups.",
+        "status": "missing",
         "plannedFiles": [
-          "frontend/src/index.css",
-          "frontend/tailwind.config.js",
-          "frontend/src/pages/HomePage.tsx",
-          "frontend/src/pages/AboutPage.tsx",
-          "frontend/src/pages/WorkoutLibraryPage.tsx",
-          "frontend/src/pages/ProgramsPage.tsx",
-          "frontend/src/pages/BlogPage.tsx",
-          "frontend/src/pages/BlogPostPage.tsx",
-          "frontend/src/pages/UserDashboardPage.tsx",
-          "frontend/src/pages/CreatorDashboardPage.tsx",
-          "frontend/src/pages/AffiliateStorePage.tsx",
-          "frontend/src/pages/ContactPage.tsx",
-          "frontend/src/components/Footer.tsx"
+          "frontend/src/pages/WorkoutLibraryPage.tsx"
         ],
-        "matchedFiles": [
-          "frontend/src/index.css",
-          "frontend/tailwind.config.js"
-        ]
+        "matchedFiles": []
       },
       {
         "id": "REQ-4",
-        "summary": "Compare Version 44 against Version 42 as the authoritative baseline to identify and revert any discrepancies in frontend files, including CSS, component structure, and configuration",
+        "summary": "Make each exercise card clickable to open a detail modal or drawer. The modal must display: the exercise name, full benefits list, correct form description, equipment needed, difficulty level, and an embedded video clip demonstrating correct form. Video URLs should support YouTube embeds and direct video files. The modal should have a clear close button.",
         "status": "missing",
         "plannedFiles": [
-          "frontend/src/App.tsx",
-          "frontend/src/components/Layout.tsx",
-          "frontend/index.html",
-          "frontend/src/components/creator/ExerciseManagement.tsx",
-          "frontend/src/components/creator/MuscleGroupManagement.tsx",
-          "frontend/src/components/creator/BlogManagement.tsx",
-          "frontend/src/components/creator/AffiliateStoreManagement.tsx",
-          "frontend/src/components/membership/StartMembershipCheckoutButton.tsx"
+          "frontend/src/components/ExerciseDetailModal.tsx",
+          "frontend/src/pages/WorkoutLibraryPage.tsx"
         ],
+        "matchedFiles": []
+      },
+      {
+        "id": "REQ-5",
+        "summary": "Implement a workout routine builder feature. Users must be able to click an 'Add to Routine' button on each exercise card to add it to a personal workout routine. The routine should be displayed in a collapsible sidebar or bottom panel showing all selected exercises. Users can remove exercises from the routine. The routine should be saveable (persisted to the backend for authenticated users, or stored in localStorage for guests).",
+        "status": "missing",
+        "plannedFiles": [
+          "frontend/src/hooks/useRoutineBuilder.ts",
+          "frontend/src/components/RoutineBuilderPanel.tsx",
+          "frontend/src/pages/WorkoutLibraryPage.tsx",
+          "frontend/src/hooks/useQueries.ts",
+          "frontend/src/pages/UserDashboardPage.tsx"
+        ],
+        "matchedFiles": []
+      },
+      {
+        "id": "REQ-6",
+        "summary": "Add backend support for storing and retrieving user workout routines. A routine must include: a name, an ordered list of exercise IDs, and the user's principal ID. Support creating, reading, updating, and deleting routines per user.",
+        "status": "unknown",
+        "plannedFiles": [],
         "matchedFiles": []
       }
     ]
   },
   "changedFiles": [
+    "backend/main.mo",
+    "backend/migration.mo",
     "build-request.json",
     "feature_evidence.json",
     "frontend-implementation-plan.json",
-    "frontend/src/index.css",
-    "frontend/tailwind.config.js",
+    "frontend/public/assets/generated/arnold-press.dim_600x400.png",
+    "frontend/public/assets/generated/bench-press.dim_600x400.png",
+    "frontend/public/assets/generated/bent-over-row.dim_600x400.png",
+    "frontend/public/assets/generated/cable-crossover.dim_600x400.png",
+    "frontend/public/assets/generated/deadlift.dim_600x400.png",
+    "frontend/public/assets/generated/dumbbell-flyes.dim_600x400.png",
+    "frontend/public/assets/generated/face-pulls.dim_600x400.png",
+    "frontend/public/assets/generated/front-raises.dim_600x400.png",
+    "frontend/public/assets/generated/incline-bench-press.dim_600x400.png",
+    "frontend/public/assets/generated/lat-pulldown.dim_600x400.png",
+    "frontend/public/assets/generated/lateral-raises.dim_600x400.png",
+    "frontend/public/assets/generated/overhead-press.dim_600x400.png",
+    "frontend/public/assets/generated/pull-ups.dim_600x400.png",
+    "frontend/public/assets/generated/push-ups.dim_600x400.png",
+    "frontend/public/assets/generated/seated-cable-row.dim_600x400.png",
+    "frontend/src/backend.d.ts",
+    "frontend/src/backend.ts",
+    "frontend/src/declarations/backend.did.d.ts",
+    "frontend/src/declarations/backend.did.js",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

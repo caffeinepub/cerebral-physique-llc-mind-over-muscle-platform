@@ -18,16 +18,24 @@ export default function StartMembershipCheckoutButton() {
         },
       ];
 
-      const session = await createCheckoutSession.mutateAsync(items);
-      
+      const baseUrl = `${window.location.protocol}//${window.location.host}`;
+      const successUrl = `${baseUrl}/payment-success`;
+      const cancelUrl = `${baseUrl}/payment-failure`;
+
+      const session = await createCheckoutSession.mutateAsync({
+        items,
+        successUrl,
+        cancelUrl,
+      });
+
       if (!session?.url) {
         throw new Error('Stripe session missing url');
       }
 
       // Redirect to Stripe checkout
       window.location.href = session.url;
-    } catch (error: any) {
-      toast.error(error?.message || 'Failed to start checkout');
+    } catch (error: unknown) {
+      toast.error((error as Error)?.message || 'Failed to start checkout');
     }
   };
 
@@ -35,10 +43,10 @@ export default function StartMembershipCheckoutButton() {
     <Button
       onClick={handleStartCheckout}
       disabled={createCheckoutSession.isPending}
-      className="bg-neon-purple hover:bg-neon-purple/90"
+      className="bg-primary hover:bg-primary/90"
     >
       {createCheckoutSession.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-      Become a Member - $24.99/month
+      Become a Member — $24.99/month
     </Button>
   );
 }

@@ -1,11 +1,11 @@
 import { useState } from 'react';
-import { useGetMuscleGroupCards, useUpdateMuscleGroupCard } from '@/hooks/useQueries';
+import { useGetAllMuscleGroups, useUpdateMuscleGroupCard } from '@/hooks/useQueries';
 import { type MuscleGroupCard } from '@/backend';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Edit, Loader2, AlertCircle, Dumbbell, Image as ImageIcon } from 'lucide-react';
@@ -25,8 +25,11 @@ const muscleGroupNames = [
 ];
 
 export default function MuscleGroupManagement() {
-  const { data: muscleGroupCards = [], isLoading, error } = useGetMuscleGroupCards();
+  const { data: muscleGroups = [], isLoading, error } = useGetAllMuscleGroups();
   const updateCard = useUpdateMuscleGroupCard();
+
+  // Extract cards from muscle group details
+  const muscleGroupCards = muscleGroups.map((mg) => mg.card);
 
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [editingName, setEditingName] = useState<string>('');
@@ -50,8 +53,9 @@ export default function MuscleGroupManagement() {
   };
 
   const openEditDialog = (name: string) => {
-    const existingCard = muscleGroupCards.find((card) => card.title === name);
-    
+    const existingMg = muscleGroups.find((mg) => mg.card.title === name || mg.name === name);
+    const existingCard = existingMg?.card;
+
     if (existingCard) {
       setFormData({
         title: existingCard.title,
@@ -67,7 +71,7 @@ export default function MuscleGroupManagement() {
         heroImage: undefined,
       });
     }
-    
+
     setEditingName(name);
     setImageError(false);
     setIsEditDialogOpen(true);
@@ -97,17 +101,16 @@ export default function MuscleGroupManagement() {
       toast.success('Muscle group card updated successfully');
       setIsEditDialogOpen(false);
       resetForm();
-    } catch (error: any) {
-      const errorMessage = error?.message || 'Failed to update muscle group card';
+    } catch (error: unknown) {
+      const errorMessage = (error as Error)?.message || 'Failed to update muscle group card';
       toast.error(errorMessage);
-      console.error('Update muscle group card error:', error);
     }
   };
 
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <Loader2 className="h-8 w-8 animate-spin text-neon-purple" />
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
@@ -125,10 +128,10 @@ export default function MuscleGroupManagement() {
 
   return (
     <div className="space-y-6">
-      <Alert className="border-neon-purple/30 bg-neon-purple/5">
-        <Dumbbell className="h-5 w-5 text-neon-purple" />
+      <Alert className="border-primary/30 bg-primary/5">
+        <Dumbbell className="h-5 w-5 text-primary" />
         <AlertDescription className="ml-2">
-          <p className="font-medium text-neon-purple">Customize Muscle Group Cards</p>
+          <p className="font-medium text-primary">Customize Muscle Group Cards</p>
           <p className="mt-1 text-sm text-muted-foreground">
             Edit the display content for each muscle group card shown in the Workout Library. You can add custom images, descriptions, and titles.
           </p>
@@ -146,7 +149,7 @@ export default function MuscleGroupManagement() {
               Customize the display content for the {editingName} muscle group card
             </DialogDescription>
           </DialogHeader>
-          
+
           <div className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="title">Card Title</Label>
@@ -223,8 +226,9 @@ export default function MuscleGroupManagement() {
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {muscleGroupNames.map((name) => {
-          const card = muscleGroupCards.find((c) => c.title === name);
-          const hasCustomContent = !!card && (card.imageUrl !== '' || card.description !== `This is the default description for the ${name} muscle group. Please add a more detailed description.`);
+          const mg = muscleGroups.find((m) => m.name === name || m.card.title === name);
+          const card = mg?.card;
+          const hasCustomContent = !!card && card.imageUrl !== '';
 
           return (
             <Card key={name} className="border-border/40 bg-card/50">

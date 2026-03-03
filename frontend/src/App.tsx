@@ -1,4 +1,10 @@
-import { RouterProvider, createRouter, createRoute, createRootRoute } from '@tanstack/react-router';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import {
+  createRootRoute,
+  createRoute,
+  createRouter,
+  RouterProvider,
+} from '@tanstack/react-router';
 import { ThemeProvider } from 'next-themes';
 import { Toaster } from '@/components/ui/sonner';
 import Layout from './components/Layout';
@@ -9,12 +15,16 @@ import ProgramsPage from './pages/ProgramsPage';
 import BlogPage from './pages/BlogPage';
 import BlogPostPage from './pages/BlogPostPage';
 import ContactPage from './pages/ContactPage';
-import CreatorDashboardPage from './pages/CreatorDashboardPage';
 import UserDashboardPage from './pages/UserDashboardPage';
 import AffiliateStorePage from './pages/AffiliateStorePage';
+import CreatorDashboardPage from './pages/CreatorDashboardPage';
 import PaymentSuccessPage from './pages/PaymentSuccessPage';
 import PaymentFailurePage from './pages/PaymentFailurePage';
 import DomainSetupPage from './pages/DomainSetupPage';
+import NutritionPage from './pages/NutritionPage';
+import NutritionArticlePage from './pages/NutritionArticlePage';
+
+const queryClient = new QueryClient();
 
 const rootRoute = createRootRoute({
   component: Layout,
@@ -56,16 +66,22 @@ const blogPostRoute = createRoute({
   component: BlogPostPage,
 });
 
+const nutritionRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/nutrition',
+  component: NutritionPage,
+});
+
+const nutritionArticleRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/nutrition/$id',
+  component: NutritionArticlePage,
+});
+
 const contactRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/contact',
   component: ContactPage,
-});
-
-const creatorDashboardRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: '/creator-dashboard',
-  component: CreatorDashboardPage,
 });
 
 const userDashboardRoute = createRoute({
@@ -74,13 +90,23 @@ const userDashboardRoute = createRoute({
   component: UserDashboardPage,
 });
 
-// NOTE: The existing /store route provides the Shop/Affiliate page functionality.
-// This add-on task preserves the existing Store page unchanged. No new /shop route is added,
-// no checkout flow is introduced, and no Amazon affiliate links are added as part of this task.
 const affiliateStoreRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/store',
   component: AffiliateStorePage,
+});
+
+const creatorDashboardRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/creator',
+  component: CreatorDashboardPage,
+});
+
+// Keep old route alias for backward compatibility
+const creatorDashboardOldRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/creator-dashboard',
+  component: CreatorDashboardPage,
 });
 
 const paymentSuccessRoute = createRoute({
@@ -108,10 +134,13 @@ const routeTree = rootRoute.addChildren([
   programsRoute,
   blogRoute,
   blogPostRoute,
+  nutritionRoute,
+  nutritionArticleRoute,
   contactRoute,
-  creatorDashboardRoute,
   userDashboardRoute,
   affiliateStoreRoute,
+  creatorDashboardRoute,
+  creatorDashboardOldRoute,
   paymentSuccessRoute,
   paymentFailureRoute,
   domainSetupRoute,
@@ -128,8 +157,10 @@ declare module '@tanstack/react-router' {
 export default function App() {
   return (
     <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
-      <RouterProvider router={router} />
-      <Toaster />
+      <QueryClientProvider client={queryClient}>
+        <RouterProvider router={router} />
+        <Toaster />
+      </QueryClientProvider>
     </ThemeProvider>
   );
 }

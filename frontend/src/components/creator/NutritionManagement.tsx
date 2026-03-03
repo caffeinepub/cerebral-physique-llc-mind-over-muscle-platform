@@ -2,13 +2,13 @@ import { useState } from 'react';
 import { Plus, Edit2, Trash2, Eye, EyeOff, Check, X, Image, Video } from 'lucide-react';
 import { toast } from 'sonner';
 import {
-  useGetAllBlogPostsAdmin,
-  useCreateBlogPost,
-  useUpdateBlogPost,
-  usePublishBlogPost,
-  useDeleteBlogPost,
+  useGetAllNutritionArticlesAdmin,
+  useCreateNutritionArticle,
+  useUpdateNutritionArticle,
+  usePublishNutritionArticle,
+  useDeleteNutritionArticle,
 } from '../../hooks/useQueries';
-import type { BlogPost, BlogMedia } from '../../backend';
+import type { NutritionArticle, BlogMedia } from '../../backend';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -26,30 +26,22 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 
-// No automation, emails, or publishing workflows — blog management is manual only.
-
-interface BlogFormData {
+interface NutritionFormData {
   title: string;
   content: string;
   author: string;
   memberOnly: boolean;
   imageUrls: string[];
   videoUrls: string[];
-  seoTitle: string;
-  seoMetaDescription: string;
-  seoKeywords: string;
 }
 
-const defaultForm: BlogFormData = {
+const defaultForm: NutritionFormData = {
   title: '',
   content: '',
   author: 'Stefan',
   memberOnly: false,
   imageUrls: [],
   videoUrls: [],
-  seoTitle: '',
-  seoMetaDescription: '',
-  seoKeywords: '',
 };
 
 function UrlArrayInput({
@@ -116,16 +108,16 @@ function UrlArrayInput({
   );
 }
 
-export default function BlogManagement() {
-  const { data: posts = [], isLoading } = useGetAllBlogPostsAdmin();
-  const createPost = useCreateBlogPost();
-  const updatePost = useUpdateBlogPost();
-  const publishPost = usePublishBlogPost();
-  const deletePost = useDeleteBlogPost();
+export default function NutritionManagement() {
+  const { data: articles = [], isLoading } = useGetAllNutritionArticlesAdmin();
+  const createArticle = useCreateNutritionArticle();
+  const updateArticle = useUpdateNutritionArticle();
+  const publishArticle = usePublishNutritionArticle();
+  const deleteArticle = useDeleteNutritionArticle();
 
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<bigint | null>(null);
-  const [form, setForm] = useState<BlogFormData>(defaultForm);
+  const [form, setForm] = useState<NutritionFormData>(defaultForm);
 
   const resetForm = () => {
     setForm(defaultForm);
@@ -133,19 +125,16 @@ export default function BlogManagement() {
     setShowForm(false);
   };
 
-  const startEdit = (post: BlogPost) => {
+  const startEdit = (article: NutritionArticle) => {
     setForm({
-      title: post.title,
-      content: post.content,
-      author: post.author,
-      memberOnly: post.memberOnly,
-      imageUrls: post.media?.imageUrls || [],
-      videoUrls: post.media?.videoUrls || [],
-      seoTitle: post.seoTitle || '',
-      seoMetaDescription: post.seoMetaDescription || '',
-      seoKeywords: post.seoKeywords?.join(', ') || '',
+      title: article.title,
+      content: article.content,
+      author: article.author,
+      memberOnly: article.memberOnly,
+      imageUrls: article.media?.imageUrls || [],
+      videoUrls: article.media?.videoUrls || [],
     });
-    setEditingId(post.id);
+    setEditingId(article.id);
     setShowForm(true);
   };
 
@@ -161,48 +150,37 @@ export default function BlogManagement() {
       videoUrls: form.videoUrls,
     };
 
-    const keywords = form.seoKeywords
-      .split(',')
-      .map((k) => k.trim())
-      .filter(Boolean);
-
     try {
       if (editingId !== null) {
-        await updatePost.mutateAsync({
+        await updateArticle.mutateAsync({
           id: editingId,
           title: form.title.trim(),
           content: form.content.trim(),
           author: form.author.trim(),
-          memberOnly: form.memberOnly,
           media,
-          seoTitle: form.seoTitle.trim(),
-          seoMetaDescription: form.seoMetaDescription.trim(),
-          seoKeywords: keywords,
+          memberOnly: form.memberOnly,
         });
-        toast.success('Blog post updated');
+        toast.success('Article updated');
       } else {
-        await createPost.mutateAsync({
+        await createArticle.mutateAsync({
           title: form.title.trim(),
           content: form.content.trim(),
           author: form.author.trim(),
-          memberOnly: form.memberOnly,
           media,
-          seoTitle: form.seoTitle.trim(),
-          seoMetaDescription: form.seoMetaDescription.trim(),
-          seoKeywords: keywords,
+          memberOnly: form.memberOnly,
         });
-        toast.success('Blog post created');
+        toast.success('Article created');
       }
       resetForm();
     } catch {
-      toast.error('Failed to save blog post');
+      toast.error('Failed to save article');
     }
   };
 
-  const handlePublishToggle = async (post: BlogPost) => {
+  const handlePublishToggle = async (article: NutritionArticle) => {
     try {
-      await publishPost.mutateAsync({ id: post.id, published: !post.published });
-      toast.success(post.published ? 'Post unpublished' : 'Post published');
+      await publishArticle.mutateAsync({ id: article.id, published: !article.published });
+      toast.success(article.published ? 'Article unpublished' : 'Article published');
     } catch {
       toast.error('Failed to update publish status');
     }
@@ -210,10 +188,10 @@ export default function BlogManagement() {
 
   const handleDelete = async (id: bigint) => {
     try {
-      await deletePost.mutateAsync(id);
-      toast.success('Blog post deleted');
+      await deleteArticle.mutateAsync(id);
+      toast.success('Article deleted');
     } catch {
-      toast.error('Failed to delete blog post');
+      toast.error('Failed to delete article');
     }
   };
 
@@ -229,15 +207,15 @@ export default function BlogManagement() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-xl font-bold text-foreground">Blog Management</h2>
+          <h2 className="text-xl font-bold text-foreground">Nutrition Management</h2>
           <p className="text-sm text-muted-foreground mt-0.5">
-            Create and manage blog posts with text, images, and videos
+            Create and manage nutrition articles with text, images, and videos
           </p>
         </div>
         {!showForm && (
           <Button onClick={() => setShowForm(true)} size="sm">
             <Plus className="w-4 h-4 mr-1.5" />
-            New Post
+            New Article
           </Button>
         )}
       </div>
@@ -246,7 +224,7 @@ export default function BlogManagement() {
       {showForm && (
         <div className="bg-card border border-border rounded-xl p-6">
           <h3 className="font-semibold text-foreground mb-4">
-            {editingId !== null ? 'Edit Post' : 'New Blog Post'}
+            {editingId !== null ? 'Edit Article' : 'New Nutrition Article'}
           </h3>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -256,7 +234,7 @@ export default function BlogManagement() {
                   id="title"
                   value={form.title}
                   onChange={(e) => setForm({ ...form, title: e.target.value })}
-                  placeholder="Post title..."
+                  placeholder="Article title..."
                   required
                 />
               </div>
@@ -291,7 +269,7 @@ export default function BlogManagement() {
                 id="content"
                 value={form.content}
                 onChange={(e) => setForm({ ...form, content: e.target.value })}
-                placeholder="Write your blog post content here..."
+                placeholder="Write your nutrition article content here..."
                 rows={8}
                 required
               />
@@ -315,51 +293,18 @@ export default function BlogManagement() {
               />
             </div>
 
-            {/* SEO */}
-            <div className="space-y-3 pt-2 border-t border-border">
-              <h4 className="text-sm font-medium text-foreground">SEO Settings</h4>
-              <div className="space-y-1.5">
-                <Label htmlFor="seoTitle">SEO Title</Label>
-                <Input
-                  id="seoTitle"
-                  value={form.seoTitle}
-                  onChange={(e) => setForm({ ...form, seoTitle: e.target.value })}
-                  placeholder="SEO title (defaults to post title)"
-                />
-              </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="seoMeta">Meta Description</Label>
-                <Textarea
-                  id="seoMeta"
-                  value={form.seoMetaDescription}
-                  onChange={(e) => setForm({ ...form, seoMetaDescription: e.target.value })}
-                  placeholder="Brief description for search engines..."
-                  rows={2}
-                />
-              </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="seoKeywords">Keywords (comma-separated)</Label>
-                <Input
-                  id="seoKeywords"
-                  value={form.seoKeywords}
-                  onChange={(e) => setForm({ ...form, seoKeywords: e.target.value })}
-                  placeholder="fitness, training, nutrition..."
-                />
-              </div>
-            </div>
-
             <div className="flex gap-2 pt-2">
               <Button
                 type="submit"
-                disabled={createPost.isPending || updatePost.isPending}
+                disabled={createArticle.isPending || updateArticle.isPending}
                 size="sm"
               >
-                {(createPost.isPending || updatePost.isPending) ? (
+                {(createArticle.isPending || updateArticle.isPending) ? (
                   <div className="animate-spin rounded-full h-3.5 w-3.5 border-b-2 border-primary-foreground mr-1.5" />
                 ) : (
                   <Check className="w-3.5 h-3.5 mr-1.5" />
                 )}
-                {editingId !== null ? 'Update Post' : 'Create Post'}
+                {editingId !== null ? 'Update Article' : 'Create Article'}
               </Button>
               <Button type="button" variant="outline" size="sm" onClick={resetForm}>
                 Cancel
@@ -369,45 +314,45 @@ export default function BlogManagement() {
         </div>
       )}
 
-      {/* Posts List */}
+      {/* Articles List */}
       <div className="space-y-3">
-        {posts.length === 0 ? (
+        {articles.length === 0 ? (
           <div className="text-center py-12 text-muted-foreground">
-            <p>No blog posts yet. Create your first post above.</p>
+            <p>No nutrition articles yet. Create your first article above.</p>
           </div>
         ) : (
-          posts.map((post) => (
+          articles.map((article) => (
             <div
-              key={post.id.toString()}
+              key={article.id.toString()}
               className="bg-card border border-border rounded-lg p-4"
             >
               <div className="flex items-start justify-between gap-3">
                 <div className="flex-1 min-w-0">
                   <div className="flex flex-wrap items-center gap-2 mb-1">
-                    <h4 className="font-medium text-foreground truncate">{post.title}</h4>
-                    {post.published ? (
+                    <h4 className="font-medium text-foreground truncate">{article.title}</h4>
+                    {article.published ? (
                       <Badge variant="default" className="text-xs">Published</Badge>
                     ) : (
                       <Badge variant="outline" className="text-xs">Draft</Badge>
                     )}
-                    {post.memberOnly && (
+                    {article.memberOnly && (
                       <Badge variant="secondary" className="text-xs">Members Only</Badge>
                     )}
                   </div>
                   <p className="text-xs text-muted-foreground">
-                    By {post.author} · {new Date(Number(post.createdAt) / 1_000_000).toLocaleDateString()}
+                    By {article.author} · {new Date(Number(article.createdAt) / 1_000_000).toLocaleDateString()}
                   </p>
                   <div className="flex gap-3 mt-1.5 text-xs text-muted-foreground">
-                    {post.media?.imageUrls?.length > 0 && (
+                    {article.media?.imageUrls?.length > 0 && (
                       <span className="flex items-center gap-1">
                         <Image className="w-3 h-3" />
-                        {post.media.imageUrls.length} image{post.media.imageUrls.length !== 1 ? 's' : ''}
+                        {article.media.imageUrls.length} image{article.media.imageUrls.length !== 1 ? 's' : ''}
                       </span>
                     )}
-                    {post.media?.videoUrls?.length > 0 && (
+                    {article.media?.videoUrls?.length > 0 && (
                       <span className="flex items-center gap-1">
                         <Video className="w-3 h-3" />
-                        {post.media.videoUrls.length} video{post.media.videoUrls.length !== 1 ? 's' : ''}
+                        {article.media.videoUrls.length} video{article.media.videoUrls.length !== 1 ? 's' : ''}
                       </span>
                     )}
                   </div>
@@ -417,12 +362,12 @@ export default function BlogManagement() {
                   <Button
                     size="sm"
                     variant="ghost"
-                    onClick={() => handlePublishToggle(post)}
-                    disabled={publishPost.isPending}
+                    onClick={() => handlePublishToggle(article)}
+                    disabled={publishArticle.isPending}
                     className="h-8 w-8 p-0"
-                    title={post.published ? 'Unpublish' : 'Publish'}
+                    title={article.published ? 'Unpublish' : 'Publish'}
                   >
-                    {post.published ? (
+                    {article.published ? (
                       <EyeOff className="w-3.5 h-3.5" />
                     ) : (
                       <Eye className="w-3.5 h-3.5" />
@@ -431,7 +376,7 @@ export default function BlogManagement() {
                   <Button
                     size="sm"
                     variant="ghost"
-                    onClick={() => startEdit(post)}
+                    onClick={() => startEdit(article)}
                     className="h-8 w-8 p-0"
                   >
                     <Edit2 className="w-3.5 h-3.5" />
@@ -444,15 +389,15 @@ export default function BlogManagement() {
                     </AlertDialogTrigger>
                     <AlertDialogContent>
                       <AlertDialogHeader>
-                        <AlertDialogTitle>Delete Post</AlertDialogTitle>
+                        <AlertDialogTitle>Delete Article</AlertDialogTitle>
                         <AlertDialogDescription>
-                          Are you sure you want to delete "{post.title}"? This cannot be undone.
+                          Are you sure you want to delete "{article.title}"? This cannot be undone.
                         </AlertDialogDescription>
                       </AlertDialogHeader>
                       <AlertDialogFooter>
                         <AlertDialogCancel>Cancel</AlertDialogCancel>
                         <AlertDialogAction
-                          onClick={() => handleDelete(post.id)}
+                          onClick={() => handleDelete(article.id)}
                           className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                         >
                           Delete

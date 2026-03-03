@@ -1,18 +1,92 @@
 import { useParams, useNavigate } from '@tanstack/react-router';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { ArrowLeft, Calendar, Lock, Loader2 } from 'lucide-react';
-import { useGetBlogPost, useHasActiveMembership } from '@/hooks/useQueries';
+import { useGetBlogPost, useGetMyMembership, useIsCallerAdmin } from '@/hooks/useQueries';
 import { useInternetIdentity } from '@/hooks/useInternetIdentity';
+import StartMembershipCheckoutButton from '@/components/membership/StartMembershipCheckoutButton';
+
+function MediaGallery({ imageUrls, videoUrls }: { imageUrls: string[]; videoUrls: string[] }) {
+  const isYouTube = (url: string) =>
+    url.includes('youtube.com') || url.includes('youtu.be');
+  const isVimeo = (url: string) => url.includes('vimeo.com');
+
+  const getYouTubeEmbedUrl = (url: string) => {
+    const match = url.match(/(?:v=|youtu\.be\/)([^&?/]+)/);
+    return match ? `https://www.youtube.com/embed/${match[1]}` : url;
+  };
+
+  const getVimeoEmbedUrl = (url: string) => {
+    const match = url.match(/vimeo\.com\/(\d+)/);
+    return match ? `https://player.vimeo.com/video/${match[1]}` : url;
+  };
+
+  if (imageUrls.length === 0 && videoUrls.length === 0) return null;
+
+  return (
+    <div className="space-y-6 mt-6">
+      {imageUrls.length > 0 && (
+        <div className={`grid gap-4 ${imageUrls.length === 1 ? 'grid-cols-1' : 'grid-cols-1 sm:grid-cols-2'}`}>
+          {imageUrls.map((url, i) => (
+            <img
+              key={i}
+              src={url}
+              alt={`Article image ${i + 1}`}
+              className="w-full rounded-xl object-cover max-h-80"
+              onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+            />
+          ))}
+        </div>
+      )}
+      {videoUrls.length > 0 && (
+        <div className="space-y-4">
+          {videoUrls.map((url, i) => {
+            if (isYouTube(url)) {
+              return (
+                <div key={i} className="aspect-video rounded-xl overflow-hidden">
+                  <iframe
+                    src={getYouTubeEmbedUrl(url)}
+                    title={`Video ${i + 1}`}
+                    className="w-full h-full"
+                    allowFullScreen
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  />
+                </div>
+              );
+            }
+            if (isVimeo(url)) {
+              return (
+                <div key={i} className="aspect-video rounded-xl overflow-hidden">
+                  <iframe
+                    src={getVimeoEmbedUrl(url)}
+                    title={`Video ${i + 1}`}
+                    className="w-full h-full"
+                    allowFullScreen
+                  />
+                </div>
+              );
+            }
+            return (
+              <video key={i} src={url} controls className="w-full rounded-xl max-h-80" />
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default function BlogPostPage() {
   const { id } = useParams({ from: '/blog/$id' });
   const navigate = useNavigate();
   const { identity } = useInternetIdentity();
   const { data: post, isLoading } = useGetBlogPost(BigInt(id));
-  const { data: hasActiveMembership = false } = useHasActiveMembership();
+  const { data: membership } = useGetMyMembership();
+  const { data: isAdmin = false } = useIsCallerAdmin();
+
+  const hasActiveMembership = membership?.active === true;
 
   const formatDate = (timestamp: bigint) => {
     const date = new Date(Number(timestamp) / 1000000);
@@ -46,14 +120,14 @@ export default function BlogPostPage() {
     );
   }
 
-  const isLocked = post.memberOnly && !hasActiveMembership;
+  const isLocked = post.memberOnly && !hasActiveMembership && !isAdmin;
   const previewContent = post.content.substring(0, 300) + '...';
 
   return (
     <div className="flex flex-col">
       {/* Hero Section */}
       <section className="relative overflow-hidden bg-gradient-to-b from-deep-blue/20 to-background py-16">
-        <div 
+        <div
           className="absolute inset-0 bg-cover bg-center opacity-10"
           style={{ backgroundImage: 'url(/assets/generated/stretching-scene.dim_1920x1080.jpg)' }}
         />
@@ -109,20 +183,16 @@ export default function BlogPostPage() {
                     <p className="mb-4 text-muted-foreground">
                       This article is exclusive to members. Become a member to unlock the full library and all premium content.
                     </p>
-                    <div className="flex gap-3">
+                    {identity ? (
+                      <StartMembershipCheckoutButton />
+                    ) : (
                       <Button
                         className="bg-neon-purple hover:bg-neon-purple/90"
                         onClick={() => navigate({ to: '/dashboard' })}
                       >
-                        Become a Member
+                        Login to Become a Member
                       </Button>
-                      <Button
-                        variant="outline"
-                        onClick={() => navigate({ to: '/workout-library' })}
-                      >
-                        Unlock the Library
-                      </Button>
-                    </div>
+                    )}
                   </AlertDescription>
                 </Alert>
               </div>
@@ -132,7 +202,15 @@ export default function BlogPostPage() {
                   <div className="prose prose-lg max-w-none dark:prose-invert">
                     <p className="whitespace-pre-wrap">{post.content}</p>
                   </div>
-                  
+
+                  {/* Media */}
+                  {(post.media?.imageUrls?.length > 0 || post.media?.videoUrls?.length > 0) && (
+                    <MediaGallery
+                      imageUrls={post.media.imageUrls}
+                      videoUrls={post.media.videoUrls}
+                    />
+                  )}
+
                   {post.seoKeywords.length > 0 && (
                     <div className="mt-8 border-t border-border/40 pt-6">
                       <p className="mb-3 text-sm font-medium">Topics:</p>

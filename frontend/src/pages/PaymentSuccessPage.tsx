@@ -11,15 +11,13 @@ export default function PaymentSuccessPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const search = useSearch({ from: '/payment-success' }) as { session_id?: string };
-  const sessionId = search.session_id;
+  const sessionId = search.session_id ?? '';
 
   const { data: sessionStatus, isLoading } = useGetStripeSessionStatus(sessionId);
 
   useEffect(() => {
     if (sessionStatus?.__kind__ === 'completed') {
-      // Invalidate membership queries to refresh status
-      queryClient.invalidateQueries({ queryKey: ['membership'] });
-      queryClient.invalidateQueries({ queryKey: ['hasActiveMembership'] });
+      queryClient.invalidateQueries({ queryKey: ['myMembership'] });
     }
   }, [sessionStatus, queryClient]);
 
@@ -35,10 +33,7 @@ export default function PaymentSuccessPage() {
             <CardDescription className="mb-8 text-center text-lg">
               No session ID was provided. Please try starting the checkout process again.
             </CardDescription>
-            <Button
-              onClick={() => navigate({ to: '/' })}
-              variant="outline"
-            >
+            <Button onClick={() => navigate({ to: '/' })} variant="outline">
               Go Home
             </Button>
           </CardContent>
@@ -50,7 +45,7 @@ export default function PaymentSuccessPage() {
   if (isLoading) {
     return (
       <div className="container mx-auto flex min-h-[60vh] items-center justify-center px-4 py-16">
-        <Loader2 className="h-8 w-8 animate-spin text-neon-purple" />
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
@@ -82,7 +77,7 @@ export default function PaymentSuccessPage() {
           <div className="flex gap-4">
             <Button
               onClick={() => navigate({ to: '/dashboard' })}
-              className="bg-neon-purple hover:bg-neon-purple/90"
+              className="bg-primary hover:bg-primary/90"
             >
               Go to Dashboard
             </Button>

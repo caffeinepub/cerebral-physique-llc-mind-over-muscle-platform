@@ -37,10 +37,18 @@ export const EquipmentType = IDL.Variant({
   'dumbbell' : IDL.Null,
   'machine' : IDL.Null,
 });
+export const ExerciseMedia = IDL.Record({
+  'imageUrls' : IDL.Vec(IDL.Text),
+  'videoUrls' : IDL.Vec(IDL.Text),
+});
 export const UserRole = IDL.Variant({
   'admin' : IDL.Null,
   'user' : IDL.Null,
   'guest' : IDL.Null,
+});
+export const BlogMedia = IDL.Record({
+  'imageUrls' : IDL.Vec(IDL.Text),
+  'videoUrls' : IDL.Vec(IDL.Text),
 });
 export const ShoppingItem = IDL.Record({
   'productName' : IDL.Text,
@@ -58,17 +66,9 @@ export const AmazonProduct = IDL.Record({
   'affiliateLink' : IDL.Text,
 });
 export const Time = IDL.Int;
-export const BlogPostPreview = IDL.Record({
-  'id' : IDL.Nat,
-  'title' : IDL.Text,
-  'seoTitle' : IDL.Text,
-  'createdAt' : Time,
-  'author' : IDL.Text,
-  'memberOnly' : IDL.Bool,
-  'seoMetaDescription' : IDL.Text,
-});
 export const BlogPost = IDL.Record({
   'id' : IDL.Nat,
+  'media' : BlogMedia,
   'title' : IDL.Text,
   'content' : IDL.Text,
   'seoTitle' : IDL.Text,
@@ -88,25 +88,15 @@ export const ExercisePreview = IDL.Record({
 });
 export const Exercise = IDL.Record({
   'id' : IDL.Nat,
+  'media' : ExerciseMedia,
   'primaryMuscle' : MuscleGroup,
   'cues' : IDL.Text,
   'name' : IDL.Text,
   'equipmentType' : EquipmentType,
-  'imageUrl' : IDL.Text,
+  'description' : IDL.Text,
   'isPlaceholder' : IDL.Bool,
   'videoUrl' : IDL.Text,
   'secondaryMuscles' : IDL.Vec(MuscleGroup),
-});
-export const Membership = IDL.Record({
-  'principal' : IDL.Principal,
-  'active' : IDL.Bool,
-  'price' : IDL.Nat,
-  'stripeId' : IDL.Text,
-});
-export const UserProfile = IDL.Record({
-  'name' : IDL.Text,
-  'email' : IDL.Opt(IDL.Text),
-  'membershipStatus' : IDL.Opt(IDL.Text),
 });
 export const ExternalBlob = IDL.Vec(IDL.Nat8);
 export const MuscleGroupCard = IDL.Record({
@@ -122,16 +112,62 @@ export const MuscleGroupDetails = IDL.Record({
   'description' : IDL.Text,
   'imageUrl' : IDL.Text,
 });
+export const NutritionArticle = IDL.Record({
+  'id' : IDL.Nat,
+  'media' : BlogMedia,
+  'title' : IDL.Text,
+  'content' : IDL.Text,
+  'published' : IDL.Bool,
+  'createdAt' : Time,
+  'author' : IDL.Text,
+  'memberOnly' : IDL.Bool,
+});
+export const UserProfile = IDL.Record({
+  'name' : IDL.Text,
+  'email' : IDL.Opt(IDL.Text),
+  'membershipStatus' : IDL.Opt(IDL.Text),
+});
+export const WorkoutRoutine = IDL.Record({
+  'principal' : IDL.Principal,
+  'name' : IDL.Text,
+  'exercises' : IDL.Vec(IDL.Nat),
+});
+export const Membership = IDL.Record({
+  'principal' : IDL.Principal,
+  'active' : IDL.Bool,
+  'price' : IDL.Nat,
+  'stripeId' : IDL.Text,
+});
+export const MiscConfig = IDL.Record({
+  'adminContactEmail' : IDL.Text,
+  'supportContactEmail' : IDL.Text,
+});
+export const BlogPostPreview = IDL.Record({
+  'id' : IDL.Nat,
+  'title' : IDL.Text,
+  'seoTitle' : IDL.Text,
+  'createdAt' : Time,
+  'author' : IDL.Text,
+  'memberOnly' : IDL.Bool,
+  'seoMetaDescription' : IDL.Text,
+});
+export const NutritionArticlePreview = IDL.Record({
+  'id' : IDL.Nat,
+  'title' : IDL.Text,
+  'createdAt' : Time,
+  'author' : IDL.Text,
+  'memberOnly' : IDL.Bool,
+});
+export const StripeConfiguration = IDL.Record({
+  'allowedCountries' : IDL.Vec(IDL.Text),
+  'secretKey' : IDL.Text,
+});
 export const StripeSessionStatus = IDL.Variant({
   'completed' : IDL.Record({
     'userPrincipal' : IDL.Opt(IDL.Text),
     'response' : IDL.Text,
   }),
   'failed' : IDL.Record({ 'error' : IDL.Text }),
-});
-export const StripeConfiguration = IDL.Record({
-  'allowedCountries' : IDL.Vec(IDL.Text),
-  'secretKey' : IDL.Text,
 });
 export const http_header = IDL.Record({
   'value' : IDL.Text,
@@ -188,19 +224,18 @@ export const idlService = IDL.Service({
   'addExercise' : IDL.Func(
       [
         IDL.Text,
+        IDL.Text,
         MuscleGroup,
         IDL.Vec(MuscleGroup),
         EquipmentType,
         IDL.Text,
         IDL.Text,
-        IDL.Text,
+        ExerciseMedia,
         IDL.Bool,
       ],
       [],
       [],
     ),
-  'addMembership' : IDL.Func([IDL.Text, IDL.Nat], [], []),
-  'addMembershipForUser' : IDL.Func([IDL.Principal, IDL.Text, IDL.Nat], [], []),
   'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
   'createBlogPost' : IDL.Func(
       [
@@ -208,6 +243,7 @@ export const idlService = IDL.Service({
         IDL.Text,
         IDL.Text,
         IDL.Bool,
+        BlogMedia,
         IDL.Text,
         IDL.Text,
         IDL.Vec(IDL.Text),
@@ -220,69 +256,98 @@ export const idlService = IDL.Service({
       [IDL.Text],
       [],
     ),
+  'createNutritionArticle' : IDL.Func(
+      [IDL.Text, IDL.Text, IDL.Text, BlogMedia, IDL.Bool],
+      [],
+      [],
+    ),
+  'createWorkoutRoutine' : IDL.Func([IDL.Text, IDL.Vec(IDL.Nat)], [], []),
   'deleteAmazonProduct' : IDL.Func([IDL.Nat], [], []),
   'deleteBlogPost' : IDL.Func([IDL.Nat], [], []),
   'deleteExercise' : IDL.Func([IDL.Nat], [], []),
-  'getAffiliateDisclosure' : IDL.Func([], [IDL.Text], ['query']),
+  'deleteNutritionArticle' : IDL.Func([IDL.Nat], [], []),
+  'deleteWorkoutRoutine' : IDL.Func([IDL.Text], [], []),
   'getAllAmazonProducts' : IDL.Func([], [IDL.Vec(AmazonProduct)], ['query']),
-  'getAllBlogPostPreviews' : IDL.Func(
-      [],
-      [IDL.Vec(BlogPostPreview)],
-      ['query'],
-    ),
-  'getAllBlogPosts' : IDL.Func([], [IDL.Vec(BlogPost)], ['query']),
+  'getAllBlogPostsAdmin' : IDL.Func([], [IDL.Vec(BlogPost)], ['query']),
   'getAllExercisePreviews' : IDL.Func(
       [],
       [IDL.Vec(ExercisePreview)],
       ['query'],
     ),
-  'getAllExercises' : IDL.Func([], [IDL.Vec(Exercise)], ['query']),
-  'getAllMemberships' : IDL.Func([], [IDL.Vec(Membership)], ['query']),
-  'getBlogPost' : IDL.Func([IDL.Nat], [IDL.Opt(BlogPost)], ['query']),
-  'getBlogPostPreview' : IDL.Func(
-      [IDL.Nat],
-      [IDL.Opt(BlogPostPreview)],
+  'getAllExercisesAdmin' : IDL.Func([], [IDL.Vec(Exercise)], ['query']),
+  'getAllMuscleGroups' : IDL.Func([], [IDL.Vec(MuscleGroupDetails)], ['query']),
+  'getAllNutritionArticlesAdmin' : IDL.Func(
+      [],
+      [IDL.Vec(NutritionArticle)],
       ['query'],
     ),
+  'getBlogPost' : IDL.Func([IDL.Nat], [IDL.Opt(BlogPost)], ['query']),
   'getCallerUserProfile' : IDL.Func([], [IDL.Opt(UserProfile)], ['query']),
   'getCallerUserRole' : IDL.Func([], [UserRole], ['query']),
-  'getMembership' : IDL.Func([], [IDL.Opt(Membership)], ['query']),
-  'getMuscleGroupArtist' : IDL.Func(
-      [IDL.Text],
-      [IDL.Opt(MuscleGroupCard)],
+  'getCallerWorkoutRoutines' : IDL.Func(
+      [],
+      [IDL.Vec(WorkoutRoutine)],
       ['query'],
     ),
-  'getMuscleGroupArtists' : IDL.Func([], [IDL.Vec(MuscleGroupCard)], ['query']),
-  'getMuscleGroupExercisePreviews' : IDL.Func(
-      [MuscleGroup],
-      [IDL.Vec(ExercisePreview)],
-      ['query'],
-    ),
-  'getMuscleGroupExercises' : IDL.Func(
+  'getExercise' : IDL.Func([IDL.Nat], [IDL.Opt(Exercise)], ['query']),
+  'getExercisesByMuscleGroup' : IDL.Func(
       [MuscleGroup],
       [IDL.Vec(Exercise)],
       ['query'],
     ),
-  'getMuscleGroups' : IDL.Func([], [IDL.Vec(MuscleGroupDetails)], ['query']),
+  'getMembership' : IDL.Func([IDL.Principal], [IDL.Opt(Membership)], ['query']),
+  'getMiscConfig' : IDL.Func([], [IDL.Opt(MiscConfig)], ['query']),
+  'getMuscleGroupDetails' : IDL.Func(
+      [IDL.Text],
+      [IDL.Opt(MuscleGroupDetails)],
+      ['query'],
+    ),
+  'getMyMembership' : IDL.Func([], [IDL.Opt(Membership)], ['query']),
+  'getNutritionArticle' : IDL.Func(
+      [IDL.Nat],
+      [IDL.Opt(NutritionArticle)],
+      ['query'],
+    ),
   'getPrivacyPolicy' : IDL.Func([], [IDL.Text], ['query']),
+  'getPublishedBlogPostPreviews' : IDL.Func(
+      [],
+      [IDL.Vec(BlogPostPreview)],
+      ['query'],
+    ),
+  'getPublishedNutritionArticlePreviews' : IDL.Func(
+      [],
+      [IDL.Vec(NutritionArticlePreview)],
+      ['query'],
+    ),
+  'getStripeConfig' : IDL.Func([], [IDL.Opt(StripeConfiguration)], ['query']),
   'getStripeSessionStatus' : IDL.Func([IDL.Text], [StripeSessionStatus], []),
   'getUserProfile' : IDL.Func(
       [IDL.Principal],
       [IDL.Opt(UserProfile)],
       ['query'],
     ),
-  'hasActiveMembership' : IDL.Func([], [IDL.Bool], ['query']),
+  'getUserWorkoutRoutines' : IDL.Func(
+      [IDL.Principal],
+      [IDL.Vec(WorkoutRoutine)],
+      ['query'],
+    ),
   'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
   'isStripeConfigured' : IDL.Func([], [IDL.Bool], ['query']),
-  'publishBlogPost' : IDL.Func([IDL.Nat], [], []),
+  'publishBlogPost' : IDL.Func([IDL.Nat, IDL.Bool], [], []),
+  'publishNutritionArticle' : IDL.Func([IDL.Nat, IDL.Bool], [], []),
   'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
+  'setMembership' : IDL.Func(
+      [IDL.Principal, IDL.Bool, IDL.Text, IDL.Nat],
+      [],
+      [],
+    ),
+  'setMiscConfig' : IDL.Func([MiscConfig], [], []),
   'setStripeConfiguration' : IDL.Func([StripeConfiguration], [], []),
   'transform' : IDL.Func(
       [TransformationInput],
       [TransformationOutput],
       ['query'],
     ),
-  'unpublishBlogPost' : IDL.Func([IDL.Nat], [], []),
   'updateAmazonProduct' : IDL.Func(
       [IDL.Nat, IDL.Text, IDL.Text, IDL.Text, IDL.Text, IDL.Text],
       [],
@@ -295,6 +360,7 @@ export const idlService = IDL.Service({
         IDL.Text,
         IDL.Text,
         IDL.Bool,
+        BlogMedia,
         IDL.Text,
         IDL.Text,
         IDL.Vec(IDL.Text),
@@ -306,20 +372,25 @@ export const idlService = IDL.Service({
       [
         IDL.Nat,
         IDL.Text,
+        IDL.Text,
         MuscleGroup,
         IDL.Vec(MuscleGroup),
         EquipmentType,
         IDL.Text,
         IDL.Text,
-        IDL.Text,
+        ExerciseMedia,
         IDL.Bool,
       ],
       [],
       [],
     ),
-  'updateMembershipStatus' : IDL.Func([IDL.Principal, IDL.Bool], [], []),
-  'updateMuscleGroup' : IDL.Func([IDL.Text, IDL.Text, IDL.Text], [], []),
-  'updateMuscleGroupArtist' : IDL.Func([IDL.Text, MuscleGroupCard], [], []),
+  'updateMuscleGroupCard' : IDL.Func([IDL.Text, MuscleGroupCard], [], []),
+  'updateNutritionArticle' : IDL.Func(
+      [IDL.Nat, IDL.Text, IDL.Text, IDL.Text, BlogMedia, IDL.Bool],
+      [],
+      [],
+    ),
+  'updateWorkoutRoutine' : IDL.Func([IDL.Text, IDL.Vec(IDL.Nat)], [], []),
 });
 
 export const idlInitArgs = [];
@@ -354,10 +425,18 @@ export const idlFactory = ({ IDL }) => {
     'dumbbell' : IDL.Null,
     'machine' : IDL.Null,
   });
+  const ExerciseMedia = IDL.Record({
+    'imageUrls' : IDL.Vec(IDL.Text),
+    'videoUrls' : IDL.Vec(IDL.Text),
+  });
   const UserRole = IDL.Variant({
     'admin' : IDL.Null,
     'user' : IDL.Null,
     'guest' : IDL.Null,
+  });
+  const BlogMedia = IDL.Record({
+    'imageUrls' : IDL.Vec(IDL.Text),
+    'videoUrls' : IDL.Vec(IDL.Text),
   });
   const ShoppingItem = IDL.Record({
     'productName' : IDL.Text,
@@ -375,17 +454,9 @@ export const idlFactory = ({ IDL }) => {
     'affiliateLink' : IDL.Text,
   });
   const Time = IDL.Int;
-  const BlogPostPreview = IDL.Record({
-    'id' : IDL.Nat,
-    'title' : IDL.Text,
-    'seoTitle' : IDL.Text,
-    'createdAt' : Time,
-    'author' : IDL.Text,
-    'memberOnly' : IDL.Bool,
-    'seoMetaDescription' : IDL.Text,
-  });
   const BlogPost = IDL.Record({
     'id' : IDL.Nat,
+    'media' : BlogMedia,
     'title' : IDL.Text,
     'content' : IDL.Text,
     'seoTitle' : IDL.Text,
@@ -405,25 +476,15 @@ export const idlFactory = ({ IDL }) => {
   });
   const Exercise = IDL.Record({
     'id' : IDL.Nat,
+    'media' : ExerciseMedia,
     'primaryMuscle' : MuscleGroup,
     'cues' : IDL.Text,
     'name' : IDL.Text,
     'equipmentType' : EquipmentType,
-    'imageUrl' : IDL.Text,
+    'description' : IDL.Text,
     'isPlaceholder' : IDL.Bool,
     'videoUrl' : IDL.Text,
     'secondaryMuscles' : IDL.Vec(MuscleGroup),
-  });
-  const Membership = IDL.Record({
-    'principal' : IDL.Principal,
-    'active' : IDL.Bool,
-    'price' : IDL.Nat,
-    'stripeId' : IDL.Text,
-  });
-  const UserProfile = IDL.Record({
-    'name' : IDL.Text,
-    'email' : IDL.Opt(IDL.Text),
-    'membershipStatus' : IDL.Opt(IDL.Text),
   });
   const ExternalBlob = IDL.Vec(IDL.Nat8);
   const MuscleGroupCard = IDL.Record({
@@ -439,16 +500,62 @@ export const idlFactory = ({ IDL }) => {
     'description' : IDL.Text,
     'imageUrl' : IDL.Text,
   });
+  const NutritionArticle = IDL.Record({
+    'id' : IDL.Nat,
+    'media' : BlogMedia,
+    'title' : IDL.Text,
+    'content' : IDL.Text,
+    'published' : IDL.Bool,
+    'createdAt' : Time,
+    'author' : IDL.Text,
+    'memberOnly' : IDL.Bool,
+  });
+  const UserProfile = IDL.Record({
+    'name' : IDL.Text,
+    'email' : IDL.Opt(IDL.Text),
+    'membershipStatus' : IDL.Opt(IDL.Text),
+  });
+  const WorkoutRoutine = IDL.Record({
+    'principal' : IDL.Principal,
+    'name' : IDL.Text,
+    'exercises' : IDL.Vec(IDL.Nat),
+  });
+  const Membership = IDL.Record({
+    'principal' : IDL.Principal,
+    'active' : IDL.Bool,
+    'price' : IDL.Nat,
+    'stripeId' : IDL.Text,
+  });
+  const MiscConfig = IDL.Record({
+    'adminContactEmail' : IDL.Text,
+    'supportContactEmail' : IDL.Text,
+  });
+  const BlogPostPreview = IDL.Record({
+    'id' : IDL.Nat,
+    'title' : IDL.Text,
+    'seoTitle' : IDL.Text,
+    'createdAt' : Time,
+    'author' : IDL.Text,
+    'memberOnly' : IDL.Bool,
+    'seoMetaDescription' : IDL.Text,
+  });
+  const NutritionArticlePreview = IDL.Record({
+    'id' : IDL.Nat,
+    'title' : IDL.Text,
+    'createdAt' : Time,
+    'author' : IDL.Text,
+    'memberOnly' : IDL.Bool,
+  });
+  const StripeConfiguration = IDL.Record({
+    'allowedCountries' : IDL.Vec(IDL.Text),
+    'secretKey' : IDL.Text,
+  });
   const StripeSessionStatus = IDL.Variant({
     'completed' : IDL.Record({
       'userPrincipal' : IDL.Opt(IDL.Text),
       'response' : IDL.Text,
     }),
     'failed' : IDL.Record({ 'error' : IDL.Text }),
-  });
-  const StripeConfiguration = IDL.Record({
-    'allowedCountries' : IDL.Vec(IDL.Text),
-    'secretKey' : IDL.Text,
   });
   const http_header = IDL.Record({ 'value' : IDL.Text, 'name' : IDL.Text });
   const http_request_result = IDL.Record({
@@ -502,20 +609,15 @@ export const idlFactory = ({ IDL }) => {
     'addExercise' : IDL.Func(
         [
           IDL.Text,
+          IDL.Text,
           MuscleGroup,
           IDL.Vec(MuscleGroup),
           EquipmentType,
           IDL.Text,
           IDL.Text,
-          IDL.Text,
+          ExerciseMedia,
           IDL.Bool,
         ],
-        [],
-        [],
-      ),
-    'addMembership' : IDL.Func([IDL.Text, IDL.Nat], [], []),
-    'addMembershipForUser' : IDL.Func(
-        [IDL.Principal, IDL.Text, IDL.Nat],
         [],
         [],
       ),
@@ -526,6 +628,7 @@ export const idlFactory = ({ IDL }) => {
           IDL.Text,
           IDL.Text,
           IDL.Bool,
+          BlogMedia,
           IDL.Text,
           IDL.Text,
           IDL.Vec(IDL.Text),
@@ -538,73 +641,106 @@ export const idlFactory = ({ IDL }) => {
         [IDL.Text],
         [],
       ),
+    'createNutritionArticle' : IDL.Func(
+        [IDL.Text, IDL.Text, IDL.Text, BlogMedia, IDL.Bool],
+        [],
+        [],
+      ),
+    'createWorkoutRoutine' : IDL.Func([IDL.Text, IDL.Vec(IDL.Nat)], [], []),
     'deleteAmazonProduct' : IDL.Func([IDL.Nat], [], []),
     'deleteBlogPost' : IDL.Func([IDL.Nat], [], []),
     'deleteExercise' : IDL.Func([IDL.Nat], [], []),
-    'getAffiliateDisclosure' : IDL.Func([], [IDL.Text], ['query']),
+    'deleteNutritionArticle' : IDL.Func([IDL.Nat], [], []),
+    'deleteWorkoutRoutine' : IDL.Func([IDL.Text], [], []),
     'getAllAmazonProducts' : IDL.Func([], [IDL.Vec(AmazonProduct)], ['query']),
-    'getAllBlogPostPreviews' : IDL.Func(
-        [],
-        [IDL.Vec(BlogPostPreview)],
-        ['query'],
-      ),
-    'getAllBlogPosts' : IDL.Func([], [IDL.Vec(BlogPost)], ['query']),
+    'getAllBlogPostsAdmin' : IDL.Func([], [IDL.Vec(BlogPost)], ['query']),
     'getAllExercisePreviews' : IDL.Func(
         [],
         [IDL.Vec(ExercisePreview)],
         ['query'],
       ),
-    'getAllExercises' : IDL.Func([], [IDL.Vec(Exercise)], ['query']),
-    'getAllMemberships' : IDL.Func([], [IDL.Vec(Membership)], ['query']),
-    'getBlogPost' : IDL.Func([IDL.Nat], [IDL.Opt(BlogPost)], ['query']),
-    'getBlogPostPreview' : IDL.Func(
-        [IDL.Nat],
-        [IDL.Opt(BlogPostPreview)],
+    'getAllExercisesAdmin' : IDL.Func([], [IDL.Vec(Exercise)], ['query']),
+    'getAllMuscleGroups' : IDL.Func(
+        [],
+        [IDL.Vec(MuscleGroupDetails)],
         ['query'],
       ),
+    'getAllNutritionArticlesAdmin' : IDL.Func(
+        [],
+        [IDL.Vec(NutritionArticle)],
+        ['query'],
+      ),
+    'getBlogPost' : IDL.Func([IDL.Nat], [IDL.Opt(BlogPost)], ['query']),
     'getCallerUserProfile' : IDL.Func([], [IDL.Opt(UserProfile)], ['query']),
     'getCallerUserRole' : IDL.Func([], [UserRole], ['query']),
-    'getMembership' : IDL.Func([], [IDL.Opt(Membership)], ['query']),
-    'getMuscleGroupArtist' : IDL.Func(
-        [IDL.Text],
-        [IDL.Opt(MuscleGroupCard)],
-        ['query'],
-      ),
-    'getMuscleGroupArtists' : IDL.Func(
+    'getCallerWorkoutRoutines' : IDL.Func(
         [],
-        [IDL.Vec(MuscleGroupCard)],
+        [IDL.Vec(WorkoutRoutine)],
         ['query'],
       ),
-    'getMuscleGroupExercisePreviews' : IDL.Func(
-        [MuscleGroup],
-        [IDL.Vec(ExercisePreview)],
-        ['query'],
-      ),
-    'getMuscleGroupExercises' : IDL.Func(
+    'getExercise' : IDL.Func([IDL.Nat], [IDL.Opt(Exercise)], ['query']),
+    'getExercisesByMuscleGroup' : IDL.Func(
         [MuscleGroup],
         [IDL.Vec(Exercise)],
         ['query'],
       ),
-    'getMuscleGroups' : IDL.Func([], [IDL.Vec(MuscleGroupDetails)], ['query']),
+    'getMembership' : IDL.Func(
+        [IDL.Principal],
+        [IDL.Opt(Membership)],
+        ['query'],
+      ),
+    'getMiscConfig' : IDL.Func([], [IDL.Opt(MiscConfig)], ['query']),
+    'getMuscleGroupDetails' : IDL.Func(
+        [IDL.Text],
+        [IDL.Opt(MuscleGroupDetails)],
+        ['query'],
+      ),
+    'getMyMembership' : IDL.Func([], [IDL.Opt(Membership)], ['query']),
+    'getNutritionArticle' : IDL.Func(
+        [IDL.Nat],
+        [IDL.Opt(NutritionArticle)],
+        ['query'],
+      ),
     'getPrivacyPolicy' : IDL.Func([], [IDL.Text], ['query']),
+    'getPublishedBlogPostPreviews' : IDL.Func(
+        [],
+        [IDL.Vec(BlogPostPreview)],
+        ['query'],
+      ),
+    'getPublishedNutritionArticlePreviews' : IDL.Func(
+        [],
+        [IDL.Vec(NutritionArticlePreview)],
+        ['query'],
+      ),
+    'getStripeConfig' : IDL.Func([], [IDL.Opt(StripeConfiguration)], ['query']),
     'getStripeSessionStatus' : IDL.Func([IDL.Text], [StripeSessionStatus], []),
     'getUserProfile' : IDL.Func(
         [IDL.Principal],
         [IDL.Opt(UserProfile)],
         ['query'],
       ),
-    'hasActiveMembership' : IDL.Func([], [IDL.Bool], ['query']),
+    'getUserWorkoutRoutines' : IDL.Func(
+        [IDL.Principal],
+        [IDL.Vec(WorkoutRoutine)],
+        ['query'],
+      ),
     'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
     'isStripeConfigured' : IDL.Func([], [IDL.Bool], ['query']),
-    'publishBlogPost' : IDL.Func([IDL.Nat], [], []),
+    'publishBlogPost' : IDL.Func([IDL.Nat, IDL.Bool], [], []),
+    'publishNutritionArticle' : IDL.Func([IDL.Nat, IDL.Bool], [], []),
     'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
+    'setMembership' : IDL.Func(
+        [IDL.Principal, IDL.Bool, IDL.Text, IDL.Nat],
+        [],
+        [],
+      ),
+    'setMiscConfig' : IDL.Func([MiscConfig], [], []),
     'setStripeConfiguration' : IDL.Func([StripeConfiguration], [], []),
     'transform' : IDL.Func(
         [TransformationInput],
         [TransformationOutput],
         ['query'],
       ),
-    'unpublishBlogPost' : IDL.Func([IDL.Nat], [], []),
     'updateAmazonProduct' : IDL.Func(
         [IDL.Nat, IDL.Text, IDL.Text, IDL.Text, IDL.Text, IDL.Text],
         [],
@@ -617,6 +753,7 @@ export const idlFactory = ({ IDL }) => {
           IDL.Text,
           IDL.Text,
           IDL.Bool,
+          BlogMedia,
           IDL.Text,
           IDL.Text,
           IDL.Vec(IDL.Text),
@@ -628,20 +765,25 @@ export const idlFactory = ({ IDL }) => {
         [
           IDL.Nat,
           IDL.Text,
+          IDL.Text,
           MuscleGroup,
           IDL.Vec(MuscleGroup),
           EquipmentType,
           IDL.Text,
           IDL.Text,
-          IDL.Text,
+          ExerciseMedia,
           IDL.Bool,
         ],
         [],
         [],
       ),
-    'updateMembershipStatus' : IDL.Func([IDL.Principal, IDL.Bool], [], []),
-    'updateMuscleGroup' : IDL.Func([IDL.Text, IDL.Text, IDL.Text], [], []),
-    'updateMuscleGroupArtist' : IDL.Func([IDL.Text, MuscleGroupCard], [], []),
+    'updateMuscleGroupCard' : IDL.Func([IDL.Text, MuscleGroupCard], [], []),
+    'updateNutritionArticle' : IDL.Func(
+        [IDL.Nat, IDL.Text, IDL.Text, IDL.Text, BlogMedia, IDL.Bool],
+        [],
+        [],
+      ),
+    'updateWorkoutRoutine' : IDL.Func([IDL.Text, IDL.Vec(IDL.Nat)], [], []),
   });
 };
 

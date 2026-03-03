@@ -1,28 +1,4 @@
 {
   "kind": "feature_evidence_report",
-  "features": [
-    {
-      "featureId": "feature-revert-all-visual-design-changes-introduced-in-version-43-and-restore-the-complete-design-system-from-version-42-including-colors-typography-layout-spacing-gradients-and-component-styling-across-all-pages",
-      "featureTitle": "Revert all visual design changes introduced in Version 43 and restore the complete design system from Version 42, including colors, typography, layout, spacing, gradients, and component styling across all pages",
-      "files": [
-        "frontend/src/index.css",
-        "frontend/tailwind.config.js"
-      ],
-      "components": [
-        "blob-storage@4.0.0",
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "authorization@4.0.0",
-        "http-outcalls@3.0.0",
-        "github-export-icp-cli@1.0.0",
-        "stripe@3.0.0"
-      ],
-      "testIds": [
-        "REQ-3"
-      ],
-      "confidence": "high"
-    }
-  ]
+  "features": []
 }
