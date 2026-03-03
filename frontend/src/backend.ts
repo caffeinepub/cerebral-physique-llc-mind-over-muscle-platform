@@ -295,6 +295,7 @@ export interface backendInterface {
     getAllAmazonProducts(): Promise<Array<AmazonProduct>>;
     getAllBlogPostsAdmin(): Promise<Array<BlogPost>>;
     getAllExercisePreviews(): Promise<Array<ExercisePreview>>;
+    getAllExercises(): Promise<Array<Exercise>>;
     getAllExercisesAdmin(): Promise<Array<Exercise>>;
     getAllMuscleGroups(): Promise<Array<MuscleGroupDetails>>;
     getAllNutritionArticlesAdmin(): Promise<Array<NutritionArticle>>;
@@ -641,6 +642,20 @@ export class Backend implements backendInterface {
         } else {
             const result = await this.actor.getAllExercisePreviews();
             return from_candid_vec_n15(this._uploadFile, this._downloadFile, result);
+        }
+    }
+    async getAllExercises(): Promise<Array<Exercise>> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.getAllExercises();
+                return from_candid_vec_n20(this._uploadFile, this._downloadFile, result);
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.getAllExercises();
+            return from_candid_vec_n20(this._uploadFile, this._downloadFile, result);
         }
     }
     async getAllExercisesAdmin(): Promise<Array<Exercise>> {

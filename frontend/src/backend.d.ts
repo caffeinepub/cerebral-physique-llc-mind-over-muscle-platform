@@ -202,6 +202,7 @@ export interface backendInterface {
     getAllAmazonProducts(): Promise<Array<AmazonProduct>>;
     getAllBlogPostsAdmin(): Promise<Array<BlogPost>>;
     getAllExercisePreviews(): Promise<Array<ExercisePreview>>;
+    getAllExercises(): Promise<Array<Exercise>>;
     getAllExercisesAdmin(): Promise<Array<Exercise>>;
     getAllMuscleGroups(): Promise<Array<MuscleGroupDetails>>;
     getAllNutritionArticlesAdmin(): Promise<Array<NutritionArticle>>;

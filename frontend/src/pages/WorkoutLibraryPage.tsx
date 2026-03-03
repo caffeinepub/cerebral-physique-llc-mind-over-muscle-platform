@@ -7,7 +7,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { ChevronDown, ChevronRight, Loader2, Lock } from 'lucide-react';
 import {
-  useGetExercisesByMuscleGroup,
+  useGetAllExercises,
   useGetMyMembership,
   useGetAllMuscleGroups,
   useIsCallerAdmin,
@@ -164,6 +164,8 @@ function ExerciseCard({ exercise, fallbackImage }: ExerciseCardProps) {
 
 interface MuscleGroupSectionProps {
   muscleGroup: MuscleGroup;
+  exercises: Exercise[];
+  isLoading: boolean;
   hasActiveMembership: boolean;
   isAuthenticated: boolean;
   isAdmin: boolean;
@@ -174,6 +176,8 @@ interface MuscleGroupSectionProps {
 
 function MuscleGroupSection({
   muscleGroup,
+  exercises,
+  isLoading,
   hasActiveMembership,
   isAuthenticated,
   isAdmin,
@@ -182,7 +186,6 @@ function MuscleGroupSection({
   cardImageUrl,
 }: MuscleGroupSectionProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const { data: exercises = [], isLoading } = useGetExercisesByMuscleGroup(muscleGroup);
 
   const canView = isAdmin || hasActiveMembership;
   const muscleGroupName = getMuscleGroupLabel(muscleGroup);
@@ -221,7 +224,11 @@ function MuscleGroupSection({
               {isOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
               {isOpen ? 'Hide' : 'View'} Exercises
             </span>
-            <Badge variant="secondary">{exercises.length} exercises</Badge>
+            {isLoading ? (
+              <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+            ) : (
+              <Badge variant="secondary">{exercises.length} exercises</Badge>
+            )}
           </Button>
         </CardContent>
 
@@ -275,11 +282,12 @@ export default function WorkoutLibraryPage() {
   const { data: membership, isLoading: membershipLoading } = useGetMyMembership();
   const { data: muscleGroupDetails = [], isLoading: cardsLoading } = useGetAllMuscleGroups();
   const { data: isAdmin = false } = useIsCallerAdmin();
+  const { data: allExercises = [], isLoading: exercisesLoading } = useGetAllExercises();
 
   const isAuthenticated = !!identity;
   const hasActiveMembership = membership?.active === true;
 
-  const muscleGroups = [
+  const muscleGroupList = [
     MuscleGroup.chest,
     MuscleGroup.back,
     MuscleGroup.shoulders,
@@ -291,6 +299,11 @@ export default function WorkoutLibraryPage() {
     MuscleGroup.calves,
     MuscleGroup.core,
   ];
+
+  // Filter exercises by muscle group client-side from the single fetched list
+  const getExercisesForMuscleGroup = (muscleGroup: MuscleGroup): Exercise[] => {
+    return allExercises.filter((e) => e.primaryMuscle === muscleGroup);
+  };
 
   return (
     <div className="flex flex-col">
@@ -343,21 +356,24 @@ export default function WorkoutLibraryPage() {
           style={{ backgroundImage: 'url(/assets/generated/dynamic-movement.dim_1920x1080.jpg)' }}
         />
         <div className="container relative mx-auto px-4">
-          {cardsLoading ? (
+          {cardsLoading || exercisesLoading ? (
             <div className="flex items-center justify-center py-12">
               <Loader2 className="h-8 w-8 animate-spin text-neon-purple" />
             </div>
           ) : (
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {muscleGroups.map((muscleGroup) => {
+              {muscleGroupList.map((muscleGroup) => {
                 const label = getMuscleGroupLabel(muscleGroup);
                 const mgDetail = muscleGroupDetails.find(
                   (mg) => mg.name === label || mg.card?.title === label
                 );
+                const filteredExercises = getExercisesForMuscleGroup(muscleGroup);
                 return (
                   <MuscleGroupSection
                     key={muscleGroup}
                     muscleGroup={muscleGroup}
+                    exercises={filteredExercises}
+                    isLoading={false}
                     hasActiveMembership={hasActiveMembership}
                     isAuthenticated={isAuthenticated}
                     isAdmin={isAdmin}

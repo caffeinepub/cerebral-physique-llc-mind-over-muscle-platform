@@ -1,90 +1,33 @@
 {
   "schemaVersion": "1.0.0",
   "projectStateVersion": 3,
-  "summary": "Fitness/workout library app with muscle group sections, blogs, and nutrition content. Features spa-style background music. Users can browse ~20 exercises per muscle group, each with realistic images, workout name, and benefits. Exercises are clickable to show video clips of correct form. Users can build custom workout routines.",
-  "architectural_notes": [
-    "Exercise content must be factual and researched; images/videos should be semi-realistic to realistic style"
+  "summary": "Fitness app with muscle group sections and exercise cards. Currently debugging an issue where each muscle group box shows zero exercises.",
+  "architectural_notes": [],
+  "known_issues": [
+    "Muscle group boxes display zero exercises instead of the expected exercise list"
   ],
-  "known_issues": [],
-  "isFixRequest": false,
-  "imageRequirements": "## Required Images\n- Semi-realistic to realistic illustration of a person performing a Barbell Bench Press with visible chest muscle engagement (bench-press.dim_600x400.png)\n- Semi-realistic to realistic illustration of a person performing Dumbbell Flyes on a flat bench (dumbbell-flyes.dim_600x400.png)\n- Semi-realistic to realistic illustration of a person performing Incline Bench Press with upper chest highlighted (incline-bench-press.dim_600x400.png)\n- Semi-realistic to realistic illustration of a person performing Cable Crossover chest exercise (cable-crossover.dim_600x400.png)\n- Semi-realistic to realistic illustration of a person performing Push-Ups in proper form (push-ups.dim_600x400.png)\n- Semi-realistic to realistic illustration of a person performing Pull-Ups with back muscles engaged (pull-ups.dim_600x400.png)\n- Semi-realistic to realistic illustration of a person performing a Barbell Deadlift with back muscles highlighted (deadlift.dim_600x400.png)\n- Semi-realistic to realistic illustration of a person performing Bent-Over Barbell Row (bent-over-row.dim_600x400.png)\n- Semi-realistic to realistic illustration of a person performing a Lat Pulldown machine exercise (lat-pulldown.dim_600x400.png)\n- Semi-realistic to realistic illustration of a person performing Seated Cable Row (seated-cable-row.dim_600x400.png)\n- Semi-realistic to realistic illustration of a person performing Overhead Press with shoulder muscles highlighted (overhead-press.dim_600x400.png)\n- Semi-realistic to realistic illustration of a person performing Dumbbell Lateral Raises (lateral-raises.dim_600x400.png)\n- Semi-realistic to realistic illustration of a person performing Arnold Press exercise (arnold-press.dim_600x400.png)\n- Semi-realistic to realistic illustration of a person performing Front Raises with dumbbells (front-raises.dim_600x400.png)\n- Semi-realistic to realistic illustration of a person performing Face Pulls with cable machine (face-pulls.dim_600x400.png)\n- Semi-realistic to realistic illustration of a person performing Barbell Bicep Curl with biceps highlighted (barbell-curl.dim_600x400.png)\n- Semi-realistic to realistic illustration of a person performing Hammer Curls with dumbbells (hammer-curls.dim_600x400.png)\n- Semi-realistic to realistic illustration of a person performing Concentration Curl seated (concentration-curl.dim_600x400.png)\n- Semi-realistic to realistic illustration of a person performing Preacher Curl on a preacher bench (preacher-curl.dim_600x400.png)\n- Semi-realistic to realistic illustration of a person performing Incline Dumbbell Curl (incline-dumbbell-curl.dim_600x400.png)\n- Semi-realistic to realistic illustration of a person performing Tricep Pushdown with cable rope (tricep-pushdown.dim_600x400.png)\n- Semi-realistic to realistic illustration of a person performing Skull Crushers on a bench (skull-crushers.dim_600x400.png)\n- Semi-realistic to realistic illustration of a person performing Close-Grip Bench Press (close-grip-bench.dim_600x400.png)\n- Semi-realistic to realistic illustration of a person performing Overhead Tricep Extension (overhead-tricep-extension.dim_600x400.png)\n- Semi-realistic to realistic illustration of a person performing Dips on parallel bars with triceps engaged (dips.dim_600x400.png)\n- Semi-realistic to realistic illustration of a person performing Barbell Back Squat with leg muscles highlighted (back-squat.dim_600x400.png)\n- Semi-realistic to realistic illustration of a person performing Romanian Deadlift for hamstrings (romanian-deadlift.dim_600x400.png)\n- Semi-realistic to realistic illustration of a person performing Leg Press machine exercise (leg-press.dim_600x400.png)\n- Semi-realistic to realistic illustration of a person performing Lunges with dumbbells (lunges.dim_600x400.png)\n- Semi-realistic to realistic illustration of a person performing Leg Curl on a machine (leg-curl.dim_600x400.png)\n- Semi-realistic to realistic illustration of a person performing Hip Thrust with barbell for glutes (hip-thrust.dim_600x400.png)\n- Semi-realistic to realistic illustration of a person performing Cable Kickback for glutes (cable-kickback.dim_600x400.png)\n- Semi-realistic to realistic illustration of a person performing Bulgarian Split Squat (bulgarian-split-squat.dim_600x400.png)\n- Semi-realistic to realistic illustration of a person performing Sumo Deadlift for inner thigh and glute activation (sumo-deadlift.dim_600x400.png)\n- Semi-realistic to realistic illustration of a person performing Glute Bridge on the floor (glute-bridge.dim_600x400.png)\n- Semi-realistic to realistic illustration of a person performing Plank with core muscles highlighted (plank.dim_600x400.png)\n- Semi-realistic to realistic illustration of a person performing Hanging Leg Raises for abs (hanging-leg-raises.dim_600x400.png)\n- Semi-realistic to realistic illustration of a person performing Cable Crunches (cable-crunches.dim_600x400.png)\n- Semi-realistic to realistic illustration of a person performing Russian Twists for obliques (russian-twists.dim_600x400.png)\n- Semi-realistic to realistic illustration of a person performing Ab Wheel Rollout (ab-wheel-rollout.dim_600x400.png)\n- Semi-realistic to realistic illustration of a person performing Standing Calf Raises (calf-raises.dim_600x400.png)\n- Semi-realistic to realistic illustration of a person performing Seated Calf Raise on a machine (seated-calf-raise.dim_600x400.png)\n- Semi-realistic to realistic illustration of a person performing Wrist Curls for forearm development (wrist-curls.dim_600x400.png)\n- Semi-realistic to realistic illustration of a person performing Reverse Wrist Curls for forearm extensors (reverse-wrist-curls.dim_600x400.png)\n- Semi-realistic to realistic illustration of a person performing Farmer's Walk carrying heavy dumbbells (farmers-walk.dim_600x400.png)",
-  "existing_features": [],
-  "new_feature_requests": [
+  "isFixRequest": true,
+  "existing_features": [
     {
-      "id": "AR-1",
-      "summary": "Each muscle group has ~20 exercises with realistic images, workout name, and benefits text",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-2",
-      "summary": "Customers can select exercises to build custom workout routines",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-3",
-      "summary": "Each exercise is clickable to show sample video clips demonstrating correct form",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-4",
-      "summary": "All exercise info must be real, factual, and researched; images and videos should be semi-realistic to realistic",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-5",
-      "summary": "Expand the backend exercise data to include approximately 20 real, factual exercises per muscle group (covering all existing muscle groups: chest, back, shoulders, biceps, triceps, legs, glutes, core, forearms, calves). Each exercise must include: name, targeted muscle group, a concise list of benefits (3–5 bullet points with accurate physiological/functional benefits), a description of correct form/technique, difficulty level, equipment needed, and at least one image URL and one video URL demonstrating correct form. All exercise names, benefits, and descriptions must be accurate and based on well-established exercise science.",
+      "id": "feature-fix-the-workoutlibrarypage-so-that-each-muscle-group-section-correctly-displays-its-associated-exercises-diagnose-and-resolve-the-data-mapping-filtering-logic-that-causes-exercise-counts-to-show-as-zero-for-every-muscle-group-ensure-exercises-are-correctly-associated-with-their-muscle-group-and-rendered-inside-the-corresponding-collapsible-section",
+      "title": "Fix the WorkoutLibraryPage so that each muscle group section correctly displays its associated exercises. Diagnose and resolve the data mapping/filtering logic that causes exercise counts to show as zero for every muscle group. Ensure exercises are correctly associated with their muscle group and rendered inside the corresponding collapsible section.",
       "reqIds": [
         "REQ-1"
       ],
-      "status": "pending"
+      "version": 1
     },
     {
-      "id": "AR-6",
-      "summary": "Generate semi-realistic to realistic exercise illustration images for each exercise. Each image should clearly depict the human body performing the specific exercise with proper form, using a semi-realistic to realistic art style (not cartoonish). Images should show muscle engagement visually. Produce one image per exercise (approximately 200 total across all muscle groups).",
+      "id": "feature-audit-the-usequeries-ts-hooks-and-backend-query-for-exercises-to-ensure-the-exercise-data-returned-includes-the-correct-muscle-group-field-and-that-the-frontend-filtering-grouping-logic-in-workoutlibrarypage-correctly-matches-exercises-to-their-respective-muscle-group-by-the-same-key-id-used-in-both-datasets",
+      "title": "Audit the useQueries.ts hooks and backend query for exercises to ensure the exercise data returned includes the correct muscle group field, and that the frontend filtering/grouping logic in WorkoutLibraryPage correctly matches exercises to their respective muscle group by the same key/ID used in both datasets.",
       "reqIds": [
         "REQ-2"
       ],
-      "status": "pending"
-    },
-    {
-      "id": "AR-7",
-      "summary": "Update the WorkoutLibraryPage to display all exercises for each muscle group in a grid or list layout. Each exercise card must show: (1) the exercise image in a semi-realistic to realistic style, (2) the exercise name prominently, and (3) a concise benefits summary. Cards must be visually polished and consistent across all muscle groups.",
-      "reqIds": [
-        "REQ-3"
-      ],
-      "status": "pending"
-    },
-    {
-      "id": "AR-8",
-      "summary": "Make each exercise card clickable to open a detail modal or drawer. The modal must display: the exercise name, full benefits list, correct form description, equipment needed, difficulty level, and an embedded video clip demonstrating correct form. Video URLs should support YouTube embeds and direct video files. The modal should have a clear close button.",
-      "reqIds": [
-        "REQ-4"
-      ],
-      "status": "pending"
-    },
-    {
-      "id": "AR-9",
-      "summary": "Implement a workout routine builder feature. Users must be able to click an 'Add to Routine' button on each exercise card to add it to a personal workout routine. The routine should be displayed in a collapsible sidebar or bottom panel showing all selected exercises. Users can remove exercises from the routine. The routine should be saveable (persisted to the backend for authenticated users, or stored in localStorage for guests).",
-      "reqIds": [
-        "REQ-5"
-      ],
-      "status": "pending"
-    },
-    {
-      "id": "AR-10",
-      "summary": "Add backend support for storing and retrieving user workout routines. A routine must include: a name, an ordered list of exercise IDs, and the user's principal ID. Support creating, reading, updating, and deleting routines per user.",
-      "reqIds": [
-        "REQ-6"
-      ],
-      "status": "pending"
+      "version": 1
     }
   ],
+  "new_feature_requests": [],
   "gameProjectType": "none",
-  "projectName": "Cerebral Physique",
+  "projectName": "Fix muscle group boxes showing zero exercises",
   "clarification_mode": "instant",
   "clarification_rounds": 0
 }

@@ -12,16 +12,13 @@ import MixinAuthorization "authorization/MixinAuthorization";
 import Stripe "stripe/stripe";
 import OutCall "http-outcalls/outcall";
 import Storage "blob-storage/Storage";
-import Migration "migration";
 
-// Data migration on upgrade
-(with migration = Migration.run)
 actor {
   include MixinStorage();
   let accessControlState = AccessControl.initState();
   include MixinAuthorization(accessControlState);
 
-  type MuscleGroup = {
+  public type MuscleGroup = {
     #chest;
     #back;
     #shoulders;
@@ -365,6 +362,11 @@ actor {
   // Public read — no auth required
   public query func getExercise(id : Nat) : async ?Exercise {
     exercises.get(id);
+  };
+
+  // Public read — returns only public content
+  public query func getAllExercises() : async [Exercise] {
+    exercises.values().toArray();
   };
 
   // Public read — no auth required

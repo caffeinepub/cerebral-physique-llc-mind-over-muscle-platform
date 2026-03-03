@@ -1,98 +1,42 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Expand exercise library with 20 exercises per muscle group, routine builder, and form videos",
+  "title": "Fix muscle group boxes showing zero exercises",
   "requirements": [
     {
+      "id": "REQ-1",
+      "summary": "Fix WorkoutLibraryPage to correctly display exercises in their respective muscle group sections",
+      "acceptanceCriteria": [
+        "Each muscle group section displays all exercises belonging to that muscle group",
+        "No muscle group section shows zero exercises when exercises exist for that group in the backend",
+        "Exercise cards render correctly with their name, image/video, and relevant details inside each section"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/pages/WorkoutLibraryPage.tsx",
+          "operation": "modify",
+          "description": "Diagnose and fix the data mapping/filtering logic that causes exercise counts to show as zero. The issue is likely in how exercises are being filtered by muscle group - verify that the primaryMuscle field from exercises matches the muscle group name/identifier used in MuscleGroupDetails. Ensure the filteredExercises logic correctly associates exercises with their muscle group sections. Check that the muscleGroup.exerciseIds array is being used or that exercises are filtered by muscleGroup.name matching exercise.primaryMuscle. Update the rendering logic to display exercise cards with images (using frontend/public/assets/generated/ paths where applicable), videos, names, and details inside each collapsible section."
+        }
+      ]
+    },
+    {
       "id": "REQ-2",
-      "summary": "Generate and wire semi-realistic to realistic exercise illustration images for approximately 200 exercises across all muscle groups",
+      "summary": "Audit and fix the data fetching and filtering logic to ensure exercises are correctly associated with muscle groups",
       "acceptanceCriteria": [
-        "Each exercise displayed in the workout library has a distinct, semi-realistic to realistic image.",
-        "Images are stored as static assets under frontend/public/assets/generated.",
-        "Images clearly depict a human performing the labeled exercise with correct form."
+        "The muscle group identifier used to group exercises on the frontend matches the identifier returned by the backend for each exercise",
+        "The React Query hooks return a non-empty list of exercises when exercises exist in the canister",
+        "Console produces no errors related to undefined muscle group fields or failed exercise fetches"
       ],
       "file_operations": [
-        {
-          "path": "frontend/src/pages/WorkoutLibraryPage.tsx",
-          "operation": "modify",
-          "description": "Update exercise card rendering to reference generated image assets at frontend/public/assets/generated/<exercise-name>.dim_600x400.png for each of the ~200 exercises. Use the exact generated filenames (e.g., barbell-bench-press.dim_600x400.png, dumbbell-flyes.dim_600x400.png, incline-bench-press.dim_600x400.png, cable-crossover.dim_600x400.png, push-ups.dim_600x400.png) as static asset paths in image src attributes. Ensure images are displayed at appropriate dimensions within exercise cards."
-        }
-      ]
-    },
-    {
-      "id": "REQ-3",
-      "summary": "Update WorkoutLibraryPage to display all exercises for each muscle group in a polished grid layout with exercise images, names, and benefit summaries",
-      "acceptanceCriteria": [
-        "All ~20 exercises per muscle group are visible when the muscle group section is expanded.",
-        "Each card shows the exercise image, exercise name, and 3–5 benefit points.",
-        "The layout is responsive and consistent across all muscle groups.",
-        "No exercises are cut off or hidden without a clear 'show more' interaction."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/pages/WorkoutLibraryPage.tsx",
-          "operation": "modify",
-          "description": "Expand the exercise grid rendering to display all exercises per muscle group (no artificial limits). For each exercise card, prominently display: (1) the exercise image from generated assets, (2) the exercise name as a heading, and (3) a concise benefits summary extracted from the Exercise.description field or presented as bullet points if benefits are provided as an array. Ensure cards use consistent styling (Tailwind classes), are responsive across breakpoints, and maintain the existing dark aesthetic. All exercises should be visible when a muscle group section is expanded—remove any pagination or 'show more' logic unless explicitly required for performance."
-        }
-      ]
-    },
-    {
-      "id": "REQ-4",
-      "summary": "Make exercise cards clickable to open a detail modal displaying full exercise information and embedded form demonstration video",
-      "acceptanceCriteria": [
-        "Clicking any exercise card opens a modal or drawer without navigating away from the page.",
-        "The modal displays the full exercise name, benefits, form description, equipment, difficulty, and an embedded video.",
-        "YouTube URLs are rendered as embedded iframes; direct video URLs use an HTML5 video player.",
-        "The modal can be dismissed via a close button or clicking outside it."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/components/ExerciseDetailModal.tsx",
-          "operation": "create",
-          "description": "Create a new modal component that accepts an Exercise object as a prop. Display the exercise name, full description/benefits, equipment type, difficulty level, and cues. Render the video demonstration using the Exercise.videoUrl field: if the URL is a YouTube or Vimeo link, embed it as an iframe; if it's a direct video file URL, use an HTML5 <video> element with controls. Provide a close button and support dismissal by clicking outside the modal. Use shadcn-ui Dialog or Sheet component for the modal implementation. Ensure the modal is accessible and responsive."
-        },
-        {
-          "path": "frontend/src/pages/WorkoutLibraryPage.tsx",
-          "operation": "modify",
-          "description": "Wire the ExerciseDetailModal into the WorkoutLibraryPage. Make each exercise card clickable (add onClick handler) to open the modal with the selected exercise data. Manage modal open/closed state and the currently selected exercise using React state hooks. Ensure clicking a card does not navigate away from the page—only opens the modal overlay."
-        }
-      ]
-    },
-    {
-      "id": "REQ-5",
-      "summary": "Implement a workout routine builder feature allowing users to add/remove exercises and persist routines to backend or localStorage",
-      "acceptanceCriteria": [
-        "Each exercise card has an 'Add to Routine' button that adds the exercise to the active routine.",
-        "A routine panel/sidebar shows all exercises currently in the routine with remove controls.",
-        "Authenticated users can save and reload their routine via the backend.",
-        "Guest users have their routine persisted in localStorage for the session.",
-        "Duplicate exercises are not added twice; a visual indicator shows when an exercise is already in the routine."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/hooks/useRoutineBuilder.ts",
-          "operation": "create",
-          "description": "Create a custom hook for managing routine builder state. Use React state to track the current routine (array of exercise IDs). Provide functions: addExerciseToRoutine(exerciseId), removeExerciseFromRoutine(exerciseId), isExerciseInRoutine(exerciseId), clearRoutine(). For guest users, persist the routine state to localStorage on every change and restore it on mount. For authenticated users, sync the routine with the backend by calling createWorkoutRoutine, updateWorkoutRoutine, and getCallerWorkoutRoutines from the backend interface. Handle duplicate prevention by checking if an exercise ID already exists before adding."
-        },
-        {
-          "path": "frontend/src/components/RoutineBuilderPanel.tsx",
-          "operation": "create",
-          "description": "Create a collapsible sidebar or bottom panel component that displays the current routine. Show a list of all exercises in the routine (fetch full Exercise details using their IDs). Each list item should display the exercise name and a remove button. Include a save button that triggers backend persistence for authenticated users (calls createWorkoutRoutine or updateWorkoutRoutine with a routine name and the exercise ID list). For guest users, display a message indicating the routine is saved locally. Include a clear/reset button to empty the routine. Use shadcn-ui Sheet or Collapsible component for the panel UI."
-        },
-        {
-          "path": "frontend/src/pages/WorkoutLibraryPage.tsx",
-          "operation": "modify",
-          "description": "Integrate the routine builder into WorkoutLibraryPage. Add an 'Add to Routine' button to each exercise card. Use the useRoutineBuilder hook to handle adding/removing exercises. Display a visual indicator (e.g., checkmark icon, highlighted border, or disabled button state) on cards when an exercise is already in the routine. Wire the RoutineBuilderPanel component into the page layout, making it accessible as a collapsible sidebar or fixed bottom panel. Ensure the routine state persists across page navigation within the workout library."
-        },
         {
           "path": "frontend/src/hooks/useQueries.ts",
           "operation": "modify",
-          "description": "Add React Query hooks for routine CRUD operations: useCreateWorkoutRoutine, useGetCallerWorkoutRoutines, useUpdateWorkoutRoutine, and useDeleteWorkoutRoutine. These hooks should wrap the corresponding backend actor methods (createWorkoutRoutine, getCallerWorkoutRoutines, updateWorkoutRoutine, deleteWorkoutRoutine). Use useMutation for create/update/delete and useQuery for fetching routines. Invalidate the 'callerWorkoutRoutines' query key after successful mutations."
+          "description": "Audit the useGetAllExercises and useGetAllMuscleGroups hooks to ensure they are correctly fetching and transforming data. Verify that the Exercise type's primaryMuscle field (which is a MuscleGroup enum) is being correctly compared with the MuscleGroupDetails name field. Add console logging during development to verify data structure and field values. Ensure the query hooks properly handle the MuscleGroup enum values and that string comparisons (if any) match the exact enum format returned by the backend."
         },
         {
-          "path": "frontend/src/pages/UserDashboardPage.tsx",
+          "path": "frontend/src/pages/WorkoutLibraryPage.tsx",
           "operation": "modify",
-          "description": "Add a section to the UserDashboardPage that displays the user's saved workout routines. Fetch routines using useGetCallerWorkoutRoutines from useQueries. Display each routine as a card showing the routine name and the list of exercise names (fetch exercise details by IDs). Provide buttons to load a routine into the active builder (navigate to WorkoutLibraryPage with state or URL params), edit a routine, or delete a routine. Handle loading, error, and empty states appropriately."
+          "description": "Add diagnostic logging to verify that exercises array and muscleGroups array are both populated correctly. Log the primaryMuscle value for each exercise and the name value for each muscle group to confirm they match. Verify the filtering logic compares the correct fields (exercise.primaryMuscle should match muscleGroup.name or use muscleGroup.exerciseIds array). If using exerciseIds, ensure exercises are looked up by id correctly. Fix any type mismatches or case-sensitivity issues in the comparison logic."
         }
       ]
     }

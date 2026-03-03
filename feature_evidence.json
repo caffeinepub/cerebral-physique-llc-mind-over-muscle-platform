@@ -1,4 +1,50 @@
 {
   "kind": "feature_evidence_report",
-  "features": []
+  "features": [
+    {
+      "featureId": "feature-fix-the-workoutlibrarypage-so-that-each-muscle-group-section-correctly-displays-its-associated-exercises-diagnose-and-resolve-the-data-mapping-filtering-logic-that-causes-exercise-counts-to-show-as-zero-for-every-muscle-group-ensure-exercises-are-correctly-associated-with-their-muscle-group-and-rendered-inside-the-corresponding-collapsible-section",
+      "featureTitle": "Fix the WorkoutLibraryPage so that each muscle group section correctly displays its associated exercises. Diagnose and resolve the data mapping/filtering logic that causes exercise counts to show as zero for every muscle group. Ensure exercises are correctly associated with their muscle group and rendered inside the corresponding collapsible section.",
+      "files": [
+        "frontend/src/pages/WorkoutLibraryPage.tsx"
+      ],
+      "components": [
+        "blob-storage@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "authorization@4.0.0",
+        "http-outcalls@3.0.0",
+        "github-export-icp-cli@1.0.0",
+        "stripe@3.0.0"
+      ],
+      "testIds": [
+        "REQ-1"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-audit-the-usequeries-ts-hooks-and-backend-query-for-exercises-to-ensure-the-exercise-data-returned-includes-the-correct-muscle-group-field-and-that-the-frontend-filtering-grouping-logic-in-workoutlibrarypage-correctly-matches-exercises-to-their-respective-muscle-group-by-the-same-key-id-used-in-both-datasets",
+      "featureTitle": "Audit the useQueries.ts hooks and backend query for exercises to ensure the exercise data returned includes the correct muscle group field, and that the frontend filtering/grouping logic in WorkoutLibraryPage correctly matches exercises to their respective muscle group by the same key/ID used in both datasets.",
+      "files": [
+        "frontend/src/hooks/useQueries.ts",
+        "frontend/src/pages/WorkoutLibraryPage.tsx"
+      ],
+      "components": [
+        "blob-storage@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "authorization@4.0.0",
+        "http-outcalls@3.0.0",
+        "github-export-icp-cli@1.0.0",
+        "stripe@3.0.0"
+      ],
+      "testIds": [
+        "REQ-2"
+      ],
+      "confidence": "high"
+    }
+  ]
 }

@@ -1,97 +1,53 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-03-03T09:30:11.116Z",
+  "generatedAt": "2026-03-03T10:09:09.170Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 6,
-    "implemented": 0,
+    "total": 2,
+    "implemented": 2,
     "items": [
       {
         "id": "REQ-1",
-        "summary": "Expand the backend exercise data to include approximately 20 real, factual exercises per muscle group (covering all existing muscle groups: chest, back, shoulders, biceps, triceps, legs, glutes, core, forearms, calves). Each exercise must include: name, targeted muscle group, a concise list of benefits (3–5 bullet points with accurate physiological/functional benefits), a description of correct form/technique, difficulty level, equipment needed, and at least one image URL and one video URL demonstrating correct form. All exercise names, benefits, and descriptions must be accurate and based on well-established exercise science.",
-        "status": "unknown",
-        "plannedFiles": [],
-        "matchedFiles": []
+        "summary": "Fix the WorkoutLibraryPage so that each muscle group section correctly displays its associated exercises. Diagnose and resolve the data mapping/filtering logic that causes exercise counts to show as zero for every muscle group. Ensure exercises are correctly associated with their muscle group and rendered inside the corresponding collapsible section.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/pages/WorkoutLibraryPage.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/pages/WorkoutLibraryPage.tsx"
+        ]
       },
       {
         "id": "REQ-2",
-        "summary": "Generate semi-realistic to realistic exercise illustration images for each exercise. Each image should clearly depict the human body performing the specific exercise with proper form, using a semi-realistic to realistic art style (not cartoonish). Images should show muscle engagement visually. Produce one image per exercise (approximately 200 total across all muscle groups).",
-        "status": "missing",
+        "summary": "Audit the useQueries.ts hooks and backend query for exercises to ensure the exercise data returned includes the correct muscle group field, and that the frontend filtering/grouping logic in WorkoutLibraryPage correctly matches exercises to their respective muscle group by the same key/ID used in both datasets.",
+        "status": "implemented",
         "plannedFiles": [
-          "frontend/src/pages/WorkoutLibraryPage.tsx"
-        ],
-        "matchedFiles": []
-      },
-      {
-        "id": "REQ-3",
-        "summary": "Update the WorkoutLibraryPage to display all exercises for each muscle group in a grid or list layout. Each exercise card must show: (1) the exercise image in a semi-realistic to realistic style, (2) the exercise name prominently, and (3) a concise benefits summary. Cards must be visually polished and consistent across all muscle groups.",
-        "status": "missing",
-        "plannedFiles": [
-          "frontend/src/pages/WorkoutLibraryPage.tsx"
-        ],
-        "matchedFiles": []
-      },
-      {
-        "id": "REQ-4",
-        "summary": "Make each exercise card clickable to open a detail modal or drawer. The modal must display: the exercise name, full benefits list, correct form description, equipment needed, difficulty level, and an embedded video clip demonstrating correct form. Video URLs should support YouTube embeds and direct video files. The modal should have a clear close button.",
-        "status": "missing",
-        "plannedFiles": [
-          "frontend/src/components/ExerciseDetailModal.tsx",
-          "frontend/src/pages/WorkoutLibraryPage.tsx"
-        ],
-        "matchedFiles": []
-      },
-      {
-        "id": "REQ-5",
-        "summary": "Implement a workout routine builder feature. Users must be able to click an 'Add to Routine' button on each exercise card to add it to a personal workout routine. The routine should be displayed in a collapsible sidebar or bottom panel showing all selected exercises. Users can remove exercises from the routine. The routine should be saveable (persisted to the backend for authenticated users, or stored in localStorage for guests).",
-        "status": "missing",
-        "plannedFiles": [
-          "frontend/src/hooks/useRoutineBuilder.ts",
-          "frontend/src/components/RoutineBuilderPanel.tsx",
-          "frontend/src/pages/WorkoutLibraryPage.tsx",
           "frontend/src/hooks/useQueries.ts",
-          "frontend/src/pages/UserDashboardPage.tsx"
+          "frontend/src/pages/WorkoutLibraryPage.tsx"
         ],
-        "matchedFiles": []
-      },
-      {
-        "id": "REQ-6",
-        "summary": "Add backend support for storing and retrieving user workout routines. A routine must include: a name, an ordered list of exercise IDs, and the user's principal ID. Support creating, reading, updating, and deleting routines per user.",
-        "status": "unknown",
-        "plannedFiles": [],
-        "matchedFiles": []
+        "matchedFiles": [
+          "frontend/src/hooks/useQueries.ts",
+          "frontend/src/pages/WorkoutLibraryPage.tsx"
+        ]
       }
     ]
   },
   "changedFiles": [
     "backend/main.mo",
-    "backend/migration.mo",
     "build-request.json",
     "feature_evidence.json",
+    "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
-    "frontend/public/assets/generated/arnold-press.dim_600x400.png",
-    "frontend/public/assets/generated/bench-press.dim_600x400.png",
-    "frontend/public/assets/generated/bent-over-row.dim_600x400.png",
-    "frontend/public/assets/generated/cable-crossover.dim_600x400.png",
-    "frontend/public/assets/generated/deadlift.dim_600x400.png",
-    "frontend/public/assets/generated/dumbbell-flyes.dim_600x400.png",
-    "frontend/public/assets/generated/face-pulls.dim_600x400.png",
-    "frontend/public/assets/generated/front-raises.dim_600x400.png",
-    "frontend/public/assets/generated/incline-bench-press.dim_600x400.png",
-    "frontend/public/assets/generated/lat-pulldown.dim_600x400.png",
-    "frontend/public/assets/generated/lateral-raises.dim_600x400.png",
-    "frontend/public/assets/generated/overhead-press.dim_600x400.png",
-    "frontend/public/assets/generated/pull-ups.dim_600x400.png",
-    "frontend/public/assets/generated/push-ups.dim_600x400.png",
-    "frontend/public/assets/generated/seated-cable-row.dim_600x400.png",
     "frontend/src/backend.d.ts",
     "frontend/src/backend.ts",
     "frontend/src/declarations/backend.did.d.ts",
     "frontend/src/declarations/backend.did.js",
+    "frontend/src/hooks/useQueries.ts",
+    "frontend/src/pages/WorkoutLibraryPage.tsx",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

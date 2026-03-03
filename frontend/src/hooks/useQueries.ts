@@ -86,6 +86,18 @@ export function useGetAllExercisePreviews() {
   });
 }
 
+export function useGetAllExercises() {
+  const { actor, isFetching } = useActor();
+  return useQuery<Exercise[]>({
+    queryKey: ['allExercises'],
+    queryFn: async () => {
+      if (!actor) return [];
+      return actor.getAllExercises();
+    },
+    enabled: !!actor && !isFetching,
+  });
+}
+
 export function useGetExercise(id: bigint) {
   const { actor, isFetching } = useActor();
   return useQuery<Exercise | null>({
@@ -153,6 +165,7 @@ export function useAddExercise() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['exercisePreviews'] });
+      queryClient.invalidateQueries({ queryKey: ['allExercises'] });
       queryClient.invalidateQueries({ queryKey: ['allExercisesAdmin'] });
       queryClient.invalidateQueries({ queryKey: ['muscleGroups'] });
     },
@@ -192,6 +205,7 @@ export function useUpdateExercise() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['exercisePreviews'] });
+      queryClient.invalidateQueries({ queryKey: ['allExercises'] });
       queryClient.invalidateQueries({ queryKey: ['allExercisesAdmin'] });
       queryClient.invalidateQueries({ queryKey: ['muscleGroups'] });
     },
@@ -209,6 +223,7 @@ export function useDeleteExercise() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['exercisePreviews'] });
+      queryClient.invalidateQueries({ queryKey: ['allExercises'] });
       queryClient.invalidateQueries({ queryKey: ['allExercisesAdmin'] });
       queryClient.invalidateQueries({ queryKey: ['muscleGroups'] });
     },
@@ -682,13 +697,11 @@ export function useCreateCheckoutSession() {
   return useMutation({
     mutationFn: async (params: { items: ShoppingItem[]; successUrl: string; cancelUrl: string }) => {
       if (!actor) throw new Error('Actor not available');
-      const result = await actor.createCheckoutSession(
-        params.items,
-        params.successUrl,
-        params.cancelUrl,
-      );
+      const result = await actor.createCheckoutSession(params.items, params.successUrl, params.cancelUrl);
       const session = JSON.parse(result) as { id: string; url: string };
-      if (!session?.url) throw new Error('Stripe session missing url');
+      if (!session?.url) {
+        throw new Error('Stripe session missing url');
+      }
       return session;
     },
   });
@@ -735,29 +748,36 @@ export function useSetMiscConfig() {
   });
 }
 
-// ── Canister ID ───────────────────────────────────────────────────────────────
-
-export function useGetCanisterId() {
-  return useQuery<string>({
-    queryKey: ['canisterId'],
-    queryFn: async () => {
-      const hostname = window.location.hostname;
-      const match = hostname.match(/^([a-z0-9-]+)\.icp0\.io$/);
-      if (match) return match[1];
-      const localMatch = hostname.match(/^([a-z0-9-]+)\.localhost$/);
-      if (localMatch) return localMatch[1];
-      return 'unknown-canister-id';
-    },
-  });
-}
-
 // ── Affiliate Disclosure ──────────────────────────────────────────────────────
 
 export function useGetAffiliateDisclosure() {
   return useQuery<string>({
     queryKey: ['affiliateDisclosure'],
     queryFn: async () => {
-      return 'This page contains affiliate links. As an Amazon Associate, we earn from qualifying purchases at no additional cost to you.';
+      return 'This page contains affiliate links. We may earn a commission if you purchase through these links, at no extra cost to you.';
     },
+  });
+}
+
+// ── Canister ID ───────────────────────────────────────────────────────────────
+
+export function useGetCanisterId() {
+  const { actor, isFetching } = useActor();
+  return useQuery<string>({
+    queryKey: ['canisterId'],
+    queryFn: async () => {
+      if (!actor) return '';
+      try {
+        const hostname = window.location.hostname;
+        const match = hostname.match(/^([a-z0-9-]+)\.icp0\.io$/);
+        if (match) return match[1];
+        const localMatch = hostname.match(/^([a-z0-9-]+)\.localhost$/);
+        if (localMatch) return localMatch[1];
+        return hostname;
+      } catch {
+        return '';
+      }
+    },
+    enabled: !!actor && !isFetching,
   });
 }

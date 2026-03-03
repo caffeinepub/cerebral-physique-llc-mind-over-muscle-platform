@@ -274,6 +274,7 @@ export const idlService = IDL.Service({
       [IDL.Vec(ExercisePreview)],
       ['query'],
     ),
+  'getAllExercises' : IDL.Func([], [IDL.Vec(Exercise)], ['query']),
   'getAllExercisesAdmin' : IDL.Func([], [IDL.Vec(Exercise)], ['query']),
   'getAllMuscleGroups' : IDL.Func([], [IDL.Vec(MuscleGroupDetails)], ['query']),
   'getAllNutritionArticlesAdmin' : IDL.Func(
@@ -659,6 +660,7 @@ export const idlFactory = ({ IDL }) => {
         [IDL.Vec(ExercisePreview)],
         ['query'],
       ),
+    'getAllExercises' : IDL.Func([], [IDL.Vec(Exercise)], ['query']),
     'getAllExercisesAdmin' : IDL.Func([], [IDL.Vec(Exercise)], ['query']),
     'getAllMuscleGroups' : IDL.Func(
         [],

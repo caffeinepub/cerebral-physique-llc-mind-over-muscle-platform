@@ -234,6 +234,7 @@ export interface _SERVICE {
   'getAllAmazonProducts' : ActorMethod<[], Array<AmazonProduct>>,
   'getAllBlogPostsAdmin' : ActorMethod<[], Array<BlogPost>>,
   'getAllExercisePreviews' : ActorMethod<[], Array<ExercisePreview>>,
+  'getAllExercises' : ActorMethod<[], Array<Exercise>>,
   'getAllExercisesAdmin' : ActorMethod<[], Array<Exercise>>,
   'getAllMuscleGroups' : ActorMethod<[], Array<MuscleGroupDetails>>,
   'getAllNutritionArticlesAdmin' : ActorMethod<[], Array<NutritionArticle>>,
