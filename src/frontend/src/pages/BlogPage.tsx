@@ -13,6 +13,7 @@ import {
   useGetPublishedBlogPostPreviews,
   useIsCallerAdmin,
 } from "@/hooks/useQueries";
+import { STATIC_BLOG_POST_PREVIEWS } from "@/lib/staticBlogContent";
 import { useNavigate } from "@tanstack/react-router";
 import { BookOpen, Calendar, Loader2, Lock, Settings } from "lucide-react";
 
@@ -28,6 +29,13 @@ export default function BlogPage() {
   const { identity: _identity } = useInternetIdentity();
 
   const hasActiveMembership = membership?.active === true;
+
+  const mergedBlogPreviews = [
+    ...STATIC_BLOG_POST_PREVIEWS,
+    ...blogPreviews.filter(
+      (p) => !STATIC_BLOG_POST_PREVIEWS.some((s) => s.title === p.title),
+    ),
+  ];
 
   const formatDate = (timestamp: bigint) => {
     const date = new Date(Number(timestamp) / 1000000);
@@ -105,7 +113,7 @@ export default function BlogPage() {
             <div className="flex items-center justify-center py-12">
               <Loader2 className="h-8 w-8 animate-spin text-neon-purple" />
             </div>
-          ) : blogPreviews.length === 0 ? (
+          ) : mergedBlogPreviews.length === 0 ? (
             <div className="mx-auto max-w-2xl text-center">
               <BookOpen className="mx-auto mb-4 h-16 w-16 text-muted-foreground" />
               <h3 className="mb-2 text-xl font-semibold">No blog posts yet</h3>
@@ -123,7 +131,7 @@ export default function BlogPage() {
             </div>
           ) : (
             <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-              {blogPreviews.map((preview) => {
+              {mergedBlogPreviews.map((preview) => {
                 const isLocked = preview.memberOnly && !hasActiveMembership;
 
                 return (

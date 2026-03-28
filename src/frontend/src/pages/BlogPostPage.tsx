@@ -9,6 +9,7 @@ import {
   useGetMyMembership,
   useIsCallerAdmin,
 } from "@/hooks/useQueries";
+import { getStaticBlogPost } from "@/lib/staticBlogContent";
 import { useNavigate, useParams } from "@tanstack/react-router";
 import { ArrowLeft, Calendar, Loader2, Lock } from "lucide-react";
 
@@ -110,6 +111,9 @@ export default function BlogPostPage() {
   const { data: membership } = useGetMyMembership();
   const { data: isAdmin = false } = useIsCallerAdmin();
 
+  const resolvedPost =
+    post ?? (isLoading ? null : getStaticBlogPost(BigInt(id)));
+
   const hasActiveMembership = membership?.active === true;
 
   const formatDate = (timestamp: bigint) => {
@@ -129,7 +133,7 @@ export default function BlogPostPage() {
     );
   }
 
-  if (!post) {
+  if (!resolvedPost) {
     return (
       <div className="container mx-auto px-4 py-16">
         <Card className="mx-auto max-w-2xl border-border/40">
@@ -148,8 +152,8 @@ export default function BlogPostPage() {
     );
   }
 
-  const isLocked = post.memberOnly && !hasActiveMembership && !isAdmin;
-  const previewContent = `${post.content.substring(0, 300)}...`;
+  const isLocked = resolvedPost.memberOnly && !hasActiveMembership && !isAdmin;
+  const previewContent = `${resolvedPost.content.substring(0, 300)}...`;
 
   return (
     <div className="flex flex-col">
@@ -174,7 +178,7 @@ export default function BlogPostPage() {
           </Button>
           <div className="mx-auto max-w-4xl">
             <div className="mb-4 flex flex-wrap items-center gap-3">
-              {post.memberOnly && (
+              {resolvedPost.memberOnly && (
                 <Badge variant="secondary" className="gap-1">
                   <Lock className="h-3 w-3" />
                   Members Only
@@ -182,13 +186,15 @@ export default function BlogPostPage() {
               )}
               <div className="flex items-center text-sm text-muted-foreground">
                 <Calendar className="mr-1 h-4 w-4" />
-                {formatDate(post.createdAt)}
+                {formatDate(resolvedPost.createdAt)}
               </div>
             </div>
             <h1 className="mb-4 text-4xl font-bold tracking-tight md:text-5xl">
-              {post.title}
+              {resolvedPost.title}
             </h1>
-            <p className="text-lg text-muted-foreground">By {post.author}</p>
+            <p className="text-lg text-muted-foreground">
+              By {resolvedPost.author}
+            </p>
           </div>
         </div>
       </section>
@@ -234,23 +240,25 @@ export default function BlogPostPage() {
               <Card className="border-border/40">
                 <CardContent className="py-8">
                   <div className="prose prose-lg max-w-none dark:prose-invert">
-                    <p className="whitespace-pre-wrap">{post.content}</p>
+                    <p className="whitespace-pre-wrap">
+                      {resolvedPost.content}
+                    </p>
                   </div>
 
                   {/* Media */}
-                  {(post.media?.imageUrls?.length > 0 ||
-                    post.media?.videoUrls?.length > 0) && (
+                  {(resolvedPost.media?.imageUrls?.length > 0 ||
+                    resolvedPost.media?.videoUrls?.length > 0) && (
                     <MediaGallery
-                      imageUrls={post.media.imageUrls}
-                      videoUrls={post.media.videoUrls}
+                      imageUrls={resolvedPost.media.imageUrls}
+                      videoUrls={resolvedPost.media.videoUrls}
                     />
                   )}
 
-                  {post.seoKeywords.length > 0 && (
+                  {resolvedPost.seoKeywords.length > 0 && (
                     <div className="mt-8 border-t border-border/40 pt-6">
                       <p className="mb-3 text-sm font-medium">Topics:</p>
                       <div className="flex flex-wrap gap-2">
-                        {post.seoKeywords.map((keyword) => (
+                        {resolvedPost.seoKeywords.map((keyword) => (
                           <Badge key={keyword} variant="outline">
                             {keyword}
                           </Badge>

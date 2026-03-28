@@ -1,5 +1,6 @@
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { STATIC_NUTRITION_ARTICLE_PREVIEWS } from "@/lib/staticNutritionContent";
 import { Link } from "@tanstack/react-router";
 import { ArrowRight, Calendar, Leaf, Lock, User } from "lucide-react";
 import { useInternetIdentity } from "../hooks/useInternetIdentity";
@@ -17,6 +18,14 @@ export default function NutritionPage() {
   const { identity } = useInternetIdentity();
 
   const isMember = membership?.active === true;
+
+  const mergedPreviews = [
+    ...STATIC_NUTRITION_ARTICLE_PREVIEWS,
+    ...previews.filter(
+      (p) =>
+        !STATIC_NUTRITION_ARTICLE_PREVIEWS.some((s) => s.title === p.title),
+    ),
+  ];
 
   return (
     <div className="min-h-screen pt-20 pb-16">
@@ -75,7 +84,7 @@ export default function NutritionPage() {
               </div>
             ))}
           </div>
-        ) : previews.length === 0 ? (
+        ) : previews.length === 0 && mergedPreviews.length === 0 ? (
           <div className="text-center py-20">
             <Leaf className="w-12 h-12 text-muted-foreground mx-auto mb-4 opacity-50" />
             <h3 className="text-xl font-semibold text-foreground mb-2">
@@ -87,7 +96,7 @@ export default function NutritionPage() {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {previews.map((article) => {
+            {mergedPreviews.map((article) => {
               const isLocked = article.memberOnly && !isMember && !isAdmin;
               return (
                 <Link

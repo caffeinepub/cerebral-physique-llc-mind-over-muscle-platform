@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { getStaticNutritionArticle } from "@/lib/staticNutritionContent";
 import { Link, useParams } from "@tanstack/react-router";
 import { ArrowLeft, Calendar, Leaf, Lock, User } from "lucide-react";
 import StartMembershipCheckoutButton from "../components/membership/StartMembershipCheckoutButton";
@@ -108,6 +109,9 @@ export default function NutritionArticlePage() {
   const { data: isAdmin } = useIsCallerAdmin();
   const { identity } = useInternetIdentity();
 
+  const resolvedArticle =
+    article ?? (isLoading ? null : getStaticNutritionArticle(articleId));
+
   const isMember = membership?.active === true;
   const isAuthenticated = !!identity;
 
@@ -123,7 +127,7 @@ export default function NutritionArticlePage() {
     );
   }
 
-  if (error || !article) {
+  if (error || !resolvedArticle) {
     return (
       <div className="min-h-screen pt-20 pb-16 flex items-center justify-center">
         <div className="text-center space-y-4">
@@ -145,7 +149,7 @@ export default function NutritionArticlePage() {
     );
   }
 
-  const isLocked = article.memberOnly && !isMember && !isAdmin;
+  const isLocked = resolvedArticle.memberOnly && !isMember && !isAdmin;
 
   return (
     <div className="min-h-screen pt-20 pb-16">
@@ -163,7 +167,7 @@ export default function NutritionArticlePage() {
         <article>
           <header className="mb-8">
             <div className="flex flex-wrap items-center gap-2 mb-3">
-              {article.memberOnly && (
+              {resolvedArticle.memberOnly && (
                 <span className="inline-flex items-center gap-1 text-xs font-medium bg-primary/10 text-primary border border-primary/20 rounded-full px-3 py-1">
                   <Leaf className="w-3 h-3" />
                   Member Content
@@ -171,17 +175,17 @@ export default function NutritionArticlePage() {
               )}
             </div>
             <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-              {article.title}
+              {resolvedArticle.title}
             </h1>
             <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
               <span className="flex items-center gap-1.5">
                 <User className="w-4 h-4" />
-                {article.author}
+                {resolvedArticle.author}
               </span>
               <span className="flex items-center gap-1.5">
                 <Calendar className="w-4 h-4" />
                 {new Date(
-                  Number(article.createdAt) / 1_000_000,
+                  Number(resolvedArticle.createdAt) / 1_000_000,
                 ).toLocaleDateString("en-US", {
                   year: "numeric",
                   month: "long",
@@ -197,7 +201,7 @@ export default function NutritionArticlePage() {
               {/* Preview snippet */}
               <div className="relative">
                 <p className="text-muted-foreground leading-relaxed line-clamp-4">
-                  {article.content}
+                  {resolvedArticle.content}
                 </p>
                 <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-background to-transparent" />
               </div>
@@ -228,16 +232,16 @@ export default function NutritionArticlePage() {
               {/* Full content */}
               <div className="prose prose-invert max-w-none">
                 <div className="text-foreground leading-relaxed whitespace-pre-wrap">
-                  {article.content}
+                  {resolvedArticle.content}
                 </div>
               </div>
 
               {/* Media */}
-              {(article.media?.imageUrls?.length > 0 ||
-                article.media?.videoUrls?.length > 0) && (
+              {(resolvedArticle.media?.imageUrls?.length > 0 ||
+                resolvedArticle.media?.videoUrls?.length > 0) && (
                 <MediaGallery
-                  imageUrls={article.media.imageUrls}
-                  videoUrls={article.media.videoUrls}
+                  imageUrls={resolvedArticle.media.imageUrls}
+                  videoUrls={resolvedArticle.media.videoUrls}
                 />
               )}
             </div>
