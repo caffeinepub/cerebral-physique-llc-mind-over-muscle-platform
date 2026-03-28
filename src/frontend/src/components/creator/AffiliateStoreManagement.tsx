@@ -1,17 +1,55 @@
-import { useState } from 'react';
-import { useGetAllAmazonProducts, useAddAmazonProduct, useUpdateAmazonProduct, useDeleteAmazonProduct } from '@/hooks/useQueries';
-import type { AmazonProduct } from '@/backend';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Plus, Edit, Trash2, Loader2, AlertCircle, CheckCircle2, ShoppingBag } from 'lucide-react';
-import { toast } from 'sonner';
+import type { AmazonProduct } from "@/backend";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  useAddAmazonProduct,
+  useDeleteAmazonProduct,
+  useGetAllAmazonProducts,
+  useUpdateAmazonProduct,
+} from "@/hooks/useQueries";
+import {
+  AlertCircle,
+  CheckCircle2,
+  Edit,
+  Loader2,
+  Plus,
+  ShoppingBag,
+  Trash2,
+} from "lucide-react";
+import { useState } from "react";
+import { toast } from "sonner";
 
 export default function AffiliateStoreManagement() {
   const { data: products = [], isLoading, error } = useGetAllAmazonProducts();
@@ -21,24 +59,26 @@ export default function AffiliateStoreManagement() {
 
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const [editingProduct, setEditingProduct] = useState<AmazonProduct | null>(null);
+  const [editingProduct, setEditingProduct] = useState<AmazonProduct | null>(
+    null,
+  );
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
 
   const [formData, setFormData] = useState({
-    name: '',
-    description: '',
-    imageUrl: '',
-    category: '',
-    affiliateLink: '',
+    name: "",
+    description: "",
+    imageUrl: "",
+    category: "",
+    affiliateLink: "",
   });
 
   const resetForm = () => {
     setFormData({
-      name: '',
-      description: '',
-      imageUrl: '',
-      category: '',
-      affiliateLink: '',
+      name: "",
+      description: "",
+      imageUrl: "",
+      category: "",
+      affiliateLink: "",
     });
     setValidationErrors([]);
   };
@@ -47,25 +87,25 @@ export default function AffiliateStoreManagement() {
     const errors: string[] = [];
 
     if (!formData.name.trim()) {
-      errors.push('Product name is required');
+      errors.push("Product name is required");
     }
 
     if (!formData.description.trim()) {
-      errors.push('Description is required');
+      errors.push("Description is required");
     }
 
     if (!formData.imageUrl.trim()) {
-      errors.push('Image URL is required');
+      errors.push("Image URL is required");
     }
 
     if (!formData.category.trim()) {
-      errors.push('Category is required');
+      errors.push("Category is required");
     }
 
     if (!formData.affiliateLink.trim()) {
-      errors.push('Affiliate link is required');
-    } else if (!formData.affiliateLink.startsWith('http')) {
-      errors.push('Affiliate link must be a valid URL');
+      errors.push("Affiliate link is required");
+    } else if (!formData.affiliateLink.startsWith("http")) {
+      errors.push("Affiliate link must be a valid URL");
     }
 
     setValidationErrors(errors);
@@ -74,25 +114,25 @@ export default function AffiliateStoreManagement() {
 
   const handleAdd = async () => {
     if (!validateForm()) {
-      toast.error('Please fix validation errors before adding');
+      toast.error("Please fix validation errors before adding");
       return;
     }
 
     try {
       await addProduct.mutateAsync(formData);
-      toast.success('Product added successfully');
+      toast.success("Product added successfully");
       setIsAddDialogOpen(false);
       resetForm();
     } catch (error: any) {
-      toast.error(error?.message || 'Failed to add product');
+      toast.error(error?.message || "Failed to add product");
     }
   };
 
   const handleEdit = async () => {
     if (!editingProduct) return;
-    
+
     if (!validateForm()) {
-      toast.error('Please fix validation errors before saving');
+      toast.error("Please fix validation errors before saving");
       return;
     }
 
@@ -101,21 +141,21 @@ export default function AffiliateStoreManagement() {
         id: editingProduct.id,
         ...formData,
       });
-      toast.success('Product updated successfully');
+      toast.success("Product updated successfully");
       setIsEditDialogOpen(false);
       setEditingProduct(null);
       resetForm();
     } catch (error: any) {
-      toast.error(error?.message || 'Failed to update product');
+      toast.error(error?.message || "Failed to update product");
     }
   };
 
   const handleDelete = async (id: bigint) => {
     try {
       await deleteProduct.mutateAsync(id);
-      toast.success('Product deleted successfully');
+      toast.success("Product deleted successfully");
     } catch (error: any) {
-      toast.error(error?.message || 'Failed to delete product');
+      toast.error(error?.message || "Failed to delete product");
     }
   };
 
@@ -166,10 +206,13 @@ export default function AffiliateStoreManagement() {
       )}
 
       <div className="flex justify-end">
-        <Dialog open={isAddDialogOpen} onOpenChange={(open) => {
-          setIsAddDialogOpen(open);
-          if (!open) resetForm();
-        }}>
+        <Dialog
+          open={isAddDialogOpen}
+          onOpenChange={(open) => {
+            setIsAddDialogOpen(open);
+            if (!open) resetForm();
+          }}
+        >
           <DialogTrigger asChild>
             <Button className="bg-neon-purple hover:bg-neon-purple/90">
               <Plus className="mr-2 h-4 w-4" />
@@ -183,18 +226,23 @@ export default function AffiliateStoreManagement() {
                 Add a new Amazon affiliate product to your store
               </DialogDescription>
             </DialogHeader>
-            <ProductForm 
-              formData={formData} 
+            <ProductForm
+              formData={formData}
               setFormData={setFormData}
               validationErrors={validationErrors}
               onValidate={validateForm}
             />
             <DialogFooter>
-              <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>
+              <Button
+                variant="outline"
+                onClick={() => setIsAddDialogOpen(false)}
+              >
                 Cancel
               </Button>
               <Button onClick={handleAdd} disabled={addProduct.isPending}>
-                {addProduct.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {addProduct.isPending && (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                )}
                 Add Product
               </Button>
             </DialogFooter>
@@ -202,32 +250,38 @@ export default function AffiliateStoreManagement() {
         </Dialog>
       </div>
 
-      <Dialog open={isEditDialogOpen} onOpenChange={(open) => {
-        setIsEditDialogOpen(open);
-        if (!open) {
-          setEditingProduct(null);
-          resetForm();
-        }
-      }}>
+      <Dialog
+        open={isEditDialogOpen}
+        onOpenChange={(open) => {
+          setIsEditDialogOpen(open);
+          if (!open) {
+            setEditingProduct(null);
+            resetForm();
+          }
+        }}
+      >
         <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-[600px]">
           <DialogHeader>
             <DialogTitle>Edit Product</DialogTitle>
-            <DialogDescription>
-              Update product details
-            </DialogDescription>
+            <DialogDescription>Update product details</DialogDescription>
           </DialogHeader>
-          <ProductForm 
-            formData={formData} 
+          <ProductForm
+            formData={formData}
             setFormData={setFormData}
             validationErrors={validationErrors}
             onValidate={validateForm}
           />
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>
+            <Button
+              variant="outline"
+              onClick={() => setIsEditDialogOpen(false)}
+            >
               Cancel
             </Button>
             <Button onClick={handleEdit} disabled={updateProduct.isPending}>
-              {updateProduct.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {updateProduct.isPending && (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              )}
               Save Changes
             </Button>
           </DialogFooter>
@@ -250,7 +304,9 @@ export default function AffiliateStoreManagement() {
                   <div className="flex flex-col items-center gap-3">
                     <ShoppingBag className="h-12 w-12 text-muted-foreground/50" />
                     <div>
-                      <p className="font-medium text-muted-foreground">No products found</p>
+                      <p className="font-medium text-muted-foreground">
+                        No products found
+                      </p>
                       <p className="mt-1 text-sm text-muted-foreground/70">
                         Add your first product to get started
                       </p>
@@ -277,7 +333,11 @@ export default function AffiliateStoreManagement() {
                       </Button>
                       <AlertDialog>
                         <AlertDialogTrigger asChild>
-                          <Button variant="ghost" size="icon" title="Delete product">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            title="Delete product"
+                          >
                             <Trash2 className="h-4 w-4 text-destructive" />
                           </Button>
                         </AlertDialogTrigger>
@@ -285,7 +345,8 @@ export default function AffiliateStoreManagement() {
                           <AlertDialogHeader>
                             <AlertDialogTitle>Delete Product</AlertDialogTitle>
                             <AlertDialogDescription>
-                              Are you sure you want to delete "{product.name}"? This action cannot be undone.
+                              Are you sure you want to delete "{product.name}"?
+                              This action cannot be undone.
                             </AlertDialogDescription>
                           </AlertDialogHeader>
                           <AlertDialogFooter>
@@ -294,7 +355,9 @@ export default function AffiliateStoreManagement() {
                               onClick={() => handleDelete(product.id)}
                               className="bg-destructive hover:bg-destructive/90"
                             >
-                              {deleteProduct.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                              {deleteProduct.isPending && (
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                              )}
                               Delete
                             </AlertDialogAction>
                           </AlertDialogFooter>
@@ -320,18 +383,25 @@ interface ProductFormProps {
     category: string;
     affiliateLink: string;
   };
-  setFormData: React.Dispatch<React.SetStateAction<{
-    name: string;
-    description: string;
-    imageUrl: string;
-    category: string;
-    affiliateLink: string;
-  }>>;
+  setFormData: React.Dispatch<
+    React.SetStateAction<{
+      name: string;
+      description: string;
+      imageUrl: string;
+      category: string;
+      affiliateLink: string;
+    }>
+  >;
   validationErrors: string[];
   onValidate: () => boolean;
 }
 
-function ProductForm({ formData, setFormData, validationErrors, onValidate }: ProductFormProps) {
+function ProductForm({
+  formData,
+  setFormData,
+  validationErrors,
+  onValidate,
+}: ProductFormProps) {
   return (
     <div className="space-y-4">
       {validationErrors.length > 0 && (
@@ -339,8 +409,8 @@ function ProductForm({ formData, setFormData, validationErrors, onValidate }: Pr
           <AlertCircle className="h-4 w-4" />
           <AlertDescription>
             <ul className="ml-2 list-inside list-disc space-y-1">
-              {validationErrors.map((error, index) => (
-                <li key={index}>{error}</li>
+              {validationErrors.map((error, _index) => (
+                <li key={error}>{error}</li>
               ))}
             </ul>
           </AlertDescription>
@@ -363,7 +433,9 @@ function ProductForm({ formData, setFormData, validationErrors, onValidate }: Pr
         <Input
           id="category"
           value={formData.category}
-          onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+          onChange={(e) =>
+            setFormData({ ...formData, category: e.target.value })
+          }
           onBlur={onValidate}
           placeholder="e.g., Fitness Equipment, Apparel, Accessories"
         />
@@ -374,7 +446,9 @@ function ProductForm({ formData, setFormData, validationErrors, onValidate }: Pr
         <Textarea
           id="description"
           value={formData.description}
-          onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+          onChange={(e) =>
+            setFormData({ ...formData, description: e.target.value })
+          }
           onBlur={onValidate}
           placeholder="Brief description of the product..."
           rows={3}
@@ -386,7 +460,9 @@ function ProductForm({ formData, setFormData, validationErrors, onValidate }: Pr
         <Input
           id="imageUrl"
           value={formData.imageUrl}
-          onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
+          onChange={(e) =>
+            setFormData({ ...formData, imageUrl: e.target.value })
+          }
           onBlur={onValidate}
           placeholder="/assets/generated/product-image.jpg"
         />
@@ -397,20 +473,27 @@ function ProductForm({ formData, setFormData, validationErrors, onValidate }: Pr
         <Input
           id="affiliateLink"
           value={formData.affiliateLink}
-          onChange={(e) => setFormData({ ...formData, affiliateLink: e.target.value })}
+          onChange={(e) =>
+            setFormData({ ...formData, affiliateLink: e.target.value })
+          }
           onBlur={onValidate}
           placeholder="https://amazon.com/..."
         />
       </div>
 
-      {validationErrors.length === 0 && formData.name && formData.description && formData.imageUrl && formData.category && formData.affiliateLink && (
-        <Alert className="border-green-500/50 bg-green-500/10">
-          <CheckCircle2 className="h-4 w-4 text-green-500" />
-          <AlertDescription className="text-green-500">
-            All fields are valid and ready to save
-          </AlertDescription>
-        </Alert>
-      )}
+      {validationErrors.length === 0 &&
+        formData.name &&
+        formData.description &&
+        formData.imageUrl &&
+        formData.category &&
+        formData.affiliateLink && (
+          <Alert className="border-green-500/50 bg-green-500/10">
+            <CheckCircle2 className="h-4 w-4 text-green-500" />
+            <AlertDescription className="text-green-500">
+              All fields are valid and ready to save
+            </AlertDescription>
+          </Alert>
+        )}
     </div>
   );
 }

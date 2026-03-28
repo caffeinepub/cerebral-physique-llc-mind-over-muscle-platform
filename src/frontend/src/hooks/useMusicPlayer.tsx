@@ -1,5 +1,5 @@
-import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { create } from "zustand";
+import { persist } from "zustand/middleware";
 
 interface MusicPlayerState {
   isPlaying: boolean;
@@ -19,7 +19,7 @@ export const useMusicPlayerStore = create<MusicPlayerState>()(
   persist(
     (set, get) => ({
       isPlaying: false,
-      volume: 0.3, // Increased from 0.15 to 0.3 for more audible playback
+      volume: 0.3,
       userMuted: false,
       audioElement: null,
       setIsPlaying: (playing) => set({ isPlaying: playing }),
@@ -36,7 +36,7 @@ export const useMusicPlayerStore = create<MusicPlayerState>()(
         const state = get();
         const newPlayingState = !state.isPlaying;
         set({ isPlaying: newPlayingState, userMuted: !newPlayingState });
-        
+
         if (newPlayingState) {
           state.play();
         } else {
@@ -45,18 +45,30 @@ export const useMusicPlayerStore = create<MusicPlayerState>()(
       },
       play: async () => {
         const audio = get().audioElement;
-        if (audio) {
-          try {
-            // Ensure volume is set before playing
-            audio.volume = get().volume;
-            await audio.play();
-            set({ isPlaying: true, userMuted: false });
-          } catch (error: any) {
-            console.log('Audio playback prevented by browser:', error);
-            set({ isPlaying: false });
-            // Re-throw error so caller can handle it (e.g., show prompt)
-            throw error;
-          }
+        if (!audio) {
+          throw new Error("Audio element not initialized");
+        }
+
+        try {
+          // Ensure volume is set before playing
+          audio.volume = get().volume;
+
+          // Attempt to play
+          await audio.play();
+
+          // Only update state if play was successful
+          set({ isPlaying: true, userMuted: false });
+        } catch (error: any) {
+          // Log the error for debugging
+          console.log("Audio playback error:", error.name, error.message);
+
+          // Update state to reflect failed playback
+          set({ isPlaying: false });
+
+          // Re-throw with more context for the caller to handle
+          const enhancedError = new Error(error.message);
+          enhancedError.name = error.name;
+          throw enhancedError;
         }
       },
       pause: () => {
@@ -68,26 +80,26 @@ export const useMusicPlayerStore = create<MusicPlayerState>()(
       },
     }),
     {
-      name: 'music-player-storage',
-      partialize: (state) => ({ 
-        volume: state.volume, 
-        userMuted: state.userMuted 
+      name: "music-player-storage",
+      partialize: (state) => ({
+        volume: state.volume,
+        userMuted: state.userMuted,
       }),
-    }
-  )
+    },
+  ),
 );
 
 export function useMusicPlayer() {
-  const { 
-    isPlaying, 
-    volume, 
+  const {
+    isPlaying,
+    volume,
     userMuted,
-    setVolume, 
-    toggle, 
-    play, 
+    setVolume,
+    toggle,
+    play,
     pause,
     setAudioElement,
-    audioElement
+    audioElement,
   } = useMusicPlayerStore();
 
   return {

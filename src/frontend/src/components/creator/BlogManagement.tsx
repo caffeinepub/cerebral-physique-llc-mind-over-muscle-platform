@@ -1,620 +1,527 @@
-import { useState } from 'react';
-import { useGetAllBlogPosts, useCreateBlogPost, useUpdateBlogPost, useDeleteBlogPost, usePublishBlogPost, useUnpublishBlogPost } from '@/hooks/useQueries';
-import type { BlogPost } from '@/backend';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent } from '@/components/ui/card';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Plus, Edit, Trash2, Eye, EyeOff, Loader2, AlertCircle, CheckCircle2, BookOpen, Lock } from 'lucide-react';
-import { toast } from 'sonner';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Check,
+  Edit2,
+  Eye,
+  EyeOff,
+  Image,
+  Plus,
+  Trash2,
+  Video,
+  X,
+} from "lucide-react";
+import { useState } from "react";
+import { toast } from "sonner";
+import type { BlogMedia, BlogPost } from "../../backend";
+import {
+  useCreateBlogPost,
+  useDeleteBlogPost,
+  useGetAllBlogPostsAdmin,
+  usePublishBlogPost,
+  useUpdateBlogPost,
+} from "../../hooks/useQueries";
 
-// NOTE: Blog management remains manual only. This component provides tools for admins to manually
-// create, edit, publish, and delete blog posts. No automation, email workflows, or publishing
-// schedules are introduced as part of this add-on task. All blog operations are manual admin actions.
+// No automation, emails, or publishing workflows — blog management is manual only.
+
+interface BlogFormData {
+  title: string;
+  content: string;
+  author: string;
+  memberOnly: boolean;
+  imageUrls: string[];
+  videoUrls: string[];
+  seoTitle: string;
+  seoMetaDescription: string;
+  seoKeywords: string;
+}
+
+const defaultForm: BlogFormData = {
+  title: "",
+  content: "",
+  author: "Stefan",
+  memberOnly: false,
+  imageUrls: [],
+  videoUrls: [],
+  seoTitle: "",
+  seoMetaDescription: "",
+  seoKeywords: "",
+};
+
+function UrlArrayInput({
+  label,
+  icon: Icon,
+  urls,
+  onChange,
+  placeholder,
+}: {
+  label: string;
+  icon: React.ElementType;
+  urls: string[];
+  onChange: (urls: string[]) => void;
+  placeholder: string;
+}) {
+  const [newUrl, setNewUrl] = useState("");
+
+  const addUrl = () => {
+    const trimmed = newUrl.trim();
+    if (!trimmed) return;
+    onChange([...urls, trimmed]);
+    setNewUrl("");
+  };
+
+  const removeUrl = (index: number) => {
+    onChange(urls.filter((_, i) => i !== index));
+  };
+
+  return (
+    <div className="space-y-2">
+      <Label className="flex items-center gap-1.5">
+        <Icon className="w-3.5 h-3.5" />
+        {label}
+      </Label>
+      <div className="flex gap-2">
+        <Input
+          value={newUrl}
+          onChange={(e) => setNewUrl(e.target.value)}
+          placeholder={placeholder}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              e.preventDefault();
+              addUrl();
+            }
+          }}
+          className="text-sm"
+        />
+        <Button type="button" size="sm" variant="outline" onClick={addUrl}>
+          <Plus className="w-3.5 h-3.5" />
+        </Button>
+      </div>
+      {urls.length > 0 && (
+        <div className="space-y-1.5">
+          {urls.map((url, i) => (
+            <div
+              key={url}
+              className="flex items-center gap-2 bg-muted/50 rounded-md px-2 py-1.5"
+            >
+              <span className="text-xs text-muted-foreground flex-1 truncate">
+                {url}
+              </span>
+              <button
+                type="button"
+                onClick={() => removeUrl(i)}
+                className="text-muted-foreground hover:text-destructive transition-colors shrink-0"
+              >
+                <X className="w-3 h-3" />
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default function BlogManagement() {
-  const { data: blogPosts = [], isLoading, error } = useGetAllBlogPosts();
-  const createBlogPost = useCreateBlogPost();
-  const updateBlogPost = useUpdateBlogPost();
-  const deleteBlogPost = useDeleteBlogPost();
-  const publishBlogPost = usePublishBlogPost();
-  const unpublishBlogPost = useUnpublishBlogPost();
+  const { data: posts = [], isLoading } = useGetAllBlogPostsAdmin();
+  const createPost = useCreateBlogPost();
+  const updatePost = useUpdateBlogPost();
+  const publishPost = usePublishBlogPost();
+  const deletePost = useDeleteBlogPost();
 
-  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const [isPreviewDialogOpen, setIsPreviewDialogOpen] = useState(false);
-  const [editingPost, setEditingPost] = useState<BlogPost | null>(null);
-  const [previewPost, setPreviewPost] = useState<BlogPost | null>(null);
-  const [validationErrors, setValidationErrors] = useState<string[]>([]);
-
-  const [formData, setFormData] = useState({
-    title: '',
-    content: '',
-    author: '',
-    memberOnly: false,
-    seoTitle: '',
-    seoMetaDescription: '',
-    seoKeywords: '',
-  });
+  const [showForm, setShowForm] = useState(false);
+  const [editingId, setEditingId] = useState<bigint | null>(null);
+  const [form, setForm] = useState<BlogFormData>(defaultForm);
 
   const resetForm = () => {
-    setFormData({
-      title: '',
-      content: '',
-      author: '',
-      memberOnly: false,
-      seoTitle: '',
-      seoMetaDescription: '',
-      seoKeywords: '',
+    setForm(defaultForm);
+    setEditingId(null);
+    setShowForm(false);
+  };
+
+  const startEdit = (post: BlogPost) => {
+    setForm({
+      title: post.title,
+      content: post.content,
+      author: post.author,
+      memberOnly: post.memberOnly,
+      imageUrls: post.media?.imageUrls || [],
+      videoUrls: post.media?.videoUrls || [],
+      seoTitle: post.seoTitle || "",
+      seoMetaDescription: post.seoMetaDescription || "",
+      seoKeywords: post.seoKeywords?.join(", ") || "",
     });
-    setValidationErrors([]);
+    setEditingId(post.id);
+    setShowForm(true);
   };
 
-  const validateForm = (): boolean => {
-    const errors: string[] = [];
-
-    if (!formData.title.trim()) {
-      errors.push('Title is required');
-    }
-
-    if (!formData.content.trim()) {
-      errors.push('Content is required');
-    }
-
-    if (!formData.author.trim()) {
-      errors.push('Author name is required');
-    }
-
-    if (formData.content.length < 50) {
-      errors.push('Content should be at least 50 characters long');
-    }
-
-    setValidationErrors(errors);
-    return errors.length === 0;
-  };
-
-  const handleCreate = async () => {
-    if (!validateForm()) {
-      toast.error('Please fix validation errors before creating');
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!form.title.trim() || !form.content.trim()) {
+      toast.error("Title and content are required");
       return;
     }
 
+    const media: BlogMedia = {
+      imageUrls: form.imageUrls,
+      videoUrls: form.videoUrls,
+    };
+
+    const keywords = form.seoKeywords
+      .split(",")
+      .map((k) => k.trim())
+      .filter(Boolean);
+
     try {
-      await createBlogPost.mutateAsync({
-        ...formData,
-        seoKeywords: formData.seoKeywords.split(',').map(k => k.trim()).filter(k => k),
-      });
-      toast.success('Blog post created successfully');
-      setIsAddDialogOpen(false);
+      if (editingId !== null) {
+        await updatePost.mutateAsync({
+          id: editingId,
+          title: form.title.trim(),
+          content: form.content.trim(),
+          author: form.author.trim(),
+          memberOnly: form.memberOnly,
+          media,
+          seoTitle: form.seoTitle.trim(),
+          seoMetaDescription: form.seoMetaDescription.trim(),
+          seoKeywords: keywords,
+        });
+        toast.success("Blog post updated");
+      } else {
+        await createPost.mutateAsync({
+          title: form.title.trim(),
+          content: form.content.trim(),
+          author: form.author.trim(),
+          memberOnly: form.memberOnly,
+          media,
+          seoTitle: form.seoTitle.trim(),
+          seoMetaDescription: form.seoMetaDescription.trim(),
+          seoKeywords: keywords,
+        });
+        toast.success("Blog post created");
+      }
       resetForm();
-    } catch (error: any) {
-      const errorMessage = error?.message || 'Failed to create blog post';
-      toast.error(errorMessage);
-      console.error('Create blog post error:', error);
+    } catch {
+      toast.error("Failed to save blog post");
     }
   };
 
-  const handleEdit = async () => {
-    if (!editingPost) return;
-    
-    if (!validateForm()) {
-      toast.error('Please fix validation errors before saving');
-      return;
-    }
-
+  const handlePublishToggle = async (post: BlogPost) => {
     try {
-      await updateBlogPost.mutateAsync({
-        id: editingPost.id,
-        ...formData,
-        seoKeywords: formData.seoKeywords.split(',').map(k => k.trim()).filter(k => k),
+      await publishPost.mutateAsync({
+        id: post.id,
+        published: !post.published,
       });
-      toast.success('Blog post updated successfully');
-      setIsEditDialogOpen(false);
-      setEditingPost(null);
-      resetForm();
-    } catch (error: any) {
-      const errorMessage = error?.message || 'Failed to update blog post';
-      toast.error(errorMessage);
-      console.error('Edit blog post error:', error);
+      toast.success(post.published ? "Post unpublished" : "Post published");
+    } catch {
+      toast.error("Failed to update publish status");
     }
   };
 
   const handleDelete = async (id: bigint) => {
     try {
-      await deleteBlogPost.mutateAsync(id);
-      toast.success('Blog post deleted successfully');
-    } catch (error: any) {
-      const errorMessage = error?.message || 'Failed to delete blog post';
-      toast.error(errorMessage);
-      console.error('Delete blog post error:', error);
+      await deletePost.mutateAsync(id);
+      toast.success("Blog post deleted");
+    } catch {
+      toast.error("Failed to delete blog post");
     }
-  };
-
-  const handleTogglePublish = async (post: BlogPost) => {
-    try {
-      if (post.published) {
-        await unpublishBlogPost.mutateAsync(post.id);
-        toast.success('Blog post unpublished successfully');
-      } else {
-        await publishBlogPost.mutateAsync(post.id);
-        toast.success('Blog post published successfully');
-      }
-    } catch (error: any) {
-      const errorMessage = error?.message || 'Failed to update publish status';
-      toast.error(errorMessage);
-      console.error('Toggle publish error:', error);
-    }
-  };
-
-  const openEditDialog = (post: BlogPost) => {
-    setEditingPost(post);
-    setFormData({
-      title: post.title,
-      content: post.content,
-      author: post.author,
-      memberOnly: post.memberOnly,
-      seoTitle: post.seoTitle,
-      seoMetaDescription: post.seoMetaDescription,
-      seoKeywords: post.seoKeywords.join(', '),
-    });
-    setValidationErrors([]);
-    setIsEditDialogOpen(true);
-  };
-
-  const openPreview = () => {
-    const previewData: BlogPost = {
-      id: BigInt(0),
-      title: formData.title,
-      content: formData.content,
-      author: formData.author,
-      memberOnly: formData.memberOnly,
-      seoTitle: formData.seoTitle,
-      seoMetaDescription: formData.seoMetaDescription,
-      seoKeywords: formData.seoKeywords.split(',').map(k => k.trim()).filter(k => k),
-      published: false,
-      createdAt: BigInt(Date.now() * 1000000),
-      modifiedAt: BigInt(Date.now() * 1000000),
-    };
-    setPreviewPost(previewData);
-    setIsPreviewDialogOpen(true);
   };
 
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <Loader2 className="h-8 w-8 animate-spin text-neon-purple" />
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
       </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <Alert variant="destructive">
-        <AlertCircle className="h-4 w-4" />
-        <AlertDescription>
-          Failed to load blog posts. Please try refreshing the page.
-        </AlertDescription>
-      </Alert>
     );
   }
 
   return (
     <div className="space-y-6">
-      {/* Empty State Message */}
-      {blogPosts.length === 0 && (
-        <Alert className="border-neon-purple/30 bg-neon-purple/5">
-          <BookOpen className="h-5 w-5 text-neon-purple" />
-          <AlertDescription className="ml-2">
-            <p className="font-medium text-neon-purple">No blog posts yet</p>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Click "Create Blog Post" below to write your first article
-            </p>
-          </AlertDescription>
-        </Alert>
-      )}
-
-      {/* Add Blog Post Button */}
-      <div className="flex justify-end">
-        <Dialog open={isAddDialogOpen} onOpenChange={(open) => {
-          setIsAddDialogOpen(open);
-          if (!open) resetForm();
-        }}>
-          <DialogTrigger asChild>
-            <Button className="bg-neon-purple hover:bg-neon-purple/90">
-              <Plus className="mr-2 h-4 w-4" />
-              Create Blog Post
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-[800px]">
-            <DialogHeader>
-              <DialogTitle>Create New Blog Post</DialogTitle>
-              <DialogDescription>
-                Write a new blog post for your audience with SEO optimization
-              </DialogDescription>
-            </DialogHeader>
-            <BlogPostForm 
-              formData={formData} 
-              setFormData={setFormData}
-              validationErrors={validationErrors}
-              onValidate={validateForm}
-            />
-            <DialogFooter className="flex-col gap-2 sm:flex-row">
-              <Button variant="outline" onClick={openPreview} disabled={!formData.title || !formData.content}>
-                <Eye className="mr-2 h-4 w-4" />
-                Preview
-              </Button>
-              <div className="flex gap-2">
-                <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>
-                  Cancel
-                </Button>
-                <Button onClick={handleCreate} disabled={createBlogPost.isPending}>
-                  {createBlogPost.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  Create Post
-                </Button>
-              </div>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-xl font-bold text-foreground">Blog Management</h2>
+          <p className="text-sm text-muted-foreground mt-0.5">
+            Create and manage blog posts with text, images, and videos
+          </p>
+        </div>
+        {!showForm && (
+          <Button onClick={() => setShowForm(true)} size="sm">
+            <Plus className="w-4 h-4 mr-1.5" />
+            New Post
+          </Button>
+        )}
       </div>
 
-      {/* Edit Blog Post Dialog */}
-      <Dialog open={isEditDialogOpen} onOpenChange={(open) => {
-        setIsEditDialogOpen(open);
-        if (!open) {
-          setEditingPost(null);
-          resetForm();
-        }
-      }}>
-        <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-[800px]">
-          <DialogHeader>
-            <DialogTitle>Edit Blog Post</DialogTitle>
-            <DialogDescription>
-              Update blog post content and SEO settings
-            </DialogDescription>
-          </DialogHeader>
-          <BlogPostForm 
-            formData={formData} 
-            setFormData={setFormData}
-            validationErrors={validationErrors}
-            onValidate={validateForm}
-          />
-          <DialogFooter className="flex-col gap-2 sm:flex-row">
-            <Button variant="outline" onClick={openPreview} disabled={!formData.title || !formData.content}>
-              <Eye className="mr-2 h-4 w-4" />
-              Preview
-            </Button>
-            <div className="flex gap-2">
-              <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>
+      {/* Form */}
+      {showForm && (
+        <div className="bg-card border border-border rounded-xl p-6">
+          <h3 className="font-semibold text-foreground mb-4">
+            {editingId !== null ? "Edit Post" : "New Blog Post"}
+          </h3>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-1.5 md:col-span-2">
+                <Label htmlFor="title">Title *</Label>
+                <Input
+                  id="title"
+                  value={form.title}
+                  onChange={(e) => setForm({ ...form, title: e.target.value })}
+                  placeholder="Post title..."
+                  required
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <Label htmlFor="author">Author</Label>
+                <Input
+                  id="author"
+                  value={form.author}
+                  onChange={(e) => setForm({ ...form, author: e.target.value })}
+                  placeholder="Author name"
+                />
+              </div>
+
+              <div className="flex items-center gap-3 pt-6">
+                <input
+                  type="checkbox"
+                  id="memberOnly"
+                  checked={form.memberOnly}
+                  onChange={(e) =>
+                    setForm({ ...form, memberOnly: e.target.checked })
+                  }
+                  className="rounded border-border"
+                />
+                <Label htmlFor="memberOnly" className="cursor-pointer">
+                  Members only
+                </Label>
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <Label htmlFor="content">Content *</Label>
+              <Textarea
+                id="content"
+                value={form.content}
+                onChange={(e) => setForm({ ...form, content: e.target.value })}
+                placeholder="Write your blog post content here..."
+                rows={8}
+                required
+              />
+            </div>
+
+            {/* Media URLs */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2 border-t border-border">
+              <UrlArrayInput
+                label="Image URLs"
+                icon={Image}
+                urls={form.imageUrls}
+                onChange={(urls) => setForm({ ...form, imageUrls: urls })}
+                placeholder="https://... image URL"
+              />
+              <UrlArrayInput
+                label="Video URLs"
+                icon={Video}
+                urls={form.videoUrls}
+                onChange={(urls) => setForm({ ...form, videoUrls: urls })}
+                placeholder="https://youtube.com/... or direct video URL"
+              />
+            </div>
+
+            {/* SEO */}
+            <div className="space-y-3 pt-2 border-t border-border">
+              <h4 className="text-sm font-medium text-foreground">
+                SEO Settings
+              </h4>
+              <div className="space-y-1.5">
+                <Label htmlFor="seoTitle">SEO Title</Label>
+                <Input
+                  id="seoTitle"
+                  value={form.seoTitle}
+                  onChange={(e) =>
+                    setForm({ ...form, seoTitle: e.target.value })
+                  }
+                  placeholder="SEO title (defaults to post title)"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="seoMeta">Meta Description</Label>
+                <Textarea
+                  id="seoMeta"
+                  value={form.seoMetaDescription}
+                  onChange={(e) =>
+                    setForm({ ...form, seoMetaDescription: e.target.value })
+                  }
+                  placeholder="Brief description for search engines..."
+                  rows={2}
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="seoKeywords">Keywords (comma-separated)</Label>
+                <Input
+                  id="seoKeywords"
+                  value={form.seoKeywords}
+                  onChange={(e) =>
+                    setForm({ ...form, seoKeywords: e.target.value })
+                  }
+                  placeholder="fitness, training, nutrition..."
+                />
+              </div>
+            </div>
+
+            <div className="flex gap-2 pt-2">
+              <Button
+                type="submit"
+                disabled={createPost.isPending || updatePost.isPending}
+                size="sm"
+              >
+                {createPost.isPending || updatePost.isPending ? (
+                  <div className="animate-spin rounded-full h-3.5 w-3.5 border-b-2 border-primary-foreground mr-1.5" />
+                ) : (
+                  <Check className="w-3.5 h-3.5 mr-1.5" />
+                )}
+                {editingId !== null ? "Update Post" : "Create Post"}
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={resetForm}
+              >
                 Cancel
               </Button>
-              <Button onClick={handleEdit} disabled={updateBlogPost.isPending}>
-                {updateBlogPost.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Save Changes
-              </Button>
             </div>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+          </form>
+        </div>
+      )}
 
-      {/* Preview Dialog */}
-      <Dialog open={isPreviewDialogOpen} onOpenChange={setIsPreviewDialogOpen}>
-        <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-[700px]">
-          <DialogHeader>
-            <DialogTitle>Blog Post Preview</DialogTitle>
-            <DialogDescription>
-              Preview how this blog post will appear to readers
-            </DialogDescription>
-          </DialogHeader>
-          {previewPost && (
-            <BlogPostPreview post={previewPost} />
-          )}
-          <DialogFooter>
-            <Button onClick={() => setIsPreviewDialogOpen(false)}>Close</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Blog Posts Table */}
-      <div className="rounded-md border border-border/40">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Title</TableHead>
-              <TableHead>Author</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {blogPosts.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={4} className="py-12 text-center">
-                  <div className="flex flex-col items-center gap-3">
-                    <BookOpen className="h-12 w-12 text-muted-foreground/50" />
-                    <div>
-                      <p className="font-medium text-muted-foreground">No blog posts found</p>
-                      <p className="mt-1 text-sm text-muted-foreground/70">
-                        Create your first post to get started
-                      </p>
-                    </div>
-                  </div>
-                </TableCell>
-              </TableRow>
-            ) : (
-              blogPosts.map((post) => (
-                <TableRow key={post.id.toString()}>
-                  <TableCell className="font-medium">
-                    <div className="flex items-center gap-2">
+      {/* Posts List */}
+      <div className="space-y-3">
+        {posts.length === 0 ? (
+          <div className="text-center py-12 text-muted-foreground">
+            <p>No blog posts yet. Create your first post above.</p>
+          </div>
+        ) : (
+          posts.map((post) => (
+            <div
+              key={post.id.toString()}
+              className="bg-card border border-border rounded-lg p-4"
+            >
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex-1 min-w-0">
+                  <div className="flex flex-wrap items-center gap-2 mb-1">
+                    <h4 className="font-medium text-foreground truncate">
                       {post.title}
-                      {post.memberOnly && (
-                        <Badge variant="secondary" className="gap-1">
-                          <Lock className="h-3 w-3" />
-                          Members
-                        </Badge>
-                      )}
-                    </div>
-                  </TableCell>
-                  <TableCell>{post.author}</TableCell>
-                  <TableCell>
-                    <Badge variant={post.published ? 'default' : 'secondary'}>
-                      {post.published ? 'Published' : 'Draft'}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex justify-end gap-2">
+                    </h4>
+                    {post.published ? (
+                      <Badge variant="default" className="text-xs">
+                        Published
+                      </Badge>
+                    ) : (
+                      <Badge variant="outline" className="text-xs">
+                        Draft
+                      </Badge>
+                    )}
+                    {post.memberOnly && (
+                      <Badge variant="secondary" className="text-xs">
+                        Members Only
+                      </Badge>
+                    )}
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    By {post.author} ·{" "}
+                    {new Date(
+                      Number(post.createdAt) / 1_000_000,
+                    ).toLocaleDateString()}
+                  </p>
+                  <div className="flex gap-3 mt-1.5 text-xs text-muted-foreground">
+                    {post.media?.imageUrls?.length > 0 && (
+                      <span className="flex items-center gap-1">
+                        <Image className="w-3 h-3" />
+                        {post.media.imageUrls.length} image
+                        {post.media.imageUrls.length !== 1 ? "s" : ""}
+                      </span>
+                    )}
+                    {post.media?.videoUrls?.length > 0 && (
+                      <span className="flex items-center gap-1">
+                        <Video className="w-3 h-3" />
+                        {post.media.videoUrls.length} video
+                        {post.media.videoUrls.length !== 1 ? "s" : ""}
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                <div className="flex gap-1.5 shrink-0">
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => handlePublishToggle(post)}
+                    disabled={publishPost.isPending}
+                    className="h-8 w-8 p-0"
+                    title={post.published ? "Unpublish" : "Publish"}
+                  >
+                    {post.published ? (
+                      <EyeOff className="w-3.5 h-3.5" />
+                    ) : (
+                      <Eye className="w-3.5 h-3.5" />
+                    )}
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => startEdit(post)}
+                    className="h-8 w-8 p-0"
+                  >
+                    <Edit2 className="w-3.5 h-3.5" />
+                  </Button>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
                       <Button
+                        size="sm"
                         variant="ghost"
-                        size="icon"
-                        onClick={() => handleTogglePublish(post)}
-                        title={post.published ? 'Unpublish' : 'Publish'}
-                        disabled={publishBlogPost.isPending || unpublishBlogPost.isPending}
+                        className="h-8 w-8 p-0 text-destructive hover:text-destructive"
                       >
-                        {publishBlogPost.isPending || unpublishBlogPost.isPending ? (
-                          <Loader2 className="h-4 w-4 animate-spin" />
-                        ) : post.published ? (
-                          <EyeOff className="h-4 w-4" />
-                        ) : (
-                          <Eye className="h-4 w-4" />
-                        )}
+                        <Trash2 className="w-3.5 h-3.5" />
                       </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => openEditDialog(post)}
-                        title="Edit post"
-                      >
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                          <Button variant="ghost" size="icon" title="Delete post">
-                            <Trash2 className="h-4 w-4 text-destructive" />
-                          </Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                          <AlertDialogHeader>
-                            <AlertDialogTitle>Delete Blog Post</AlertDialogTitle>
-                            <AlertDialogDescription>
-                              Are you sure you want to delete "{post.title}"? This action cannot be undone and will permanently remove the post from your blog.
-                            </AlertDialogDescription>
-                          </AlertDialogHeader>
-                          <AlertDialogFooter>
-                            <AlertDialogCancel>Cancel</AlertDialogCancel>
-                            <AlertDialogAction
-                              onClick={() => handleDelete(post.id)}
-                              className="bg-destructive hover:bg-destructive/90"
-                            >
-                              {deleteBlogPost.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                              Delete
-                            </AlertDialogAction>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
-      </div>
-    </div>
-  );
-}
-
-interface BlogPostFormProps {
-  formData: {
-    title: string;
-    content: string;
-    author: string;
-    memberOnly: boolean;
-    seoTitle: string;
-    seoMetaDescription: string;
-    seoKeywords: string;
-  };
-  setFormData: React.Dispatch<React.SetStateAction<{
-    title: string;
-    content: string;
-    author: string;
-    memberOnly: boolean;
-    seoTitle: string;
-    seoMetaDescription: string;
-    seoKeywords: string;
-  }>>;
-  validationErrors: string[];
-  onValidate: () => boolean;
-}
-
-function BlogPostForm({ formData, setFormData, validationErrors, onValidate }: BlogPostFormProps) {
-  return (
-    <div className="space-y-4">
-      {/* Validation Errors */}
-      {validationErrors.length > 0 && (
-        <Alert variant="destructive">
-          <AlertCircle className="h-4 w-4" />
-          <AlertDescription>
-            <ul className="ml-2 list-inside list-disc space-y-1">
-              {validationErrors.map((error, index) => (
-                <li key={index}>{error}</li>
-              ))}
-            </ul>
-          </AlertDescription>
-        </Alert>
-      )}
-
-      <div className="space-y-2">
-        <Label htmlFor="title">Title *</Label>
-        <Input
-          id="title"
-          value={formData.title}
-          onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-          onBlur={onValidate}
-          placeholder="Enter an engaging blog post title"
-          className={validationErrors.some(e => e.includes('Title')) ? 'border-destructive' : ''}
-        />
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="author">Author *</Label>
-        <Input
-          id="author"
-          value={formData.author}
-          onChange={(e) => setFormData({ ...formData, author: e.target.value })}
-          onBlur={onValidate}
-          placeholder="Author name"
-          className={validationErrors.some(e => e.includes('Author')) ? 'border-destructive' : ''}
-        />
-      </div>
-
-      <div className="flex items-center space-x-2">
-        <Checkbox
-          id="memberOnly"
-          checked={formData.memberOnly}
-          onCheckedChange={(checked) => setFormData({ ...formData, memberOnly: checked as boolean })}
-        />
-        <Label htmlFor="memberOnly" className="cursor-pointer">
-          Members-only content
-        </Label>
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="content">Content *</Label>
-        <Textarea
-          id="content"
-          value={formData.content}
-          onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-          onBlur={onValidate}
-          placeholder="Write your blog post content here... (minimum 50 characters)"
-          rows={10}
-          className={validationErrors.some(e => e.includes('Content')) ? 'border-destructive' : ''}
-        />
-        <p className="text-xs text-muted-foreground">
-          {formData.content.length} characters
-        </p>
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="seoTitle">SEO Title</Label>
-        <Input
-          id="seoTitle"
-          value={formData.seoTitle}
-          onChange={(e) => setFormData({ ...formData, seoTitle: e.target.value })}
-          placeholder="SEO optimized title (optional)"
-        />
-        <p className="text-xs text-muted-foreground">
-          Optimized title for search engines (leave blank to use main title)
-        </p>
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="seoMetaDescription">SEO Meta Description</Label>
-        <Textarea
-          id="seoMetaDescription"
-          value={formData.seoMetaDescription}
-          onChange={(e) => setFormData({ ...formData, seoMetaDescription: e.target.value })}
-          placeholder="Brief description for search engines (optional)"
-          rows={2}
-        />
-        <p className="text-xs text-muted-foreground">
-          Recommended: 150-160 characters
-        </p>
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="seoKeywords">SEO Keywords</Label>
-        <Input
-          id="seoKeywords"
-          value={formData.seoKeywords}
-          onChange={(e) => setFormData({ ...formData, seoKeywords: e.target.value })}
-          placeholder="fitness, workout, training, mindset (comma-separated)"
-        />
-        <p className="text-xs text-muted-foreground">
-          Separate keywords with commas
-        </p>
-      </div>
-
-      {/* Validation Status */}
-      {validationErrors.length === 0 && formData.title && formData.content && formData.author && (
-        <Alert className="border-green-500/50 bg-green-500/10">
-          <CheckCircle2 className="h-4 w-4 text-green-500" />
-          <AlertDescription className="text-green-500">
-            All required fields are valid and ready to save
-          </AlertDescription>
-        </Alert>
-      )}
-    </div>
-  );
-}
-
-interface BlogPostPreviewProps {
-  post: BlogPost;
-}
-
-function BlogPostPreview({ post }: BlogPostPreviewProps) {
-  return (
-    <Card className="border-border/40 bg-card/50">
-      <CardContent className="space-y-4 py-6">
-        <div className="space-y-2">
-          <div className="flex items-center gap-2">
-            <h3 className="text-2xl font-bold">{post.title}</h3>
-            {post.memberOnly && (
-              <Badge variant="secondary" className="gap-1">
-                <Lock className="h-3 w-3" />
-                Members Only
-              </Badge>
-            )}
-          </div>
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <span>By {post.author}</span>
-            <span>•</span>
-            <Badge variant={post.published ? 'default' : 'secondary'}>
-              {post.published ? 'Published' : 'Draft'}
-            </Badge>
-          </div>
-        </div>
-        
-        <div className="prose prose-sm max-w-none dark:prose-invert">
-          <p className="whitespace-pre-wrap">{post.content}</p>
-        </div>
-        
-        {post.seoKeywords.length > 0 && (
-          <div className="space-y-2 border-t border-border/40 pt-4">
-            <p className="text-sm font-medium">Keywords:</p>
-            <div className="flex flex-wrap gap-2">
-              {post.seoKeywords.map((keyword, index) => (
-                <Badge key={index} variant="outline">{keyword}</Badge>
-              ))}
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Delete Post</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Are you sure you want to delete "{post.title}"? This
+                          cannot be undone.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction
+                          onClick={() => handleDelete(post.id)}
+                          className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                        >
+                          Delete
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                </div>
+              </div>
             </div>
-          </div>
+          ))
         )}
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }

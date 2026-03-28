@@ -1,38 +1,72 @@
-import { useInternetIdentity } from '@/hooks/useInternetIdentity';
-import { useGetMembership, useGetCallerUserProfile, useSaveCallerUserProfile } from '@/hooks/useQueries';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { User, CreditCard, CheckCircle, XCircle, Loader2, AlertCircle } from 'lucide-react';
-import { useState, useEffect } from 'react';
-import { toast } from 'sonner';
-import StartMembershipCheckoutButton from '@/components/membership/StartMembershipCheckoutButton';
+import StartMembershipCheckoutButton from "@/components/membership/StartMembershipCheckoutButton";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { useInternetIdentity } from "@/hooks/useInternetIdentity";
+import {
+  useGetCallerUserProfile,
+  useGetMyMembership,
+  useSaveCallerUserProfile,
+} from "@/hooks/useQueries";
+import {
+  AlertCircle,
+  CheckCircle,
+  CreditCard,
+  Loader2,
+  User,
+  XCircle,
+} from "lucide-react";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
 export default function UserDashboardPage() {
   const { identity, login, clear, loginStatus } = useInternetIdentity();
-  const { data: membership, isLoading: membershipLoading } = useGetMembership();
-  const { data: userProfile, isLoading: profileLoading, isFetched } = useGetCallerUserProfile();
+  const { data: membership, isLoading: membershipLoading } =
+    useGetMyMembership();
+  const {
+    data: userProfile,
+    isLoading: profileLoading,
+    isFetched,
+  } = useGetCallerUserProfile();
   const saveProfile = useSaveCallerUserProfile();
 
   const [showProfileSetup, setShowProfileSetup] = useState(false);
-  const [profileName, setProfileName] = useState('');
+  const [profileName, setProfileName] = useState("");
 
   const isAuthenticated = !!identity;
   const isActive = membership?.active || false;
 
   useEffect(() => {
-    if (isAuthenticated && !profileLoading && isFetched && userProfile === null) {
+    if (
+      isAuthenticated &&
+      !profileLoading &&
+      isFetched &&
+      userProfile === null
+    ) {
       setShowProfileSetup(true);
     }
   }, [isAuthenticated, profileLoading, isFetched, userProfile]);
 
   const handleSaveProfile = async () => {
     if (!profileName.trim()) {
-      toast.error('Please enter your name');
+      toast.error("Please enter your name");
       return;
     }
 
@@ -42,16 +76,16 @@ export default function UserDashboardPage() {
         email: undefined,
         membershipStatus: undefined,
       });
-      toast.success('Profile created successfully');
+      toast.success("Profile created successfully");
       setShowProfileSetup(false);
-    } catch (error: any) {
-      toast.error(error?.message || 'Failed to save profile');
+    } catch (error: unknown) {
+      toast.error((error as Error)?.message || "Failed to save profile");
     }
   };
 
   const handleLogout = async () => {
     await clear();
-    window.location.href = '/';
+    window.location.href = "/";
   };
 
   if (!isAuthenticated) {
@@ -66,10 +100,10 @@ export default function UserDashboardPage() {
             </p>
             <Button
               onClick={login}
-              disabled={loginStatus === 'logging-in'}
-              className="bg-neon-purple hover:bg-neon-purple/90"
+              disabled={loginStatus === "logging-in"}
+              className="bg-primary hover:bg-primary/90"
             >
-              {loginStatus === 'logging-in' ? 'Logging in...' : 'Login'}
+              {loginStatus === "logging-in" ? "Logging in..." : "Login"}
             </Button>
           </CardContent>
         </Card>
@@ -80,7 +114,7 @@ export default function UserDashboardPage() {
   if (profileLoading || membershipLoading) {
     return (
       <div className="container mx-auto flex min-h-[60vh] items-center justify-center px-4 py-16">
-        <Loader2 className="h-8 w-8 animate-spin text-neon-purple" />
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
@@ -104,6 +138,7 @@ export default function UserDashboardPage() {
                 value={profileName}
                 onChange={(e) => setProfileName(e.target.value)}
                 placeholder="Enter your name"
+                onKeyDown={(e) => e.key === "Enter" && handleSaveProfile()}
               />
             </div>
           </div>
@@ -111,9 +146,11 @@ export default function UserDashboardPage() {
             <Button
               onClick={handleSaveProfile}
               disabled={saveProfile.isPending || !profileName.trim()}
-              className="bg-neon-purple hover:bg-neon-purple/90"
+              className="bg-primary hover:bg-primary/90"
             >
-              {saveProfile.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {saveProfile.isPending && (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              )}
               Save Profile
             </Button>
           </DialogFooter>
@@ -122,14 +159,20 @@ export default function UserDashboardPage() {
 
       {/* Hero Section */}
       <section className="relative overflow-hidden bg-gradient-to-b from-deep-blue/20 to-background py-16">
-        <div 
+        <div
           className="absolute inset-0 bg-cover bg-center opacity-10"
-          style={{ backgroundImage: 'url(/assets/generated/gym-training-scene.dim_1920x1080.jpg)' }}
+          style={{
+            backgroundImage:
+              "url(/assets/generated/gym-training-scene.dim_1920x1080.jpg)",
+          }}
         />
         <div className="container relative mx-auto px-4">
           <div className="mx-auto max-w-4xl">
             <h1 className="mb-4 text-4xl font-bold tracking-tight md:text-5xl">
-              Welcome, <span className="text-neon-purple">{userProfile?.name || 'Member'}</span>
+              Welcome,{" "}
+              <span className="text-neon-purple">
+                {userProfile?.name || "Member"}
+              </span>
             </h1>
             <p className="text-lg text-muted-foreground">
               Manage your membership and access your content
@@ -151,7 +194,9 @@ export default function UserDashboardPage() {
                       <CreditCard className="h-5 w-5" />
                       Membership Status
                     </CardTitle>
-                    <CardDescription>Your current membership details</CardDescription>
+                    <CardDescription>
+                      Your current membership details
+                    </CardDescription>
                   </div>
                   {isActive ? (
                     <Badge className="gap-1 bg-green-500/20 text-green-400">
@@ -170,18 +215,25 @@ export default function UserDashboardPage() {
                 {isActive ? (
                   <Alert className="border-green-500/30 bg-green-500/5">
                     <CheckCircle className="h-4 w-4 text-green-500" />
-                    <AlertTitle className="text-green-500">Active Membership</AlertTitle>
+                    <AlertTitle className="text-green-500">
+                      Active Membership
+                    </AlertTitle>
                     <AlertDescription className="text-muted-foreground">
-                      You have full access to all member content including the exercise library and exclusive blog posts.
+                      You have full access to all member content including the
+                      exercise library and exclusive blog posts.
                     </AlertDescription>
                   </Alert>
                 ) : (
                   <Alert className="border-neon-purple/30 bg-neon-purple/5">
                     <AlertCircle className="h-4 w-4 text-neon-purple" />
-                    <AlertTitle className="text-neon-purple">No Active Membership</AlertTitle>
+                    <AlertTitle className="text-neon-purple">
+                      No Active Membership
+                    </AlertTitle>
                     <AlertDescription>
                       <p className="mb-4 text-muted-foreground">
-                        Become a member to unlock the full exercise library, exclusive blog content, and all premium features for $19.99/month.
+                        Become a member to unlock the full exercise library,
+                        exclusive blog content, and all premium features for
+                        $24.99/month.
                       </p>
                       <StartMembershipCheckoutButton />
                     </AlertDescription>
@@ -190,7 +242,7 @@ export default function UserDashboardPage() {
               </CardContent>
             </Card>
 
-            {/* Account Actions Card */}
+            {/* Account Card */}
             <Card className="border-border/40">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -202,7 +254,9 @@ export default function UserDashboardPage() {
               <CardContent className="space-y-4">
                 <div className="space-y-2">
                   <Label>Name</Label>
-                  <p className="text-sm text-muted-foreground">{userProfile?.name || 'Not set'}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {userProfile?.name || "Not set"}
+                  </p>
                 </div>
                 <div className="space-y-2">
                   <Label>Principal ID</Label>
@@ -224,27 +278,44 @@ export default function UserDashboardPage() {
             <Card className="border-border/40">
               <CardHeader>
                 <CardTitle>Quick Links</CardTitle>
-                <CardDescription>Access your content and features</CardDescription>
+                <CardDescription>
+                  Access your content and features
+                </CardDescription>
               </CardHeader>
               <CardContent className="space-y-3">
                 <Button
                   variant="outline"
                   className="w-full justify-start"
-                  onClick={() => (window.location.href = '/workout-library')}
+                  onClick={() => {
+                    window.location.href = "/workout-library";
+                  }}
                 >
                   Workout Library
                 </Button>
                 <Button
                   variant="outline"
                   className="w-full justify-start"
-                  onClick={() => (window.location.href = '/blog')}
+                  onClick={() => {
+                    window.location.href = "/nutrition";
+                  }}
+                >
+                  Nutrition Hub
+                </Button>
+                <Button
+                  variant="outline"
+                  className="w-full justify-start"
+                  onClick={() => {
+                    window.location.href = "/blog";
+                  }}
                 >
                   Blog & Insights
                 </Button>
                 <Button
                   variant="outline"
                   className="w-full justify-start"
-                  onClick={() => (window.location.href = '/store')}
+                  onClick={() => {
+                    window.location.href = "/store";
+                  }}
                 >
                   Affiliate Store
                 </Button>

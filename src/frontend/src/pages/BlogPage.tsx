@@ -1,34 +1,53 @@
-import { useNavigate } from '@tanstack/react-router';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Calendar, BookOpen, Lock, Loader2, Settings } from 'lucide-react';
-import { useGetAllBlogPostPreviews, useHasActiveMembership, useIsCallerAdmin } from '@/hooks/useQueries';
-import { useInternetIdentity } from '@/hooks/useInternetIdentity';
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { useInternetIdentity } from "@/hooks/useInternetIdentity";
+import {
+  useGetMyMembership,
+  useGetPublishedBlogPostPreviews,
+  useIsCallerAdmin,
+} from "@/hooks/useQueries";
+import { useNavigate } from "@tanstack/react-router";
+import { BookOpen, Calendar, Loader2, Lock, Settings } from "lucide-react";
 
 // NOTE: Blog content publishing and editing remains manual via the Creator Dashboard.
-// This add-on task does not introduce any email automation, publishing workflows, or automated behaviors.
-// All blog management is done manually by admins through the BlogManagement component.
+// No automation, email workflows, or publishing schedules are introduced.
 
 export default function BlogPage() {
   const navigate = useNavigate();
-  const { data: blogPreviews = [], isLoading } = useGetAllBlogPostPreviews();
-  const { data: hasActiveMembership = false } = useHasActiveMembership();
+  const { data: blogPreviews = [], isLoading } =
+    useGetPublishedBlogPostPreviews();
+  const { data: membership } = useGetMyMembership();
   const { data: isAdmin = false } = useIsCallerAdmin();
-  const { identity } = useInternetIdentity();
+  const { identity: _identity } = useInternetIdentity();
+
+  const hasActiveMembership = membership?.active === true;
 
   const formatDate = (timestamp: bigint) => {
     const date = new Date(Number(timestamp) / 1000000);
-    return date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+    return date.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
   };
 
   return (
     <div className="flex flex-col">
-      {/* Hero Section with energetic gym background */}
+      {/* Hero Section */}
       <section className="relative overflow-hidden bg-gradient-to-b from-deep-blue/20 to-background py-16 md:py-24">
-        <div 
+        <div
           className="absolute inset-0 animate-subtle-zoom bg-cover bg-center opacity-15"
-          style={{ backgroundImage: 'url(/assets/generated/stretching-scene.dim_1920x1080.jpg)' }}
+          style={{
+            backgroundImage:
+              "url(/assets/generated/stretching-scene.dim_1920x1080.jpg)",
+          }}
         />
         <div className="absolute inset-0 bg-gradient-to-br from-deep-blue/40 via-background/60 to-neon-purple/20" />
         <div className="container relative mx-auto px-4">
@@ -37,14 +56,15 @@ export default function BlogPage() {
               Insights & <span className="text-neon-purple">Education</span>
             </h1>
             <p className="text-lg text-muted-foreground md:text-xl">
-              Science-informed articles on training, breathwork, and mind-body performance
+              Science-informed articles on training, breathwork, and mind-body
+              performance
             </p>
             {isAdmin && (
               <div className="mt-6">
                 <Button
                   variant="outline"
                   className="border-neon-purple/50 bg-neon-purple/10 hover:bg-neon-purple/20"
-                  onClick={() => navigate({ to: '/creator-dashboard' })}
+                  onClick={() => navigate({ to: "/creator" })}
                 >
                   <Settings className="mr-2 h-4 w-4" />
                   Manage Blog
@@ -55,11 +75,14 @@ export default function BlogPage() {
         </div>
       </section>
 
-      {/* Fitness Quote Overlay */}
+      {/* Quote Banner */}
       <section className="relative border-b border-border/40 bg-card py-6">
-        <div 
+        <div
           className="absolute inset-0 bg-cover bg-center opacity-15"
-          style={{ backgroundImage: 'url(/assets/generated/breath-quote-overlay-transparent.dim_800x200.png)' }}
+          style={{
+            backgroundImage:
+              "url(/assets/generated/breath-quote-overlay-transparent.dim_800x200.png)",
+          }}
         />
         <div className="container relative mx-auto px-4 text-center">
           <p className="text-base font-semibold italic text-neon-purple md:text-lg">
@@ -70,9 +93,12 @@ export default function BlogPage() {
 
       {/* Articles Grid */}
       <section className="relative py-16 md:py-24">
-        <div 
+        <div
           className="absolute inset-0 animate-subtle-pan bg-cover bg-center opacity-5"
-          style={{ backgroundImage: 'url(/assets/generated/dynamic-movement.dim_1920x1080.jpg)' }}
+          style={{
+            backgroundImage:
+              "url(/assets/generated/dynamic-movement.dim_1920x1080.jpg)",
+          }}
         />
         <div className="container relative mx-auto px-4">
           {isLoading ? (
@@ -83,11 +109,13 @@ export default function BlogPage() {
             <div className="mx-auto max-w-2xl text-center">
               <BookOpen className="mx-auto mb-4 h-16 w-16 text-muted-foreground" />
               <h3 className="mb-2 text-xl font-semibold">No blog posts yet</h3>
-              <p className="text-muted-foreground">Check back soon for new content</p>
+              <p className="text-muted-foreground">
+                Check back soon for new content
+              </p>
               {isAdmin && (
                 <Button
                   className="mt-6 bg-neon-purple hover:bg-neon-purple/90"
-                  onClick={() => navigate({ to: '/creator-dashboard' })}
+                  onClick={() => navigate({ to: "/creator" })}
                 >
                   Create Your First Post
                 </Button>
@@ -97,10 +125,10 @@ export default function BlogPage() {
             <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
               {blogPreviews.map((preview) => {
                 const isLocked = preview.memberOnly && !hasActiveMembership;
-                
+
                 return (
-                  <Card 
-                    key={preview.id.toString()} 
+                  <Card
+                    key={preview.id.toString()}
                     className="border-border/40 transition-shadow hover:shadow-lg"
                   >
                     <CardHeader>
@@ -123,15 +151,21 @@ export default function BlogPage() {
                     </CardHeader>
                     <CardContent>
                       <p className="mb-4 text-sm text-muted-foreground">
-                        {preview.seoMetaDescription || 'Read this article to learn more...'}
+                        {preview.seoMetaDescription ||
+                          "Read this article to learn more..."}
                       </p>
                       <Button
-                        variant={isLocked ? 'outline' : 'default'}
+                        variant={isLocked ? "outline" : "default"}
                         size="sm"
                         className="w-full"
-                        onClick={() => navigate({ to: `/blog/${preview.id}` })}
+                        onClick={() =>
+                          navigate({
+                            to: "/blog/$id",
+                            params: { id: preview.id.toString() },
+                          })
+                        }
                       >
-                        {isLocked ? 'Preview Article' : 'Read Article'}
+                        {isLocked ? "Preview Article" : "Read Article"}
                       </Button>
                     </CardContent>
                   </Card>

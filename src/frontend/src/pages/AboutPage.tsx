@@ -1,14 +1,17 @@
-import { Card, CardContent } from '@/components/ui/card';
-import { Award, Target, Zap, Dumbbell } from 'lucide-react';
+import { Card, CardContent } from "@/components/ui/card";
+import { Award, Dumbbell, Target, Zap } from "lucide-react";
 
 export default function AboutPage() {
   return (
     <div className="flex flex-col">
       {/* Hero Section with energetic background */}
       <section className="relative overflow-hidden bg-gradient-to-b from-deep-blue/20 to-background py-16 md:py-24">
-        <div 
+        <div
           className="absolute inset-0 animate-subtle-zoom bg-cover bg-center opacity-35"
-          style={{ backgroundImage: 'url(/assets/generated/gym-training-scene.dim_1920x1080.jpg)' }}
+          style={{
+            backgroundImage:
+              "url(/assets/generated/gym-training-scene.dim_1920x1080.jpg)",
+          }}
         />
         <div className="absolute inset-0 bg-gradient-to-br from-deep-blue/30 via-background/50 to-neon-purple/10" />
         <div className="container relative mx-auto px-4">
@@ -25,22 +28,29 @@ export default function AboutPage() {
 
       {/* Fitness Quote Overlay */}
       <section className="relative border-b border-border/40 bg-card py-6">
-        <div 
+        <div
           className="absolute inset-0 bg-cover bg-center opacity-15"
-          style={{ backgroundImage: 'url(/assets/generated/discipline-quote-overlay-transparent.dim_800x200.png)' }}
+          style={{
+            backgroundImage:
+              "url(/assets/generated/discipline-quote-overlay-transparent.dim_800x200.png)",
+          }}
         />
         <div className="container relative mx-auto px-4 text-center">
           <p className="text-base font-semibold italic text-neon-purple md:text-lg">
-            "Discipline is choosing between what you want now and what you want most."
+            "Discipline is choosing between what you want now and what you want
+            most."
           </p>
         </div>
       </section>
 
       {/* Founder Story with new portrait */}
       <section className="relative py-16 md:py-24">
-        <div 
+        <div
           className="absolute inset-0 animate-subtle-pan bg-cover bg-center opacity-15"
-          style={{ backgroundImage: 'url(/assets/generated/dynamic-movement.dim_1920x1080.jpg)' }}
+          style={{
+            backgroundImage:
+              "url(/assets/generated/dynamic-movement.dim_1920x1080.jpg)",
+          }}
         />
         <div className="container relative mx-auto px-4">
           <div className="grid items-center gap-12 lg:grid-cols-2">
@@ -50,16 +60,27 @@ export default function AboutPage() {
               </h2>
               <div className="space-y-4 text-lg text-muted-foreground">
                 <p>
-                  Stefan Philip Sweeting is not your typical fitness influencer. He's a disciplined guide who has spent years mastering the intersection of mental clarity and physical performance.
+                  Stefan Philip Sweeting is not your typical fitness influencer.
+                  He's a disciplined guide who has spent years mastering the
+                  intersection of mental clarity and physical performance.
                 </p>
                 <p>
-                  His journey began not in a gym, but in the study of human physiology, breathwork, and the neuroscience of movement. Through rigorous self-experimentation and evidence-based practice, Stefan developed a training philosophy that prioritizes quality over quantity, intention over intensity.
+                  His journey began not in a gym, but in the study of human
+                  physiology, breathwork, and the neuroscience of movement.
+                  Through rigorous self-experimentation and evidence-based
+                  practice, Stefan developed a training philosophy that
+                  prioritizes quality over quantity, intention over intensity.
                 </p>
                 <p>
-                  Today, Stefan helps individuals build physiques that reflect not just aesthetic goals, but mental discipline, nervous system resilience, and long-term health. His approach is confident, intelligent, and free from the hype that dominates the fitness industry.
+                  Today, Stefan helps individuals build physiques that reflect
+                  not just aesthetic goals, but mental discipline, nervous
+                  system resilience, and long-term health. His approach is
+                  confident, intelligent, and free from the hype that dominates
+                  the fitness industry.
                 </p>
                 <p className="font-semibold text-foreground">
-                  "Every rep is a conversation between your mind and muscle. Learn to listen."
+                  "Every rep is a conversation between your mind and muscle.
+                  Learn to listen."
                 </p>
               </div>
             </div>
@@ -79,9 +100,12 @@ export default function AboutPage() {
 
       {/* Training Origins Subsection */}
       <section className="relative bg-card py-16 md:py-20">
-        <div 
+        <div
           className="absolute inset-0 animate-subtle-zoom bg-cover bg-center opacity-15"
-          style={{ backgroundImage: 'url(/assets/generated/stretching-scene.dim_1920x1080.jpg)' }}
+          style={{
+            backgroundImage:
+              "url(/assets/generated/stretching-scene.dim_1920x1080.jpg)",
+          }}
         />
         <div className="container relative mx-auto px-4">
           <div className="mx-auto max-w-5xl">
@@ -97,13 +121,19 @@ export default function AboutPage() {
             <div className="grid items-center gap-8 md:grid-cols-2">
               <div className="space-y-4 text-muted-foreground">
                 <p>
-                  Stefan's training philosophy was forged through years of dedicated practice, combining traditional strength training with modern neuroscience and breathwork principles.
+                  Stefan's training philosophy was forged through years of
+                  dedicated practice, combining traditional strength training
+                  with modern neuroscience and breathwork principles.
                 </p>
                 <p>
-                  His approach emphasizes the mind-muscle connection, viewing each training session as an opportunity to refine both physical capability and mental discipline.
+                  His approach emphasizes the mind-muscle connection, viewing
+                  each training session as an opportunity to refine both
+                  physical capability and mental discipline.
                 </p>
                 <p>
-                  This foundation of intentional practice has shaped the Cerebral Physique methodology—a system that transforms fitness from mere exercise into a practice of self-mastery.
+                  This foundation of intentional practice has shaped the
+                  Cerebral Physique methodology—a system that transforms fitness
+                  from mere exercise into a practice of self-mastery.
                 </p>
               </div>
               <div className="relative overflow-hidden rounded-lg shadow-xl">
@@ -121,9 +151,12 @@ export default function AboutPage() {
 
       {/* Philosophy */}
       <section className="relative py-16 md:py-24">
-        <div 
+        <div
           className="absolute inset-0 bg-cover bg-center opacity-15"
-          style={{ backgroundImage: 'url(/assets/generated/dynamic-movement.dim_1920x1080.jpg)' }}
+          style={{
+            backgroundImage:
+              "url(/assets/generated/dynamic-movement.dim_1920x1080.jpg)",
+          }}
         />
         <div className="container relative mx-auto px-4">
           <h2 className="mb-12 text-center text-3xl font-bold tracking-tight md:text-4xl">
@@ -135,7 +168,9 @@ export default function AboutPage() {
                 <Target className="mb-4 h-12 w-12 text-neon-purple" />
                 <h3 className="mb-3 text-xl font-bold">Intentional Training</h3>
                 <p className="text-muted-foreground">
-                  Every movement serves a purpose. We train with clear objectives, understanding the 'why' behind each exercise and technique.
+                  Every movement serves a purpose. We train with clear
+                  objectives, understanding the 'why' behind each exercise and
+                  technique.
                 </p>
               </CardContent>
             </Card>
@@ -145,7 +180,9 @@ export default function AboutPage() {
                 <Zap className="mb-4 h-12 w-12 text-neon-purple" />
                 <h3 className="mb-3 text-xl font-bold">Nervous System First</h3>
                 <p className="text-muted-foreground">
-                  True performance comes from a regulated nervous system. We integrate breathwork and recovery to optimize your body's stress response.
+                  True performance comes from a regulated nervous system. We
+                  integrate breathwork and recovery to optimize your body's
+                  stress response.
                 </p>
               </CardContent>
             </Card>
@@ -153,9 +190,13 @@ export default function AboutPage() {
             <Card className="border-border/40 bg-card">
               <CardContent className="pt-6">
                 <Award className="mb-4 h-12 w-12 text-neon-purple" />
-                <h3 className="mb-3 text-xl font-bold">Sustainable Excellence</h3>
+                <h3 className="mb-3 text-xl font-bold">
+                  Sustainable Excellence
+                </h3>
                 <p className="text-muted-foreground">
-                  We reject quick fixes and extreme protocols. Our methods are designed for lifelong practice, building resilience that lasts.
+                  We reject quick fixes and extreme protocols. Our methods are
+                  designed for lifelong practice, building resilience that
+                  lasts.
                 </p>
               </CardContent>
             </Card>
@@ -165,9 +206,12 @@ export default function AboutPage() {
 
       {/* Fitness Quote Overlay */}
       <section className="relative border-y border-border/40 bg-card py-6">
-        <div 
+        <div
           className="absolute inset-0 bg-cover bg-center opacity-15"
-          style={{ backgroundImage: 'url(/assets/generated/breath-quote-overlay-transparent.dim_800x200.png)' }}
+          style={{
+            backgroundImage:
+              "url(/assets/generated/breath-quote-overlay-transparent.dim_800x200.png)",
+          }}
         />
         <div className="container relative mx-auto px-4 text-center">
           <p className="text-base font-semibold italic text-neon-purple md:text-lg">
@@ -178,9 +222,12 @@ export default function AboutPage() {
 
       {/* Mission Statement */}
       <section className="relative bg-card py-16 md:py-24">
-        <div 
+        <div
           className="absolute inset-0 animate-subtle-pan bg-cover bg-center opacity-15"
-          style={{ backgroundImage: 'url(/assets/generated/gym-training-scene.dim_1920x1080.jpg)' }}
+          style={{
+            backgroundImage:
+              "url(/assets/generated/gym-training-scene.dim_1920x1080.jpg)",
+          }}
         />
         <div className="container relative mx-auto px-4">
           <div className="mx-auto max-w-3xl text-center">
@@ -188,7 +235,10 @@ export default function AboutPage() {
               Our Mission
             </h2>
             <p className="text-lg text-muted-foreground md:text-xl">
-              To elevate the standard of physical training by integrating mental discipline, breathwork mastery, and evidence-based movement science. We empower individuals to build physiques that reflect not just strength, but wisdom, resilience, and longevity.
+              To elevate the standard of physical training by integrating mental
+              discipline, breathwork mastery, and evidence-based movement
+              science. We empower individuals to build physiques that reflect
+              not just strength, but wisdom, resilience, and longevity.
             </p>
           </div>
         </div>

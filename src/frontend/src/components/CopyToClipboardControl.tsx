@@ -1,22 +1,22 @@
-import { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Check, Copy } from 'lucide-react';
-import { toast } from 'sonner';
+import { Button } from "@/components/ui/button";
+import { Check, Copy } from "lucide-react";
+import { useState } from "react";
+import { toast } from "sonner";
 
 interface CopyToClipboardControlProps {
   text: string;
   label?: string;
-  variant?: 'default' | 'outline' | 'ghost';
-  size?: 'default' | 'sm' | 'lg' | 'icon';
+  variant?: "default" | "outline" | "ghost";
+  size?: "default" | "sm" | "lg" | "icon";
   className?: string;
 }
 
 export default function CopyToClipboardControl({
   text,
   label,
-  variant = 'outline',
-  size = 'sm',
-  className = '',
+  variant = "outline",
+  size = "sm",
+  className = "",
 }: CopyToClipboardControlProps) {
   const [copied, setCopied] = useState(false);
 
@@ -26,32 +26,32 @@ export default function CopyToClipboardControl({
       if (navigator.clipboard && window.isSecureContext) {
         await navigator.clipboard.writeText(text);
         setCopied(true);
-        toast.success('Copied to clipboard!');
+        toast.success("Copied to clipboard!");
         setTimeout(() => setCopied(false), 2000);
       } else {
         // Fallback for older browsers or non-secure contexts
-        const textArea = document.createElement('textarea');
+        const textArea = document.createElement("textarea");
         textArea.value = text;
-        textArea.style.position = 'fixed';
-        textArea.style.left = '-999999px';
-        textArea.style.top = '-999999px';
+        textArea.style.position = "fixed";
+        textArea.style.left = "-999999px";
+        textArea.style.top = "-999999px";
         document.body.appendChild(textArea);
         textArea.focus();
         textArea.select();
-        
+
         try {
-          document.execCommand('copy');
+          document.execCommand("copy");
           setCopied(true);
-          toast.success('Copied to clipboard!');
+          toast.success("Copied to clipboard!");
           setTimeout(() => setCopied(false), 2000);
-        } catch (err) {
-          toast.error('Failed to copy. Please copy manually.');
+        } catch (_err) {
+          toast.error("Failed to copy. Please copy manually.");
         } finally {
           textArea.remove();
         }
       }
-    } catch (err) {
-      toast.error('Failed to copy. Please copy manually.');
+    } catch (_err) {
+      toast.error("Failed to copy. Please copy manually.");
     }
   };
 

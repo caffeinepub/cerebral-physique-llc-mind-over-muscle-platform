@@ -1,21 +1,33 @@
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Check } from 'lucide-react';
-import { toast } from 'sonner';
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Check } from "lucide-react";
+import { toast } from "sonner";
 
 export default function ProgramsPage() {
   const handlePurchase = (programName: string) => {
-    toast.success(`Thank you for your interest in ${programName}! Checkout coming soon.`);
+    toast.success(
+      `Thank you for your interest in ${programName}! Checkout coming soon.`,
+    );
   };
 
   return (
     <div className="flex flex-col">
       {/* Hero Section with energetic gym background */}
       <section className="relative overflow-hidden bg-gradient-to-b from-deep-blue/20 to-background py-16 md:py-24">
-        <div 
+        <div
           className="absolute inset-0 animate-subtle-zoom bg-cover bg-center opacity-45"
-          style={{ backgroundImage: 'url(/assets/generated/gym-training-scene.dim_1920x1080.jpg)' }}
+          style={{
+            backgroundImage:
+              "url(/assets/generated/gym-training-scene.dim_1920x1080.jpg)",
+          }}
         />
         <div className="absolute inset-0 bg-gradient-to-br from-deep-blue/30 via-background/40 to-neon-purple/20" />
         <div className="container relative mx-auto px-4">
@@ -32,9 +44,12 @@ export default function ProgramsPage() {
 
       {/* Fitness Quote Overlay */}
       <section className="relative border-b border-border/40 bg-card py-6">
-        <div 
+        <div
           className="absolute inset-0 bg-cover bg-center opacity-15"
-          style={{ backgroundImage: 'url(/assets/generated/discipline-quote-overlay-transparent.dim_800x200.png)' }}
+          style={{
+            backgroundImage:
+              "url(/assets/generated/discipline-quote-overlay-transparent.dim_800x200.png)",
+          }}
         />
         <div className="container relative mx-auto px-4 text-center">
           <p className="text-base font-semibold italic text-neon-purple md:text-lg">
@@ -45,34 +60,48 @@ export default function ProgramsPage() {
 
       {/* Featured Program with dynamic movement background */}
       <section className="relative py-16 md:py-24">
-        <div 
+        <div
           className="absolute inset-0 animate-subtle-pan bg-cover bg-center opacity-20"
-          style={{ backgroundImage: 'url(/assets/generated/dynamic-movement.dim_1920x1080.jpg)' }}
+          style={{
+            backgroundImage:
+              "url(/assets/generated/dynamic-movement.dim_1920x1080.jpg)",
+          }}
         />
         <div className="container relative mx-auto px-4">
           <div className="mx-auto max-w-5xl">
             <Card className="border-neon-purple/50 bg-gradient-to-br from-deep-blue/20 to-background/95 backdrop-blur-sm">
               <CardHeader className="text-center">
-                <Badge className="mx-auto mb-4 w-fit bg-neon-purple">Featured Program</Badge>
+                <Badge className="mx-auto mb-4 w-fit bg-neon-purple">
+                  Featured Program
+                </Badge>
                 <CardTitle className="text-3xl md:text-4xl">
                   7-Day Mental & Physical Reset Challenge
                 </CardTitle>
                 <CardDescription className="text-lg">
-                  A comprehensive introduction to mind-muscle training, breathwork, and intentional movement
+                  A comprehensive introduction to mind-muscle training,
+                  breathwork, and intentional movement
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="grid gap-6 md:grid-cols-2">
                   <div>
-                    <h3 className="mb-4 text-xl font-semibold">What's Included:</h3>
+                    <h3 className="mb-4 text-xl font-semibold">
+                      What's Included:
+                    </h3>
                     <ul className="space-y-3">
                       <li className="flex items-start">
                         <Check className="mr-2 mt-1 h-5 w-5 shrink-0 text-neon-purple" />
-                        <span>7 days of structured workouts with video demonstrations</span>
+                        <span>
+                          7 days of structured workouts with video
+                          demonstrations
+                        </span>
                       </li>
                       <li className="flex items-start">
                         <Check className="mr-2 mt-1 h-5 w-5 shrink-0 text-neon-purple" />
-                        <span>Daily breathwork protocols for nervous system regulation</span>
+                        <span>
+                          Daily breathwork protocols for nervous system
+                          regulation
+                        </span>
                       </li>
                       <li className="flex items-start">
                         <Check className="mr-2 mt-1 h-5 w-5 shrink-0 text-neon-purple" />
@@ -85,7 +114,9 @@ export default function ProgramsPage() {
                     </ul>
                   </div>
                   <div>
-                    <h3 className="mb-4 text-xl font-semibold">You'll Learn:</h3>
+                    <h3 className="mb-4 text-xl font-semibold">
+                      You'll Learn:
+                    </h3>
                     <ul className="space-y-3">
                       <li className="flex items-start">
                         <Check className="mr-2 mt-1 h-5 w-5 shrink-0 text-neon-purple" />
@@ -93,7 +124,9 @@ export default function ProgramsPage() {
                       </li>
                       <li className="flex items-start">
                         <Check className="mr-2 mt-1 h-5 w-5 shrink-0 text-neon-purple" />
-                        <span>Breathing techniques for performance and recovery</span>
+                        <span>
+                          Breathing techniques for performance and recovery
+                        </span>
                       </li>
                       <li className="flex items-start">
                         <Check className="mr-2 mt-1 h-5 w-5 shrink-0 text-neon-purple" />
@@ -101,7 +134,9 @@ export default function ProgramsPage() {
                       </li>
                       <li className="flex items-start">
                         <Check className="mr-2 mt-1 h-5 w-5 shrink-0 text-neon-purple" />
-                        <span>Sustainable training principles for longevity</span>
+                        <span>
+                          Sustainable training principles for longevity
+                        </span>
                       </li>
                     </ul>
                   </div>
@@ -110,12 +145,14 @@ export default function ProgramsPage() {
               <CardFooter className="flex flex-col items-center justify-center space-y-4">
                 <div className="text-center">
                   <p className="text-4xl font-bold text-neon-purple">$39</p>
-                  <p className="text-sm text-muted-foreground">One-time payment</p>
+                  <p className="text-sm text-muted-foreground">
+                    One-time payment
+                  </p>
                 </div>
                 <Button
                   size="lg"
                   className="bg-neon-purple hover:bg-neon-purple/90"
-                  onClick={() => handlePurchase('7-Day Challenge')}
+                  onClick={() => handlePurchase("7-Day Challenge")}
                 >
                   Start Your Reset
                 </Button>
@@ -127,9 +164,12 @@ export default function ProgramsPage() {
 
       {/* Audiobooks with stretching background */}
       <section className="relative bg-card py-16 md:py-24">
-        <div 
+        <div
           className="absolute inset-0 animate-subtle-zoom bg-cover bg-center opacity-15"
-          style={{ backgroundImage: 'url(/assets/generated/stretching-scene.dim_1920x1080.jpg)' }}
+          style={{
+            backgroundImage:
+              "url(/assets/generated/stretching-scene.dim_1920x1080.jpg)",
+          }}
         />
         <div className="container relative mx-auto px-4">
           <h2 className="mb-12 text-center text-3xl font-bold tracking-tight md:text-4xl">
@@ -140,7 +180,8 @@ export default function ProgramsPage() {
               <CardHeader>
                 <CardTitle>The Breathwork Blueprint</CardTitle>
                 <CardDescription>
-                  Master the fundamentals of breathwork for performance, recovery, and nervous system regulation
+                  Master the fundamentals of breathwork for performance,
+                  recovery, and nervous system regulation
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -164,7 +205,7 @@ export default function ProgramsPage() {
                 <Button
                   className="w-full"
                   variant="outline"
-                  onClick={() => handlePurchase('The Breathwork Blueprint')}
+                  onClick={() => handlePurchase("The Breathwork Blueprint")}
                 >
                   Get Audiobook
                 </Button>
@@ -175,7 +216,8 @@ export default function ProgramsPage() {
               <CardHeader>
                 <CardTitle>Push-Up Mastery</CardTitle>
                 <CardDescription>
-                  Transform the humble push-up into a full-body mind-muscle connection exercise
+                  Transform the humble push-up into a full-body mind-muscle
+                  connection exercise
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -199,7 +241,7 @@ export default function ProgramsPage() {
                 <Button
                   className="w-full"
                   variant="outline"
-                  onClick={() => handlePurchase('Push-Up Mastery')}
+                  onClick={() => handlePurchase("Push-Up Mastery")}
                 >
                   Get Audiobook
                 </Button>
@@ -210,7 +252,8 @@ export default function ProgramsPage() {
               <CardHeader>
                 <CardTitle>Mindset for Longevity</CardTitle>
                 <CardDescription>
-                  Develop the mental frameworks that support lifelong physical excellence
+                  Develop the mental frameworks that support lifelong physical
+                  excellence
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -234,7 +277,7 @@ export default function ProgramsPage() {
                 <Button
                   className="w-full"
                   variant="outline"
-                  onClick={() => handlePurchase('Mindset for Longevity')}
+                  onClick={() => handlePurchase("Mindset for Longevity")}
                 >
                   Get Audiobook
                 </Button>
@@ -246,9 +289,12 @@ export default function ProgramsPage() {
 
       {/* Fitness Quote Overlay */}
       <section className="relative border-y border-border/40 bg-card py-6">
-        <div 
+        <div
           className="absolute inset-0 bg-cover bg-center opacity-15"
-          style={{ backgroundImage: 'url(/assets/generated/longevity-quote-overlay-transparent.dim_800x200.png)' }}
+          style={{
+            backgroundImage:
+              "url(/assets/generated/longevity-quote-overlay-transparent.dim_800x200.png)",
+          }}
         />
         <div className="container relative mx-auto px-4 text-center">
           <p className="text-base font-semibold italic text-neon-purple md:text-lg">
@@ -259,9 +305,12 @@ export default function ProgramsPage() {
 
       {/* Coming Soon */}
       <section className="relative py-16 md:py-24">
-        <div 
+        <div
           className="absolute inset-0 bg-cover bg-center opacity-15"
-          style={{ backgroundImage: 'url(/assets/generated/gym-training-scene.dim_1920x1080.jpg)' }}
+          style={{
+            backgroundImage:
+              "url(/assets/generated/gym-training-scene.dim_1920x1080.jpg)",
+          }}
         />
         <div className="container relative mx-auto px-4">
           <h2 className="mb-12 text-center text-3xl font-bold tracking-tight md:text-4xl">
@@ -275,7 +324,8 @@ export default function ProgramsPage() {
                 </Badge>
                 <CardTitle>12-Week Strength & Longevity Program</CardTitle>
                 <CardDescription>
-                  A comprehensive program combining progressive strength training with mobility, breathwork, and recovery protocols
+                  A comprehensive program combining progressive strength
+                  training with mobility, breathwork, and recovery protocols
                 </CardDescription>
               </CardHeader>
             </Card>
@@ -287,7 +337,8 @@ export default function ProgramsPage() {
                 </Badge>
                 <CardTitle>Advanced Mind-Muscle Certification</CardTitle>
                 <CardDescription>
-                  For coaches and trainers looking to integrate mind-muscle connection principles into their practice
+                  For coaches and trainers looking to integrate mind-muscle
+                  connection principles into their practice
                 </CardDescription>
               </CardHeader>
             </Card>

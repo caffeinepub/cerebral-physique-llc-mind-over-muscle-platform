@@ -1,139 +1,58 @@
-import { useNavigate } from '@tanstack/react-router';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Brain, Heart, Dumbbell, Wind, Volume2 } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
-import { useMusicPlayer } from '@/hooks/useMusicPlayer';
-import { toast } from 'sonner';
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { useNavigate } from "@tanstack/react-router";
+import { Brain, Dumbbell, Heart, Wind } from "lucide-react";
 
 export default function HomePage() {
   const navigate = useNavigate();
-  const { play, pause, setAudioElement, userMuted, volume } = useMusicPlayer();
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-  const hasAttemptedPlayRef = useRef(false);
-  const [showEnableAudioPrompt, setShowEnableAudioPrompt] = useState(false);
-
-  useEffect(() => {
-    // Create and configure audio element
-    if (!audioRef.current) {
-      // Note: No background-music.mp3 file exists in assets yet
-      // Using a placeholder path - admin should add the audio file to /assets/
-      const audio = new Audio('/assets/background-music.mp3');
-      audio.loop = true;
-      audio.volume = volume;
-      audioRef.current = audio;
-      setAudioElement(audio);
-
-      // Handle audio loading errors gracefully
-      audio.addEventListener('error', (e) => {
-        console.warn('Background music file not found. Please add background-music.mp3 to frontend/public/assets/');
-      });
-
-      // Listen for successful play
-      audio.addEventListener('play', () => {
-        setShowEnableAudioPrompt(false);
-      });
-
-      // Listen for pause
-      audio.addEventListener('pause', () => {
-        // Don't show prompt if user manually paused
-      });
-    }
-
-    // Auto-play music when homepage loads (if not manually muted by user)
-    if (!hasAttemptedPlayRef.current && !userMuted) {
-      hasAttemptedPlayRef.current = true;
-      // Small delay to improve autoplay success rate
-      const timer = setTimeout(async () => {
-        try {
-          await play();
-          // If play succeeds, hide any prompt
-          setShowEnableAudioPrompt(false);
-        } catch (error: any) {
-          // Autoplay was blocked by browser
-          console.log('Autoplay blocked by browser. User interaction required.');
-          // Show prompt to enable audio
-          setShowEnableAudioPrompt(true);
-        }
-      }, 100);
-      return () => clearTimeout(timer);
-    }
-
-    // Cleanup: pause music when leaving homepage
-    return () => {
-      pause();
-    };
-  }, []);
-
-  // Update volume when it changes
-  useEffect(() => {
-    if (audioRef.current) {
-      audioRef.current.volume = volume;
-    }
-  }, [volume]);
-
-  const handleEnableAudio = async () => {
-    try {
-      await play();
-      setShowEnableAudioPrompt(false);
-      toast.success('Background music enabled');
-    } catch (error) {
-      toast.error('Unable to play audio. Please check your browser settings.');
-    }
-  };
 
   return (
     <div className="flex flex-col">
-      {/* Enable Audio Prompt - shown when autoplay is blocked */}
-      {showEnableAudioPrompt && (
-        <div className="fixed bottom-6 right-6 z-50 animate-in slide-in-from-bottom-5">
-          <Card className="border-neon-purple/30 bg-card/95 shadow-lg shadow-neon-purple/10 backdrop-blur">
-            <CardContent className="flex items-center gap-4 p-4">
-              <Volume2 className="h-6 w-6 text-neon-purple" />
-              <div className="flex-1">
-                <p className="text-sm font-medium">Enable Background Music?</p>
-                <p className="text-xs text-muted-foreground">Click to start the experience</p>
-              </div>
-              <Button
-                size="sm"
-                onClick={handleEnableAudio}
-                className="bg-neon-purple text-white hover:bg-neon-purple/90"
-              >
-                Enable
-              </Button>
-              <Button
-                size="sm"
-                variant="ghost"
-                onClick={() => setShowEnableAudioPrompt(false)}
-              >
-                Dismiss
-              </Button>
-            </CardContent>
-          </Card>
-        </div>
-      )}
+      {/* Logo strip — image only, no text */}
+      <section className="flex flex-col items-center justify-center py-6 bg-black/80 border-b border-purple-900/30">
+        <img
+          src="/assets/uploads/logo-2.jpg"
+          alt="Cerebral Physique LLC logo"
+          className="h-24 w-auto object-contain"
+        />
+      </section>
 
-      {/* Hero Section with energetic gym background */}
+      {/* Hero Section */}
       <section className="relative overflow-hidden bg-gradient-to-b from-deep-blue/20 to-background">
-        <div 
-          className="absolute inset-0 animate-subtle-zoom bg-cover bg-center opacity-45" 
-          style={{ backgroundImage: 'url(/assets/generated/gym-training-scene.dim_1920x1080.jpg)' }}
+        <div
+          className="absolute inset-0 animate-subtle-zoom bg-cover bg-center opacity-45"
+          style={{
+            backgroundImage:
+              "url(/assets/generated/gym-training-scene.dim_1920x1080.jpg)",
+          }}
         />
         <div className="absolute inset-0 bg-gradient-to-br from-deep-blue/30 via-background/40 to-neon-purple/20" />
         <div className="container relative mx-auto px-4 py-24 md:py-32">
           <div className="mx-auto max-w-4xl text-center">
-            <h1 className="mb-6 text-4xl font-bold tracking-tight text-foreground md:text-6xl lg:text-7xl">
-              Master the{' '}
-              <span className="text-neon-purple">Mind-Muscle Connection</span>
+            <h1 className="mb-3 text-5xl font-black tracking-tight md:text-7xl lg:text-8xl">
+              <span className="bg-gradient-to-r from-black via-blue-900 to-purple-500 bg-clip-text text-transparent">
+                Cerebral Physique
+              </span>
             </h1>
-            <p className="mb-8 text-lg text-muted-foreground md:text-xl">
-              Transform your training through disciplined mindset, intentional breathwork, and longevity-focused movement. Build a physique that reflects mental clarity and physical excellence.
+            <p className="mb-6 text-xl font-medium text-gray-300 md:text-2xl">
+              Master the Mind-Muscle Connection
+            </p>
+            <p className="mb-8 text-base text-muted-foreground md:text-lg">
+              Transform your training through disciplined mindset, intentional
+              breathwork, and longevity-focused movement. Build a physique that
+              reflects mental clarity and physical excellence.
             </p>
             <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
               <Button
                 size="lg"
                 className="bg-neon-purple text-white hover:bg-neon-purple/90"
-                onClick={() => navigate({ to: '/dashboard' })}
+                onClick={() => navigate({ to: "/dashboard" })}
               >
                 Become a Member
               </Button>
@@ -141,7 +60,7 @@ export default function HomePage() {
                 size="lg"
                 variant="outline"
                 className="border-neon-purple text-neon-purple hover:bg-neon-purple/10"
-                onClick={() => navigate({ to: '/workout-library' })}
+                onClick={() => navigate({ to: "/workout-library" })}
               >
                 Explore Library
               </Button>
@@ -152,9 +71,12 @@ export default function HomePage() {
 
       {/* Fitness Quote Overlay */}
       <section className="relative border-b border-border/40 bg-card py-6">
-        <div 
+        <div
           className="absolute inset-0 bg-cover bg-center opacity-15"
-          style={{ backgroundImage: 'url(/assets/generated/breath-quote-overlay-transparent.dim_800x200.png)' }}
+          style={{
+            backgroundImage:
+              "url(/assets/generated/breath-quote-overlay-transparent.dim_800x200.png)",
+          }}
         />
         <div className="container relative mx-auto px-4 text-center">
           <p className="text-base font-semibold italic text-neon-purple md:text-lg">
@@ -165,9 +87,12 @@ export default function HomePage() {
 
       {/* Core Principles */}
       <section className="relative bg-card py-16 md:py-24">
-        <div 
+        <div
           className="absolute inset-0 animate-subtle-pan bg-cover bg-center opacity-15"
-          style={{ backgroundImage: 'url(/assets/generated/stretching-scene.dim_1920x1080.jpg)' }}
+          style={{
+            backgroundImage:
+              "url(/assets/generated/stretching-scene.dim_1920x1080.jpg)",
+          }}
         />
         <div className="container relative mx-auto px-4">
           <h2 className="mb-12 text-center text-3xl font-bold tracking-tight md:text-4xl">
@@ -181,7 +106,8 @@ export default function HomePage() {
               </CardHeader>
               <CardContent>
                 <CardDescription>
-                  Develop conscious control over every contraction. Train with intention, not just intensity.
+                  Develop conscious control over every contraction. Train with
+                  intention, not just intensity.
                 </CardDescription>
               </CardContent>
             </Card>
@@ -193,7 +119,8 @@ export default function HomePage() {
               </CardHeader>
               <CardContent>
                 <CardDescription>
-                  Harness the power of breath to optimize performance, recovery, and nervous system regulation.
+                  Harness the power of breath to optimize performance, recovery,
+                  and nervous system regulation.
                 </CardDescription>
               </CardContent>
             </Card>
@@ -205,7 +132,8 @@ export default function HomePage() {
               </CardHeader>
               <CardContent>
                 <CardDescription>
-                  Build strength that serves you for life. Movement quality over ego-driven numbers.
+                  Build strength that serves you for life. Movement quality over
+                  ego-driven numbers.
                 </CardDescription>
               </CardContent>
             </Card>
@@ -217,7 +145,8 @@ export default function HomePage() {
               </CardHeader>
               <CardContent>
                 <CardDescription>
-                  Train for the long game. Sustainable practices that enhance health span, not just performance.
+                  Train for the long game. Sustainable practices that enhance
+                  health span, not just performance.
                 </CardDescription>
               </CardContent>
             </Card>
@@ -227,9 +156,12 @@ export default function HomePage() {
 
       {/* Featured Visual */}
       <section className="relative py-16 md:py-24">
-        <div 
+        <div
           className="absolute inset-0 bg-cover bg-center opacity-15"
-          style={{ backgroundImage: 'url(/assets/generated/dynamic-movement.dim_1920x1080.jpg)' }}
+          style={{
+            backgroundImage:
+              "url(/assets/generated/dynamic-movement.dim_1920x1080.jpg)",
+          }}
         />
         <div className="container relative mx-auto px-4">
           <div className="grid items-center gap-12 lg:grid-cols-2">
@@ -238,7 +170,9 @@ export default function HomePage() {
                 Science-Informed Training
               </h2>
               <p className="mb-6 text-lg text-muted-foreground">
-                Every exercise, every technique, every principle is backed by research and refined through practice. We don't chase trends—we build foundations.
+                Every exercise, every technique, every principle is backed by
+                research and refined through practice. We don't chase trends—we
+                build foundations.
               </p>
               <ul className="space-y-4 text-muted-foreground">
                 <li className="flex items-start gap-3">
@@ -272,21 +206,25 @@ export default function HomePage() {
 
       {/* Membership CTA */}
       <section className="relative overflow-hidden bg-gradient-to-br from-neon-purple/10 via-background to-deep-blue/10 py-16 md:py-24">
-        <div 
+        <div
           className="absolute inset-0 bg-cover bg-center opacity-10"
-          style={{ backgroundImage: 'url(/assets/generated/hero-background.dim_1920x1080.jpg)' }}
+          style={{
+            backgroundImage:
+              "url(/assets/generated/hero-background.dim_1920x1080.jpg)",
+          }}
         />
         <div className="container relative mx-auto px-4 text-center">
           <h2 className="mb-6 text-3xl font-bold tracking-tight md:text-4xl lg:text-5xl">
             Unlock the Library!
           </h2>
           <p className="mx-auto mb-8 max-w-2xl text-lg text-muted-foreground">
-            Get full access to our comprehensive exercise library, exclusive programs, and member-only content. Start your transformation today.
+            Get full access to our comprehensive exercise library, exclusive
+            programs, and member-only content. Start your transformation today.
           </p>
           <Button
             size="lg"
             className="bg-neon-purple text-white hover:bg-neon-purple/90"
-            onClick={() => navigate({ to: '/dashboard' })}
+            onClick={() => navigate({ to: "/dashboard" })}
           >
             Become a Member
           </Button>

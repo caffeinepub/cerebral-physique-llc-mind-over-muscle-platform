@@ -1,30 +1,44 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { ExternalLink, Loader2, ShoppingBag, Info } from 'lucide-react';
-import { useGetAllAmazonProducts, useGetAffiliateDisclosure } from '@/hooks/useQueries';
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  useGetAffiliateDisclosure,
+  useGetAllAmazonProducts,
+} from "@/hooks/useQueries";
+import { ExternalLink, Info, Loader2, ShoppingBag } from "lucide-react";
 
 export default function AffiliateStorePage() {
   const { data: products = [], isLoading } = useGetAllAmazonProducts();
-  const { data: disclosure = '' } = useGetAffiliateDisclosure();
+  const { data: disclosure = "" } = useGetAffiliateDisclosure();
 
   return (
     <div className="flex flex-col">
       {/* Hero Section */}
       <section className="relative overflow-hidden bg-gradient-to-b from-deep-blue/20 to-background py-16 md:py-24">
-        <div 
+        <div
           className="absolute inset-0 bg-cover bg-center opacity-15"
-          style={{ backgroundImage: 'url(/assets/generated/gym-training-scene.dim_1920x1080.jpg)' }}
+          style={{
+            backgroundImage:
+              "url(/assets/generated/gym-training-scene.dim_1920x1080.jpg)",
+          }}
         />
         <div className="absolute inset-0 bg-gradient-to-br from-deep-blue/40 via-background/60 to-neon-purple/20" />
         <div className="container relative mx-auto px-4">
           <div className="mx-auto max-w-4xl text-center">
             <h1 className="mb-6 text-4xl font-bold tracking-tight md:text-5xl lg:text-6xl">
-              Recommended <span className="text-neon-purple">Gear & Equipment</span>
+              Recommended{" "}
+              <span className="text-neon-purple">Gear & Equipment</span>
             </h1>
             <p className="text-lg text-muted-foreground md:text-xl">
-              Curated fitness equipment and accessories to support your training journey
+              Curated fitness equipment and accessories to support your training
+              journey
             </p>
           </div>
         </div>
@@ -46,9 +60,12 @@ export default function AffiliateStorePage() {
 
       {/* Products Grid */}
       <section className="relative py-16 md:py-24">
-        <div 
+        <div
           className="absolute inset-0 animate-subtle-pan bg-cover bg-center opacity-5"
-          style={{ backgroundImage: 'url(/assets/generated/dynamic-movement.dim_1920x1080.jpg)' }}
+          style={{
+            backgroundImage:
+              "url(/assets/generated/dynamic-movement.dim_1920x1080.jpg)",
+          }}
         />
         <div className="container relative mx-auto px-4">
           {isLoading ? (
@@ -59,12 +76,17 @@ export default function AffiliateStorePage() {
             <div className="mx-auto max-w-2xl text-center">
               <ShoppingBag className="mx-auto mb-4 h-16 w-16 text-muted-foreground" />
               <h3 className="mb-2 text-xl font-semibold">No products yet</h3>
-              <p className="text-muted-foreground">Check back soon for recommended gear and equipment</p>
+              <p className="text-muted-foreground">
+                Check back soon for recommended gear and equipment
+              </p>
             </div>
           ) : (
             <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
               {products.map((product) => (
-                <Card key={product.id.toString()} className="border-border/40 transition-shadow hover:shadow-lg">
+                <Card
+                  key={product.id.toString()}
+                  className="border-border/40 transition-shadow hover:shadow-lg"
+                >
                   <CardHeader>
                     <div className="relative mb-4 h-48 w-full overflow-hidden rounded-lg">
                       <img
@@ -84,7 +106,13 @@ export default function AffiliateStorePage() {
                     </CardDescription>
                     <Button
                       className="w-full bg-neon-purple hover:bg-neon-purple/90"
-                      onClick={() => window.open(product.affiliateLink, '_blank', 'noopener,noreferrer')}
+                      onClick={() =>
+                        window.open(
+                          product.affiliateLink,
+                          "_blank",
+                          "noopener,noreferrer",
+                        )
+                      }
                     >
                       <ExternalLink className="mr-2 h-4 w-4" />
                       View on Amazon

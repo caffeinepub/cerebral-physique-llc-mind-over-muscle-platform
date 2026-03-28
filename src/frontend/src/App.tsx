@@ -1,20 +1,30 @@
-import { RouterProvider, createRouter, createRoute, createRootRoute } from '@tanstack/react-router';
-import { ThemeProvider } from 'next-themes';
-import { Toaster } from '@/components/ui/sonner';
-import Layout from './components/Layout';
-import HomePage from './pages/HomePage';
-import AboutPage from './pages/AboutPage';
-import WorkoutLibraryPage from './pages/WorkoutLibraryPage';
-import ProgramsPage from './pages/ProgramsPage';
-import BlogPage from './pages/BlogPage';
-import BlogPostPage from './pages/BlogPostPage';
-import ContactPage from './pages/ContactPage';
-import CreatorDashboardPage from './pages/CreatorDashboardPage';
-import UserDashboardPage from './pages/UserDashboardPage';
-import AffiliateStorePage from './pages/AffiliateStorePage';
-import PaymentSuccessPage from './pages/PaymentSuccessPage';
-import PaymentFailurePage from './pages/PaymentFailurePage';
-import DomainSetupPage from './pages/DomainSetupPage';
+import { Toaster } from "@/components/ui/sonner";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import {
+  RouterProvider,
+  createRootRoute,
+  createRoute,
+  createRouter,
+} from "@tanstack/react-router";
+import { ThemeProvider } from "next-themes";
+import Layout from "./components/Layout";
+import AboutPage from "./pages/AboutPage";
+import AffiliateStorePage from "./pages/AffiliateStorePage";
+import BlogPage from "./pages/BlogPage";
+import BlogPostPage from "./pages/BlogPostPage";
+import ContactPage from "./pages/ContactPage";
+import CreatorDashboardPage from "./pages/CreatorDashboardPage";
+import DomainSetupPage from "./pages/DomainSetupPage";
+import HomePage from "./pages/HomePage";
+import NutritionArticlePage from "./pages/NutritionArticlePage";
+import NutritionPage from "./pages/NutritionPage";
+import PaymentFailurePage from "./pages/PaymentFailurePage";
+import PaymentSuccessPage from "./pages/PaymentSuccessPage";
+import ProgramsPage from "./pages/ProgramsPage";
+import UserDashboardPage from "./pages/UserDashboardPage";
+import WorkoutLibraryPage from "./pages/WorkoutLibraryPage";
+
+const queryClient = new QueryClient();
 
 const rootRoute = createRootRoute({
   component: Layout,
@@ -22,82 +32,98 @@ const rootRoute = createRootRoute({
 
 const indexRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: '/',
+  path: "/",
   component: HomePage,
 });
 
 const aboutRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: '/about',
+  path: "/about",
   component: AboutPage,
 });
 
 const workoutLibraryRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: '/workout-library',
+  path: "/workout-library",
   component: WorkoutLibraryPage,
 });
 
 const programsRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: '/programs',
+  path: "/programs",
   component: ProgramsPage,
 });
 
 const blogRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: '/blog',
+  path: "/blog",
   component: BlogPage,
 });
 
 const blogPostRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: '/blog/$id',
+  path: "/blog/$id",
   component: BlogPostPage,
+});
+
+const nutritionRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/nutrition",
+  component: NutritionPage,
+});
+
+const nutritionArticleRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/nutrition/$id",
+  component: NutritionArticlePage,
 });
 
 const contactRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: '/contact',
+  path: "/contact",
   component: ContactPage,
-});
-
-const creatorDashboardRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: '/creator-dashboard',
-  component: CreatorDashboardPage,
 });
 
 const userDashboardRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: '/dashboard',
+  path: "/dashboard",
   component: UserDashboardPage,
 });
 
-// NOTE: The existing /store route provides the Shop/Affiliate page functionality.
-// This add-on task preserves the existing Store page unchanged. No new /shop route is added,
-// no checkout flow is introduced, and no Amazon affiliate links are added as part of this task.
 const affiliateStoreRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: '/store',
+  path: "/store",
   component: AffiliateStorePage,
+});
+
+const creatorDashboardRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/creator",
+  component: CreatorDashboardPage,
+});
+
+// Keep old route alias for backward compatibility
+const creatorDashboardOldRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/creator-dashboard",
+  component: CreatorDashboardPage,
 });
 
 const paymentSuccessRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: '/payment-success',
+  path: "/payment-success",
   component: PaymentSuccessPage,
 });
 
 const paymentFailureRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: '/payment-failure',
+  path: "/payment-failure",
   component: PaymentFailurePage,
 });
 
 const domainSetupRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: '/domain-setup',
+  path: "/domain-setup",
   component: DomainSetupPage,
 });
 
@@ -108,10 +134,13 @@ const routeTree = rootRoute.addChildren([
   programsRoute,
   blogRoute,
   blogPostRoute,
+  nutritionRoute,
+  nutritionArticleRoute,
   contactRoute,
-  creatorDashboardRoute,
   userDashboardRoute,
   affiliateStoreRoute,
+  creatorDashboardRoute,
+  creatorDashboardOldRoute,
   paymentSuccessRoute,
   paymentFailureRoute,
   domainSetupRoute,
@@ -119,7 +148,7 @@ const routeTree = rootRoute.addChildren([
 
 const router = createRouter({ routeTree });
 
-declare module '@tanstack/react-router' {
+declare module "@tanstack/react-router" {
   interface Register {
     router: typeof router;
   }
@@ -128,8 +157,10 @@ declare module '@tanstack/react-router' {
 export default function App() {
   return (
     <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
-      <RouterProvider router={router} />
-      <Toaster />
+      <QueryClientProvider client={queryClient}>
+        <RouterProvider router={router} />
+        <Toaster />
+      </QueryClientProvider>
     </ThemeProvider>
   );
 }
