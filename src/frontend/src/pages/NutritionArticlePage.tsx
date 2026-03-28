@@ -103,19 +103,24 @@ function MediaGallery({
 export default function NutritionArticlePage() {
   const { id } = useParams({ from: "/nutrition/$id" });
   const articleId = BigInt(id);
+  const isStaticId = articleId < 0n;
 
-  const { data: article, isLoading, error } = useGetNutritionArticle(articleId);
+  // Always call hook (Rules of Hooks), but ignore backend error for static articles
+  const { data: article, isLoading } = useGetNutritionArticle(articleId);
   const { data: membership } = useGetMyMembership();
   const { data: isAdmin } = useIsCallerAdmin();
   const { identity } = useInternetIdentity();
 
-  const resolvedArticle =
-    article ?? (isLoading ? null : getStaticNutritionArticle(articleId));
+  // Static articles resolve immediately from local data; skip backend for them
+  const resolvedArticle = isStaticId
+    ? getStaticNutritionArticle(articleId)
+    : (article ?? (!isLoading ? null : undefined));
 
   const isMember = membership?.active === true;
   const isAuthenticated = !!identity;
 
-  if (isLoading) {
+  // Only show skeleton for non-static articles that are still loading
+  if (!isStaticId && isLoading) {
     return (
       <div className="min-h-screen pt-20 pb-16">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 space-y-4 mt-8">
@@ -127,7 +132,7 @@ export default function NutritionArticlePage() {
     );
   }
 
-  if (error || !resolvedArticle) {
+  if (!resolvedArticle) {
     return (
       <div className="min-h-screen pt-20 pb-16 flex items-center justify-center">
         <div className="text-center space-y-4">

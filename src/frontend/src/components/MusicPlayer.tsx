@@ -10,15 +10,15 @@ class SpaElectronicMusic {
   private nextNoteTime = 0;
   private beat = 0;
 
-  // Pentatonic scale in A minor, suitable for energetic gym music
+  // Pentatonic scale in A minor
   private readonly scale = [
     220, 261.63, 293.66, 329.63, 392, 440, 523.25, 587.33, 659.25, 784,
   ];
-  private readonly melody = [4, 4, 6, 4, 7, 6, 4, 2, 4, 4, 6, 7, 9, 7, 6, 4];
+  // Arpeggiated 16th-note line: progressive house / EDM arp
+  private readonly arpNotes = [220, 277, 330, 392, 440, 330, 277, 220];
   private readonly bassNotes = [110, 110, 98, 98, 87.31, 87.31, 98, 98];
-  private readonly bpm = 140;
-  private melodyStep = 0;
-  private bassStep = 0;
+  private readonly bpm = 152;
+  private arpStep = 0;
 
   constructor() {
     this.ctx = new AudioContext();
@@ -27,12 +27,36 @@ class SpaElectronicMusic {
     this.masterGain.connect(this.ctx.destination);
   }
 
-  private playLead(
-    freq: number,
-    time: number,
-    duration: number,
-    gainVal = 0.1,
-  ) {
+  // Pumping sidechain: duck master on each kick
+  private sidechain(time: number) {
+    const sixteenth = 60 / this.bpm / 4;
+    this.masterGain.gain.setValueAtTime(0.15, time);
+    this.masterGain.gain.linearRampToValueAtTime(0.3, time + sixteenth);
+  }
+
+  // Chord stab for beats 1 & 3 of each bar
+  private playChordStab(time: number) {
+    const chordFreqs = [220, 277, 330];
+    for (const freq of chordFreqs) {
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      const filter = this.ctx.createBiquadFilter();
+      osc.type = "sawtooth";
+      osc.frequency.value = freq * (1 + (Math.random() - 0.5) * 0.004);
+      filter.type = "highpass";
+      filter.frequency.value = 800;
+      osc.connect(filter);
+      filter.connect(gain);
+      gain.connect(this.masterGain);
+      gain.gain.setValueAtTime(0, time);
+      gain.gain.linearRampToValueAtTime(0.06, time + 0.02);
+      gain.gain.linearRampToValueAtTime(0, time + 0.12);
+      osc.start(time);
+      osc.stop(time + 0.14);
+    }
+  }
+
+  private playArp(freq: number, time: number, duration: number) {
     const osc1 = this.ctx.createOscillator();
     const osc2 = this.ctx.createOscillator();
     const gain = this.ctx.createGain();
@@ -49,8 +73,7 @@ class SpaElectronicMusic {
     filter.connect(gain);
     gain.connect(this.masterGain);
     gain.gain.setValueAtTime(0, time);
-    gain.gain.linearRampToValueAtTime(gainVal, time + 0.01);
-    gain.gain.linearRampToValueAtTime(gainVal * 0.7, time + duration * 0.6);
+    gain.gain.linearRampToValueAtTime(0.06, time + 0.01);
     gain.gain.linearRampToValueAtTime(0, time + duration);
     osc1.start(time);
     osc2.start(time);
@@ -84,8 +107,9 @@ class SpaElectronicMusic {
     osc2.stop(time + duration);
   }
 
-  private playHihat(time: number, accent = false) {
-    const bufferSize = Math.floor(this.ctx.sampleRate * 0.04);
+  private playHihat(time: number, accent = false, open = false) {
+    const dur = open ? 0.08 : 0.04;
+    const bufferSize = Math.floor(this.ctx.sampleRate * dur);
     const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
     const data = buffer.getChannelData(0);
     for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
@@ -93,20 +117,21 @@ class SpaElectronicMusic {
     source.buffer = buffer;
     const filter = this.ctx.createBiquadFilter();
     filter.type = "highpass";
-    filter.frequency.value = 10000;
+    filter.frequency.value = open ? 8000 : 10000;
     const gain = this.ctx.createGain();
-    gain.gain.setValueAtTime(accent ? 0.09 : 0.04, time);
-    gain.gain.exponentialRampToValueAtTime(0.001, time + 0.035);
+    const peakGain = open ? 0.12 : accent ? 0.09 : 0.04;
+    gain.gain.setValueAtTime(peakGain, time);
+    gain.gain.exponentialRampToValueAtTime(0.001, time + dur);
     source.connect(filter);
     filter.connect(gain);
     gain.connect(this.masterGain);
     source.start(time);
-    source.stop(time + 0.04);
+    source.stop(time + dur + 0.005);
   }
 
   private playSnare(time: number) {
-    // Noise layer
-    const bufferSize = Math.floor(this.ctx.sampleRate * 0.15);
+    // Tighter noise burst
+    const bufferSize = Math.floor(this.ctx.sampleRate * 0.08);
     const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
     const data = buffer.getChannelData(0);
     for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
@@ -114,16 +139,16 @@ class SpaElectronicMusic {
     noiseSource.buffer = buffer;
     const noiseFilter = this.ctx.createBiquadFilter();
     noiseFilter.type = "bandpass";
-    noiseFilter.frequency.value = 3000;
+    noiseFilter.frequency.value = 4000;
     noiseFilter.Q.value = 0.5;
     const noiseGain = this.ctx.createGain();
-    noiseGain.gain.setValueAtTime(0.22, time);
-    noiseGain.gain.exponentialRampToValueAtTime(0.001, time + 0.12);
+    noiseGain.gain.setValueAtTime(0.3, time);
+    noiseGain.gain.exponentialRampToValueAtTime(0.001, time + 0.08);
     noiseSource.connect(noiseFilter);
     noiseFilter.connect(noiseGain);
     noiseGain.connect(this.masterGain);
     noiseSource.start(time);
-    noiseSource.stop(time + 0.15);
+    noiseSource.stop(time + 0.09);
     // Tone layer
     const osc = this.ctx.createOscillator();
     const oscGain = this.ctx.createGain();
@@ -135,23 +160,36 @@ class SpaElectronicMusic {
     osc.connect(oscGain);
     oscGain.connect(this.masterGain);
     osc.start(time);
-    osc.stop(time + 0.1);
+    osc.stop(time + 0.09);
   }
 
   private playKick(time: number) {
+    // Main kick
     const osc = this.ctx.createOscillator();
     const gain = this.ctx.createGain();
-    const click = this.ctx.createOscillator();
-    const clickGain = this.ctx.createGain();
     osc.type = "sine";
     osc.frequency.setValueAtTime(180, time);
-    osc.frequency.exponentialRampToValueAtTime(40, time + 0.08);
-    gain.gain.setValueAtTime(0.6, time);
-    gain.gain.exponentialRampToValueAtTime(0.001, time + 0.18);
+    osc.frequency.exponentialRampToValueAtTime(40, time + 0.1);
+    gain.gain.setValueAtTime(0.8, time);
+    gain.gain.exponentialRampToValueAtTime(0.001, time + 0.2);
     osc.connect(gain);
     gain.connect(this.masterGain);
     osc.start(time);
-    osc.stop(time + 0.2);
+    osc.stop(time + 0.22);
+    // Sub-bass boost
+    const sub = this.ctx.createOscillator();
+    const subGain = this.ctx.createGain();
+    sub.type = "sine";
+    sub.frequency.value = 55;
+    subGain.gain.setValueAtTime(0.3, time);
+    subGain.gain.exponentialRampToValueAtTime(0.001, time + 0.15);
+    sub.connect(subGain);
+    subGain.connect(this.masterGain);
+    sub.start(time);
+    sub.stop(time + 0.16);
+    // Click transient
+    const click = this.ctx.createOscillator();
+    const clickGain = this.ctx.createGain();
     click.type = "square";
     click.frequency.value = 1200;
     clickGain.gain.setValueAtTime(0.08, time);
@@ -171,29 +209,32 @@ class SpaElectronicMusic {
       const b = this.beat % 16;
       const t = this.nextNoteTime;
 
-      // Kick on beats 1 and 3 (b=0 and b=8), plus occasional syncopation
-      if (b === 0 || b === 8) this.playKick(t);
-      if (b === 12) this.playKick(t); // extra syncopated kick
+      // Kick on beats 1 and 3 (b=0, b=8) + syncopated extra
+      if (b === 0 || b === 8) {
+        this.playKick(t);
+        this.sidechain(t);
+        // Chord stab on beats 1 & 3
+        this.playChordStab(t);
+      }
+      if (b === 12) this.playKick(t);
 
       // Snare on beats 2 and 4
       if (b === 4 || b === 12) this.playSnare(t);
 
-      // 16th-note hi-hats, strong accents on 1 and 3
-      this.playHihat(t, b % 4 === 0);
+      // Hi-hats: 16th notes with open hihat on offbeats (every other 8th note)
+      const isOpenHat = b === 2 || b === 6 || b === 10 || b === 14;
+      this.playHihat(t, b % 4 === 0, isOpenHat);
 
-      // Bass every half-beat (8th note), drives energy
+      // Bass every half-beat (8th note)
       if (b % 2 === 0) {
         const bassIdx = Math.floor(b / 2) % this.bassNotes.length;
         this.playBass(this.bassNotes[bassIdx], t, sixteenth * 1.8);
       }
 
-      // Lead melody every quarter beat
-      if (b % 2 === 1) {
-        const noteFreq =
-          this.scale[this.melody[this.melodyStep % this.melody.length]];
-        this.playLead(noteFreq * 2, t, beatDuration * 0.8, 0.09);
-        this.melodyStep++;
-      }
+      // Arpeggiated 16th-note synth line
+      const arpFreq = this.arpNotes[this.arpStep % this.arpNotes.length];
+      this.playArp(arpFreq * 2, t, sixteenth * 0.85);
+      this.arpStep++;
 
       this.nextNoteTime += sixteenth;
       this.beat++;
@@ -209,8 +250,7 @@ class SpaElectronicMusic {
     this.isRunning = true;
     this.nextNoteTime = this.ctx.currentTime + 0.1;
     this.beat = 0;
-    this.melodyStep = 0;
-    this.bassStep = 0;
+    this.arpStep = 0;
     this.scheduleAhead();
   }
 
@@ -362,28 +402,28 @@ export default function MusicPlayer() {
               className="w-0.5 bg-primary rounded-full"
               style={{
                 height: "40%",
-                animation: "equalizer 0.8s ease-in-out infinite",
+                animation: "equalizer 0.5s ease-in-out infinite",
               }}
             />
             <span
               className="w-0.5 bg-primary rounded-full"
               style={{
                 height: "100%",
-                animation: "equalizer 0.8s ease-in-out 0.2s infinite",
+                animation: "equalizer 0.5s ease-in-out 0.1s infinite",
               }}
             />
             <span
               className="w-0.5 bg-primary rounded-full"
               style={{
                 height: "60%",
-                animation: "equalizer 0.8s ease-in-out 0.4s infinite",
+                animation: "equalizer 0.5s ease-in-out 0.2s infinite",
               }}
             />
             <span
               className="w-0.5 bg-primary rounded-full"
               style={{
                 height: "80%",
-                animation: "equalizer 0.8s ease-in-out 0.1s infinite",
+                animation: "equalizer 0.5s ease-in-out 0.05s infinite",
               }}
             />
           </div>
